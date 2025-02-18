@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
@@ -24,11 +26,27 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        $request->authenticate();
 
-        $request->session()->regenerate();
+        $credentials = $request->only('username', 'password');
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $user = User::where('username', $credentials['username'])->first();
+
+        if ($user && Hash::check($credentials['password'], $user->password)) {
+            Auth::login($user);
+            $request->session()->regenerate();
+
+            return redirect()->intended(route('dashboard', absolute: false));
+        }
+
+        return back()->withErrors([
+            'username' => 'Sorry, your password was incorrect. Please double-check your password.',
+        ]);
+
+        // $request->authenticate();
+
+        // $request->session()->regenerate();
+
+        // return redirect()->intended(route('dashboard', absolute: false));
     }
 
     /**
