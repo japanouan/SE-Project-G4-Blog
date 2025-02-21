@@ -22,13 +22,14 @@ class RegisterStaffController extends Controller
      */
     public function register(Request $request)
     {
+        
         // ตรวจสอบข้อมูลที่กรอกมา
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'username' => ['required', 'string', 'max:255', 'unique:users'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:' . User::class],
+            'username' => ['required', 'string', 'max:255', 'unique:' . User::class],
             'phone' => ['required', 'numeric'],
-            'userType' => ['required', 'in:make_up_artist,photographer,admin,staff'],  // ตรวจสอบประเภท staff
+            'userType' => ['required', 'in:make-up artist,photographer,admin,shop owner'],  // ตรวจสอบประเภท staff
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
@@ -40,12 +41,13 @@ class RegisterStaffController extends Controller
             'phone' => $request->phone,
             'userType' => $request->userType,  // กำหนดประเภทของ staff
             'password' => Hash::make($request->password),
+            'status' => 'inactive'
         ]);
 
         // ล็อกอินผู้ใช้ใหม่
         Auth::login($user);
 
         // รีไดเร็กไปที่หน้า dashboard หรือหน้าที่ต้องการ
-        return redirect()->route('staff.dashboard');
+        return redirect()->route('dashboard');
     }
 }

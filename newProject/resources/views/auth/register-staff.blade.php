@@ -34,10 +34,10 @@
         <div class="mt-4">
             <x-input-label for="userType" :value="__('Staff Role')" />
             <select id="userTypeSelect" name="userType" class="block mt-1 w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                <option value="make_up_artist" {{ old('userType') == 'make_up_artist' ? 'selected' : '' }}>Make-Up Artist</option>
+                <option value="make-up artist" {{ old('userType') == 'make-up artist' ? 'selected' : '' }}>Make-Up Artist</option>
                 <option value="photographer" {{ old('userType') == 'photographer' ? 'selected' : '' }}>Photographer</option>
                 <option value="admin" {{ old('userType') == 'admin' ? 'selected' : '' }}>Admin</option>
-                <option value="staff" {{ old('userType') == 'staff' ? 'selected' : '' }}>Staff</option>
+                <option value="shop owner" {{ old('userType') == 'shop owner' ? 'selected' : '' }}>Shop Owner</option>
             </select>
             <x-input-error :messages="$errors->get('userType')" class="mt-2" />
         </div>
