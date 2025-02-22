@@ -12,7 +12,16 @@ use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
-    /*** Display the user's profile form.*/
+
+    public function show(Request $request): View
+    {
+        $user = Auth::user();  // หรือใช้ User::find(Auth::id()) ถ้าต้องการดึงข้อมูลด้วย ID
+
+        return view('profile.show', compact('user'));
+    }
+
+    
+
     public function edit(Request $request): View
     {
         return view('profile.edit', [
@@ -20,19 +29,9 @@ class ProfileController extends Controller
         ]);
     }
 
-    public function show(Request $request): View
-    {
-        // ดึงข้อมูลของผู้ใช้ที่ล็อกอินอยู่
-        $user = Auth::user();  // หรือใช้ User::find(Auth::id()) ถ้าต้องการดึงข้อมูลด้วย ID
-
-        // ส่งข้อมูลผู้ใช้ไปยัง Blade view
-        return view('profile.show', compact('user'));
-    }
 
 
-    /**
-     * Update the user's profile information.
-     */
+
     public function update(Request $request)
     {
         $request->validate([
@@ -61,9 +60,6 @@ class ProfileController extends Controller
     }
 
 
-    /**
-     * Delete the user's account.
-     */
     public function destroy(Request $request): RedirectResponse
     {
         $request->validateWithBag('userDeletion', [
