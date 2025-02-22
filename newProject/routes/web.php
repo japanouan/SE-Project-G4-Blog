@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -10,6 +11,51 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::prefix('make-upartist')->name('make-upartist.')->middleware('auth', 'is_makeup')->group(function () {
+    Route::get('/dashboard', function () {
+    })->name('dashboard');
+    
+    Route::get('/users', function () {
+    })->name('users');
+});
+
+Route::prefix('admin')->name('admin.')->middleware('auth', 'is_admin')->group(function () {
+
+    Route::get('/dashboard', function () {
+        return view('admin.dashboard');
+    })->name('dashboard');
+    
+    // Route::get('/users', function () {
+    //     return view('admin.users');
+    // })->name('users');
+
+    // แสดงรายการผู้ใช้
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+
+    // แก้ไขผู้ใช้
+    Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('users.edit');
+    Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
+
+    // เปลี่ยนสถานะผู้ใช้
+    Route::post('/users/{id}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggleStatus');
+});
+
+Route::prefix('photographer')->name('photographer.')->middleware('auth', 'is_photographer')->group(function () {
+    Route::get('/dashboard', function () {
+    })->name('dashboard');
+    
+    Route::get('/users', function () {
+    })->name('users');
+});
+
+Route::prefix('shopowner')->name('shopowner.')->middleware('auth', 'is_shopowner')->group(function () {
+    Route::get('/dashboard', function () {
+    })->name('dashboard');
+    
+    Route::get('/users', function () {
+    })->name('users');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
