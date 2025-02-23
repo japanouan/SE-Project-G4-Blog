@@ -74,25 +74,14 @@ class UserController extends Controller
         return view('admin.users.acceptance', compact('users'));
     }
 
-    // accept
-    public function accept($user_id)
+    // updateStatus
+    public function updateStatus(Request $request, $user_id, $status)
     {
         $user = User::where('user_id', $user_id)->firstOrFail();
-        $user->status = 'active';
+        $user->status = $status;
         $user->is_newUser = false;
         $user->save();
 
-        return redirect()->route('admin.users.acceptance')->with('success', 'User accepted successfully.');
-    }
-    
-    // accept
-    public function decline($user_id)
-    {
-        $user = User::where('user_id', $user_id)->firstOrFail();
-        $user->status = 'inactive';
-        $user->is_newUser = false;
-        $user->save();
-
-        return redirect()->route('admin.users.acceptance')->with('success', 'User accepted successfully.');
+        return response()->json(['success' => true]);
     }
 }
