@@ -36,6 +36,9 @@ Route::prefix('admin')->name('admin.')->middleware('auth', 'is_admin')->group(fu
 
     // แสดงรายการผู้ใช้
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::get('/users/acceptance', [UserController::class, 'acceptance'])->name('users.acceptance');
+    Route::get('/users/accept/{user_id}', [UserController::class, 'accept'])->name('users.accept');
+    Route::get('/users/decline/{user_id}', [UserController::class, 'decline'])->name('users.decline');
 
     // แก้ไขผู้ใช้
     Route::get('/users/{user_id}/edit', [UserController::class, 'edit'])->name('users.edit');

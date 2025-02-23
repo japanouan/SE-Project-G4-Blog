@@ -31,9 +31,6 @@ class UserController extends Controller
     // ฟังก์ชันอัปเดตข้อมูลผู้ใช้
     public function update(Request $request, $user_id)
     {
-        
-        // DB::enableQueryLog();  // เปิดการล็อกคำสั่ง SQL
-        // dd(DB::getQueryLog());  // ดูคำสั่ง SQL ที่ถูกส่งไป
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email',
@@ -60,5 +57,42 @@ class UserController extends Controller
         $user->save();
 
         return redirect()->route('admin.users.index')->with('success', 'User status updated successfully!');
+    }
+
+    // accept form
+    public function acceptance()
+    {
+        // ดึงข้อมูลผู้ใช้ทั้งหมด
+        $users = User::where(function ($query) {
+            $query->where('status', 'inactive')
+                  ->where('is_newUser', true);
+        })
+        ->get();
+
+
+        // ส่งข้อมูลไปยัง view
+        return view('admin.users.acceptance', compact('users'));
+    }
+
+    // accept
+    public function accept($user_id)
+    {
+        $user = User::where('user_id', $user_id)->firstOrFail();
+        $user->status = 'active';
+        $user->is_newUser = false;
+        $user->save();
+
+        return redirect()->route('admin.users.acceptance')->with('success', 'User accepted successfully.');
+    }
+    
+    // accept
+    public function decline($user_id)
+    {
+        $user = User::where('user_id', $user_id)->firstOrFail();
+        $user->status = 'inactive';
+        $user->is_newUser = false;
+        $user->save();
+
+        return redirect()->route('admin.users.acceptance')->with('success', 'User accepted successfully.');
     }
 }
