@@ -55,22 +55,23 @@ class ShopController extends Controller
 
     public function update(Request $request, $shop_id)
     {
-        // $request->validate([
-        //     'name' => 'required|string|max:255',
-        //     'email' => 'required|email',
-        //     'phone' => 'required|numeric',
-        //     'shopname' => 'required|string|max:255|unique:shop,shopname,' . $shop_id . ',shop_id',
-        //     'shopType' => 'required|string',
-        //     'status' => 'required|in:active,inactive',
-        // ]);
+        $request->validate([
+            'shop_name' => 'required|string|max:255',
+            'shop_description' => 'required|string',
+            'shop_location' => 'required|string',
+            'rental_terms' => 'required|string',
+            'depositfee' => 'required|numeric|min:0',
+            'penaltyfee' => 'required|numeric|min:0',
+            'status' => 'required|in:active,inactive',
+        ]);
 
 
 
-        // // ค้นหาผู้ใช้และอัปเดตข้อมูล
-        // $shop = shop::find($shop_id);
-        // $shop->update($request->all());
+        // ค้นหาผู้ใช้และอัปเดตข้อมูล
+        $shop = shop::find($shop_id);
+        $shop->update($request->all());
 
-        // return redirect()->route('admin.shop.index')->with('success', 'shop updated successfully!');
+        return redirect()->route('admin.shops.index')->with('success', 'shop updated successfully!');
     }
 
 
