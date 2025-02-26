@@ -4,7 +4,7 @@
 
     <form method="POST" action="{{ route('admin.users.update', $user->user_id) }}">
         @csrf
-        @method('PUT')  <!-- เพิ่ม @method('PUT') เพื่อให้รองรับการอัปเดตข้อมูล -->
+        @method('PUT')  <!-- เพิ่ม @method('PUT') เพื่อให้รองรับการอัปเดตข้อมูล --> 
 
         <div>
             <x-input-label for="name" :value="__('Fullname')" />

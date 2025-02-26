@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
+
+
     // ฟังก์ชันแสดงรายการผู้ใช้
     public function index()
     {
@@ -20,6 +22,23 @@ class UserController extends Controller
         return view('admin.users.index', compact('users'));
     }
 
+
+    // ฟังก์ชันแสดงรายการผู้ใช้
+    public function index_order(Request $request)
+    {
+        $query = User::query();     // สร้างโครงสำหรับ query
+        //check if 'orderBy' and 'direction' are in request
+        if($request->has('orderBy') && $request->has('direction')){     
+            $query->orderBy($request->orderBy, $request->direction);    //add orderBy to query
+        }
+        $users = $query->get(); //query to get user
+
+        // ส่งข้อมูลไปยัง view
+        return view('admin.users.index', compact('users'));
+    }
+
+
+
     // ฟังก์ชันแสดงฟอร์มแก้ไขผู้ใช้
     public function edit($user_id)
     {
@@ -27,6 +46,8 @@ class UserController extends Controller
 
         return view('admin.users.edit', compact('user'));
     }
+
+
 
     // ฟังก์ชันอัปเดตข้อมูลผู้ใช้
     public function update(Request $request, $user_id)
@@ -49,15 +70,21 @@ class UserController extends Controller
         return redirect()->route('admin.users.index')->with('success', 'User updated successfully!');
     }
 
+
+
     // ฟังก์ชันเปลี่ยนสถานะผู้ใช้
-    public function toggleStatus($user_id)
+    public function toggleStatus(Request $request, $user_id)
     {
         $user = User::findOrFail($user_id);
-        $user->status = ($user->status == 'active') ? 'inactive' : 'active';
+        $user->status = $request->status; // รับค่าจากฟอร์ม
         $user->save();
-
+    
         return redirect()->route('admin.users.index')->with('success', 'User status updated successfully!');
     }
+    
+
+
+
 
     // accept form
     public function acceptance()
@@ -65,9 +92,9 @@ class UserController extends Controller
         // ดึงข้อมูลผู้ใช้ทั้งหมด
         $users = User::where(function ($query) {
             $query->where('status', 'inactive')
-                  ->where('is_newUser', true);
+                ->where('is_newUser', true);
         })
-        ->get();
+            ->get();
 
 
         // ส่งข้อมูลไปยัง view
