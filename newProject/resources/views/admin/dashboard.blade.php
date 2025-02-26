@@ -11,6 +11,7 @@
                 <div class="p-6 text-gray-900">
                     {{ __("You're logged in!") }}
                     <p><a href="{{ route('admin.users.index') }}" class="btn btn-primary">Users</a></p>
+                    <p><a href="{{ route('admin.shops.index') }}" class="btn btn-primary">Shops</a></p>
                 </div>
             </div>
         </div>

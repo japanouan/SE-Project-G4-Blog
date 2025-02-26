@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ShopController;
 use Illuminate\Http\Request;
 
 
@@ -44,6 +45,18 @@ Route::prefix('admin')->name('admin.')->middleware('auth', 'is_admin')->group(fu
     // แก้ไขผู้ใช้
     Route::get('/users/{user_id}/edit', [UserController::class, 'edit'])->name('users.edit');
     Route::put('/users/{user_id}', [UserController::class, 'update'])->name('users.update');
+
+
+    Route::get('/shops', [ShopController::class, 'index'])->name('shops.index');
+    Route::post('/shops/{user_id}/toggleStatus', [ShopController::class, 'toggleStatus'])->name('shops.toggleStatus');
+
+    Route::post('/shops/{user_id}/edit', [ShopController::class, 'edit'])->name('shops.edit');
+    Route::put('/shops/{user_id}', [ShopController::class, 'update'])->name('shops.update');
+
+    Route::get('/shops/acceptance', [ShopController::class, 'acceptance'])->name('shops.acceptance');
+    Route::post('/shops/{shop_id}/updateStatus', [ShopController::class, 'updateStatus'])->name('shops.updateStatus'); // error เกิดจากตัวนี้ !!!!!!!!!!!
+    
+
 });
 
 
