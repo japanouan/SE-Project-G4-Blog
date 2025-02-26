@@ -13,27 +13,38 @@ class UserController extends Controller
 
 
     // ฟังก์ชันแสดงรายการผู้ใช้
-    public function index()
+    public function index(Request $request)
     {
-        // ดึงข้อมูลผู้ใช้ทั้งหมด
-        $users = User::all();
-
-        // ส่งข้อมูลไปยัง view
-        return view('admin.users.index', compact('users'));
-    }
+        // รับค่าการจัดเรียง
+        $orderBy = $request->input('orderBy') ?: 'user_id';
+        $direction = $request->input('direction') ?: 'asc';
 
 
-    // ฟังก์ชันแสดงรายการผู้ใช้
-    public function index_order(Request $request)
-    {
-        $query = User::query();     // สร้างโครงสำหรับ query
-        //check if 'orderBy' and 'direction' are in request
-        if($request->has('orderBy') && $request->has('direction')){     
-            $query->orderBy($request->orderBy, $request->direction);    //add orderBy to query
+        // รับค่า userType filter เป็น array (ถ้าไม่มีจะได้ array ว่าง)
+        if (!empty($request->input('userType'))) {
+            // ถ้ามีค่า userType ใน request ให้ใช้ค่านั้น
+            $userTypes = $request->input('userType');
+        } else {
+            // ถ้าไม่มีเลย ให้ใช้ array ว่าง
+            $userTypes = [];
         }
-        $users = $query->get(); //query to get user
 
-        // ส่งข้อมูลไปยัง view
+
+        $query = User::query();
+        // dd($orderBy);
+
+        // กรองตาม userType ถ้ามีการเลือก
+        if (!empty($userTypes) && is_array($userTypes)) {
+            $query->whereIn('userType', $userTypes);
+        }
+
+        // จัดเรียงตาม orderBy และ direction
+        $query->orderBy($orderBy, $direction);
+        // dd($query);
+
+        $users = $query->get();
+        // dd($users);
+
         return view('admin.users.index', compact('users'));
     }
 
@@ -78,10 +89,18 @@ class UserController extends Controller
         $user = User::findOrFail($user_id);
         $user->status = $request->status; // รับค่าจากฟอร์ม
         $user->save();
-    
-        return redirect()->route('admin.users.index')->with('success', 'User status updated successfully!');
+
+        $orderBy = $request->input('orderBy', 'user_id');
+        $direction = $request->input('direction', 'asc');
+        $userTypes = $request->input('userType', []);
+
+        return redirect()->route('admin.users.index', [
+            'orderBy'  => $orderBy,
+            'direction'=> $direction,
+            'userType' => $userTypes, // Laravel จะทำการแปลง array เป็น query string ให้เอง
+       ])->with('success', 'User status updated successfully!');
     }
-    
+
 
 
 

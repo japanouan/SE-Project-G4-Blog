@@ -3,6 +3,8 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
+use Illuminate\Http\Request;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -23,13 +25,13 @@ Route::prefix('make-upartist')->name('make-upartist.')->middleware('auth', 'is_m
 
 // admin
 Route::prefix('admin')->name('admin.')->middleware('auth', 'is_admin')->group(function () {
+    Route::get('/', function () {
+        return view('admin.dashboard');
+    });
 
     Route::get('/dashboard', function () {
         return view('admin.dashboard');
     })->name('dashboard');
-    
-    // แสดงหน้า user index ที่เรียงข้อมูลแล้ว
-    Route::post('/users/index_order', [UserController::class, 'index_order'])->name('users.index_order');
 
     // เปลี่ยนสถานะผู้ใช้
     Route::post('/users/{user_id}/toggleStatus', [UserController::class, 'toggleStatus'])->name('users.toggleStatus');
