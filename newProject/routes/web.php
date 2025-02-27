@@ -71,7 +71,13 @@ Route::prefix('photographer')->name('photographer.')->middleware('auth', 'is_pho
 // shop owner
 Route::prefix('shopowner')->name('shopowner.')->middleware('auth', 'is_shopowner')->group(function () {
     Route::get('/dashboard', function () {return view('dashboard');})->name('dashboard');
-    Route::get('/users', function () {})->name('users');
+    
+    // เพิ่ม routes สำหรับการจัดการร้านค้า
+    Route::get('/shops/create', [ShopController::class, 'create'])->name('shops.create');
+    Route::post('/shops', [ShopController::class, 'store'])->name('shops.store');
+    Route::get('/shops/my-shop', [ShopController::class, 'myShop'])->name('shops.my-shop');
+    Route::get('/shops/{shop_id}/edit-my-shop', [ShopController::class, 'editMyShop'])->name('shops.edit-my-shop');
+    Route::put('/shops/{shop_id}/update-my-shop', [ShopController::class, 'updateMyShop'])->name('shops.update-my-shop');
 });
 
 //auth

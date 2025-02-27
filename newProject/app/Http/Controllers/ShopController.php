@@ -102,4 +102,85 @@ class ShopController extends Controller
     }
 
 
+    // เพิ่มเมธอดสำหรับสร้างร้านค้าใหม่
+public function create()
+{
+    return view('shopowner.shops.create');
+}
+
+// เมธอดสำหรับบันทึกร้านค้าใหม่
+public function store(Request $request)
+{
+    $request->validate([
+        'shop_name' => 'required|string|max:255',
+        'shop_description' => 'required|string',
+        'shop_location' => 'required|string',
+        'rental_terms' => 'required|string',
+        'depositfee' => 'required|numeric|min:0',
+        'penaltyfee' => 'required|numeric|min:0',
+    ]);
+
+    $shop = new Shop();
+    $shop->shop_name = $request->shop_name;
+    $shop->shop_description = $request->shop_description;
+    $shop->shop_location = $request->shop_location;
+    $shop->rental_terms = $request->rental_terms;
+    $shop->depositfee = $request->depositfee;
+    $shop->penaltyfee = $request->penaltyfee;
+    $shop->status = 'inactive'; // รอการอนุมัติจาก admin
+    $shop->is_newShop = true;
+    $shop->shop_owner_id = auth()->id();
+    $shop->save();
+
+    return redirect()->route('shopowner.shops.my-shop')
+        ->with('success', 'ร้านค้าของคุณถูกส่งไปรอการอนุมัติแล้ว');
+}
+
+// เมธอดสำหรับดูร้านค้าของตัวเอง
+public function myShop()
+{
+    $shop = Shop::where('shop_owner_id', auth()->id())->first();
+    
+    return view('shopowner.shops.my-shop', compact('shop'));
+}
+
+// เมธอดสำหรับแก้ไขร้านค้าของตัวเอง
+public function editMyShop($shop_id)
+{
+    $shop = Shop::where('shop_id', $shop_id)
+        ->where('shop_owner_id', auth()->id())
+        ->firstOrFail();
+        
+    return view('shopowner.shops.edit-my-shop', compact('shop'));
+}
+
+// เมธอดสำหรับอัปเดตร้านค้าของตัวเอง
+public function updateMyShop(Request $request, $shop_id)
+{
+    $shop = Shop::where('shop_id', $shop_id)
+        ->where('shop_owner_id', auth()->id())
+        ->firstOrFail();
+        
+    $request->validate([
+        'shop_name' => 'required|string|max:255',
+        'shop_description' => 'required|string',
+        'shop_location' => 'required|string',
+        'rental_terms' => 'required|string',
+        'depositfee' => 'required|numeric|min:0',
+        'penaltyfee' => 'required|numeric|min:0',
+    ]);
+    
+    $shop->update($request->only([
+        'shop_name', 
+        'shop_description', 
+        'shop_location', 
+        'rental_terms', 
+        'depositfee', 
+        'penaltyfee'
+    ]));
+    
+    return redirect()->route('shopowner.shops.my-shop')
+        ->with('success', 'ข้อมูลร้านค้าอัปเดตเรียบร้อยแล้ว');
+    }
+
 }
