@@ -19,7 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'is_admin' => IsAdmin::class,
             'is_makeup' => IsMakeUp::class,
-            'is_ownshop' => IsOwnShop::class,
+            'is_shopowner' => IsOwnShop::class,
             'is_photographer' => IsPhotographer::class,
             'is_customer' => IsCustomer::class,
         ]);
