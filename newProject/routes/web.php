@@ -70,8 +70,7 @@ Route::prefix('photographer')->name('photographer.')->middleware('auth', 'is_pho
 
 // shop owner
 Route::prefix('shopowner')->name('shopowner.')->middleware('auth', 'is_shopowner')->group(function () {
-    Route::get('/dashboard', function () {})->name('dashboard');
-
+    Route::get('/dashboard', function () {return view('dashboard');})->name('dashboard');
     Route::get('/users', function () {})->name('users');
 });
 
