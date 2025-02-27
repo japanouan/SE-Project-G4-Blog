@@ -88,4 +88,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile-edit', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+//เรีนกฟอร์ม 
+Route::get('/seller/new-form', function () {
+    return view('Seller.new_form'); // ชื่อต้องตรงกับโฟลเดอร์และไฟล์
+})->name('seller.new_form');
+
+
 require __DIR__ . '/auth.php';
