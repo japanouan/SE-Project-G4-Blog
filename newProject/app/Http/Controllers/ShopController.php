@@ -182,5 +182,38 @@ public function updateMyShop(Request $request, $shop_id)
     return redirect()->route('shopowner.shops.my-shop')
         ->with('success', 'ข้อมูลร้านค้าอัปเดตเรียบร้อยแล้ว');
     }
+// แสดงรายการชุดทั้งหมดของร้าน
+public function listCostumes()
+{
+    // ในอนาคตจะต้องดึงข้อมูลจริงจากฐานข้อมูล
+    return view('shopowner.shops.costumes.index');
+}
 
+// แสดงฟอร์มเพิ่มชุดใหม่
+public function newForm()
+{
+    return view('shopowner.shops.costumes.create');
+}
+
+// บันทึกข้อมูลชุดใหม่
+public function storeCostume(Request $request)
+{
+    // ตรวจสอบข้อมูล
+    $request->validate([
+        'costume_name' => 'required|string|max:255',
+        'costume_level' => 'required|string',
+        'costume_type' => 'required|string',
+        'fabric_type' => 'required|string',
+        'costume_color' => 'required|string',
+        'costume_size' => 'required|string',
+        'price_per_day' => 'required|numeric|min:0',
+        'quantity' => 'required|integer|min:1',
+        'costume_image' => 'nullable|image|max:2048',
+    ]);
+
+    // บันทึกข้อมูล (ต้องสร้างโมเดลสำหรับชุด)
+    
+    return redirect()->route('shopowner.shop.costumes')
+        ->with('success', 'เพิ่มชุดใหม่เรียบร้อยแล้ว');
+}
 }
