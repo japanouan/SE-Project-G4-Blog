@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\OufitController;
+use App\Http\Controllers\OutfitController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
@@ -8,9 +8,12 @@ use App\Http\Controllers\ShopController;
 use Illuminate\Http\Request;
 
 
-use App\Http\Controllers\OutfitController;
+
+
 
 Route::get('/', [OutfitController::class, 'index'])->name('outfits.index');
+
+
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -68,14 +71,22 @@ Route::prefix('photographer')->name('photographer.')->middleware('auth', 'is_pho
     Route::get('/users', function () {})->name('users');
 });
 
-
 // shop owner
 Route::prefix('shopowner')->name('shopowner.')->middleware('auth', 'is_shopowner')->group(function () {
-    Route::get('/dashboard', function () {})->name('dashboard');
-
-    Route::get('/users', function () {})->name('users');
+    Route::get('/dashboard', function () {return view('dashboard');})->name('dashboard');
+    
+    // จัดการร้านค้า
+    Route::get('/shops/create', [ShopController::class, 'create'])->name('shops.create');
+    Route::post('/shops', [ShopController::class, 'store'])->name('shops.store');
+    Route::get('/shops/my-shop', [ShopController::class, 'myShop'])->name('shops.my-shop');
+    Route::get('/shops/{shop_id}/edit-my-shop', [ShopController::class, 'editMyShop'])->name('shops.edit-my-shop');
+    Route::put('/shops/{shop_id}/update-my-shop', [ShopController::class, 'updateMyShop'])->name('shops.update-my-shop');
+    
+    // จัดการชุด
+    Route::get('/shop/costumes', [ShopController::class, 'listCostumes'])->name('shop.costumes');
+    Route::get('/shop/new-form', [ShopController::class, 'newForm'])->name('shop.new-form');
+    Route::post('/shop/store-costume', [ShopController::class, 'storeCostume'])->name('shop.store-costume');
 });
-
 //auth
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
@@ -84,8 +95,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile-edit', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+
 Route::prefix('outfit')->group(function (){
     Route::get('/all',[OutfitController::class, 'index'])->name('outfit.all');
 });
+
 
 require __DIR__ . '/auth.php';
