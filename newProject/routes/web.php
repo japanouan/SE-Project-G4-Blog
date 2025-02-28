@@ -100,5 +100,4 @@ Route::prefix('outfit')->group(function (){
     Route::get('/all',[OutfitController::class, 'index'])->name('outfit.all');
 });
 
-
 require __DIR__ . '/auth.php';
