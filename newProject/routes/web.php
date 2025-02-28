@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\OutfitController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
@@ -7,9 +8,12 @@ use App\Http\Controllers\ShopController;
 use Illuminate\Http\Request;
 
 
-Route::get('/', function () {
-    return view('main');
-});
+
+
+
+Route::get('/', [OutfitController::class, 'index'])->name('outfits.index');
+
+
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -91,10 +95,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile-edit', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-//เรีนกฟอร์ม 
-Route::get('/seller/new-form', function () {
-    return view('Seller.new_form'); // ชื่อต้องตรงกับโฟลเดอร์และไฟล์
-})->name('seller.new_form');
 
+Route::prefix('outfit')->group(function (){
+    Route::get('/all',[OutfitController::class, 'index'])->name('outfit.all');
+});
 
 require __DIR__ . '/auth.php';
