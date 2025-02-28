@@ -30,7 +30,7 @@
             <x-input-error :messages="$errors->get('phone')" class="mt-2" />
         </div>
 
-        
+
 
 
         <!-- Password -->
