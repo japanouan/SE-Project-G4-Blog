@@ -6,7 +6,7 @@
     <title>Login - ThaiWijit</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="flex items-center justify-center h-screen bg-indigo-400">
+<body class="flex items-center justify-center h-screen bg-[#8B9DF9]">
 
     <div class="text-center">
         <!-- โลโก้ -->
