@@ -1,48 +1,46 @@
-<x-guest-layout>
-    <style>
-        body {
-            background-color: #8b9df9;
-        }
-    </style>
-    
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - ThaiWijit</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex items-center justify-center h-screen bg-indigo-400">
 
-    <form method="POST" action="{{ route('login') }}">
-        @csrf
+    <div class="text-center">
+        <!-- โลโก้ -->
+        <h1 class="text-white text-5xl font-bold mb-6">Thai<span class="font-extrabold">Wijit</span></h1>
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="username" :value="__('Username')" />
-            <x-text-input id="username" class="block mt-1 w-full" type="text" name="username" :value="old('username')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('username')" class="mt-2" />
+        <!-- กล่องล็อกอิน -->
+        <div class="bg-white p-8 rounded-lg shadow-lg w-80">
+            <form method="POST" action="{{ route('login') }}">
+                @csrf
+
+                <!-- Username -->
+                <div class="mb-4">
+                    <label for="username" class="block text-sm font-semibold text-gray-700">Username</label>
+                    <input id="username" type="text" name="username" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400" required autofocus>
+                </div>
+
+                <!-- Password -->
+                <div class="mb-4">
+                    <label for="password" class="block text-sm font-semibold text-gray-700">Password</label>
+                    <input id="password" type="password" name="password" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400" required>
+                </div>
+
+                <!-- ปุ่ม Login -->
+                <button type="submit" class="w-full bg-black text-white py-2 rounded-md font-semibold hover:bg-gray-800 transition">
+                    Login
+                </button>
+            </form>
+
+            <!-- ลิงก์สมัครสมาชิก -->
+            <p class="mt-4 text-sm text-gray-600">
+                <a href="{{ route('register') }}" class="text-indigo-500 hover:underline">Sign Up</a>
+            </p>
         </div>
+    </div>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-            <x-text-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="current-password" />
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
-            </label>
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
-                </a>
-            @endif
-
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
-        </div>
-    </form>
-</x-guest-layout>
+</body>
+</html>
