@@ -67,13 +67,22 @@ Route::prefix('photographer')->name('photographer.')->middleware('auth', 'is_pho
     Route::get('/users', function () {})->name('users');
 });
 
-
 // shop owner
 Route::prefix('shopowner')->name('shopowner.')->middleware('auth', 'is_shopowner')->group(function () {
     Route::get('/dashboard', function () {return view('dashboard');})->name('dashboard');
-    Route::get('/users', function () {})->name('users');
+    
+    // จัดการร้านค้า
+    Route::get('/shops/create', [ShopController::class, 'create'])->name('shops.create');
+    Route::post('/shops', [ShopController::class, 'store'])->name('shops.store');
+    Route::get('/shops/my-shop', [ShopController::class, 'myShop'])->name('shops.my-shop');
+    Route::get('/shops/{shop_id}/edit-my-shop', [ShopController::class, 'editMyShop'])->name('shops.edit-my-shop');
+    Route::put('/shops/{shop_id}/update-my-shop', [ShopController::class, 'updateMyShop'])->name('shops.update-my-shop');
+    
+    // จัดการชุด
+    Route::get('/shop/costumes', [ShopController::class, 'listCostumes'])->name('shop.costumes');
+    Route::get('/shop/new-form', [ShopController::class, 'newForm'])->name('shop.new-form');
+    Route::post('/shop/store-costume', [ShopController::class, 'storeCostume'])->name('shop.store-costume');
 });
-
 //auth
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
