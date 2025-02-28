@@ -3,9 +3,9 @@
 @section('content')
 <div class="container">
     <h2 class="mb-4">รายการชุดไทย</h2>
-    <a href="#" class="btn btn-success mb-3">เพิ่มชุดไทย</a>
+    <a href="{{ route('thai-dress.create') }}" class="btn btn-success mb-3">เพิ่มชุดไทย</a>
     <div class="row">
-        @foreach ($outfits as $dress)
+        @foreach ($thaiDresses as $dress)
             <div class="col-md-4 mb-3">
                 <div class="card">
                     <img src="{{ asset('storage/' . $dress->image) }}" class="card-img-top" alt="{{ $dress->name }}">
