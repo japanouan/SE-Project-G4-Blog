@@ -11,6 +11,9 @@ class OutfitController extends Controller
      function index(){
         $outfits=ThaiOutfit::paginate(10);
         return view('main',compact('outfits'));
-        
+    }
+
+    function indexAddToCart($id){
+
     }
 }

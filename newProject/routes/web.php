@@ -96,8 +96,11 @@ Route::middleware('auth')->group(function () {
 });
 
 
-Route::prefix('outfit')->group(function (){
-    Route::get('/all',[OutfitController::class, 'index'])->name('outfit.all');
+
+
+Route::prefix('outfit')->middleware(['auth', 'IsCustomer'])->group(function () {
+    Route::get('/all', [OutfitController::class, 'index'])->name('outfit.all');
 });
+
 
 require __DIR__ . '/auth.php';
