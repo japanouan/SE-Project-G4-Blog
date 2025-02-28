@@ -45,12 +45,26 @@
             top: 71px;
             left: 0;
             color: white;
+            transition: transform 0.3s ease-in-out; /* Add transition for smooth animation */
+            z-index: 90; /* Ensure sidebar appears above content */
         }
+        
+        /* New class for collapsed sidebar */
+        .sidebar-collapsed {
+            transform: translateX(-100%); /* Move sidebar off-screen */
+        }
+        
         .content {
             margin-left: 259px;
             margin-top: 71px;
             padding: 20px;
             flex: 1;
+            transition: margin-left 0.3s ease-in-out; /* Add transition for content */
+        }
+        
+        /* New class for content when sidebar is collapsed */
+        .content-expanded {
+            margin-left: 0;
         }
         .menu-item {
             width: 259px;
@@ -196,12 +210,19 @@
             <div id="shops-content" class="content-section hidden"></div>
         </div>
     </div>
-
     <script>
         $(document).ready(function() {
-            // Toggle sidebar visibility
+            // Toggle sidebar visibility with animation
             $('#menuToggle').click(function() {
-                $('#sidebar').toggle();
+                $('#sidebar').toggleClass('sidebar-collapsed');
+                $('.content').toggleClass('content-expanded');
+                
+                // Change menu icon based on sidebar state
+                if ($('#sidebar').hasClass('sidebar-collapsed')) {
+                    $('#menuToggle i').removeClass('fa-bars').addClass('fa-bars-staggered');
+                } else {
+                    $('#menuToggle i').removeClass('fa-bars-staggered').addClass('fa-bars');
+                }
             });
             
             // Toggle user dropdown

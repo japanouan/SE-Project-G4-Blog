@@ -5,12 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - ThaiWijit</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jomhuria&display=swap">
+    <style>
+        .logo-text {
+            color: #FFFAFA;
+            font-family: 'Jomhuria', sans-serif;
+            font-size: 128px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: normal;
+            margin-bottom: 0.5rem;
+        }
+    </style>
 </head>
 <body class="flex items-center justify-center h-screen bg-[#8B9DF9]">
 
     <div class="text-center">
-        <!-- โลโก้ -->
-        <h1 class="text-white text-5xl font-bold mb-6">Thai<span class="font-extrabold">Wijit</span></h1>
+        <!-- โลโก้ - Updated styling -->
+        <h1 class="logo-text mb-6">ThaiWijit</h1>
 
         <!-- กล่องล็อกอิน -->
         <div class="bg-white p-8 rounded-lg shadow-lg w-80">
