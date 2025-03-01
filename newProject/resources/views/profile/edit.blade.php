@@ -1,5 +1,13 @@
-<x-app-layout>
-    <x-slot name="header">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+<x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Edit Profile') }}
         </h2>
@@ -8,9 +16,8 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
-                <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data">
+                <form method="PATCH" action="{{ route('profile.update') }}" enctype="multipart/form-data">
                     @csrf
-                    @method('PUT')
 
                     <!-- Profile Picture (Optional) -->
                     <div class="mt-4">
@@ -68,20 +75,7 @@
             </div>
         </div>
     </div>
-</x-app-layout>
 
-<form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data">
-    @csrf
-    @method('PUT')
-
-    <!-- อัปโหลดรูปโปรไฟล์ -->
-    <div class="mt-4">
-        <x-input-label for="profile_picture" :value="__('Profile Picture')" />
-        <x-text-input id="profile_picture" name="profile_picture" type="file" class="mt-1 block w-full" />
-        <x-input-error :messages="$errors->get('profile_picture')" class="mt-2" />
-    </div>
-
-    <div class="flex items-center justify-end mt-4">
-        <x-primary-button>{{ __('Save') }}</x-primary-button>
-    </div>
-</form>
+</body>
+</html>
+    

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ProfileController extends Controller
 {
@@ -31,33 +32,32 @@ class ProfileController extends Controller
 
 
 
-
     public function update(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . Auth::id(),
-            'profile_picture' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
-        ]);
-
-        $user = Auth::user();
-
-        $user->name = $request->name;
-        $user->email = $request->email;
-        if ($request->hasFile('profile_picture')) {
-            // ลบรูปภาพเก่าหากมี
-            if ($user->profile_picture_url) {
-                Storage::delete($user->profile_picture_url);
-            }
+        dd();
+        // รับข้อมูลผู้ใช้ที่ล็อกอิน
+        $user = $request->user();
     
-            // อัปโหลดรูปภาพใหม่และบันทึก path
-            $path = $request->file('profile_picture')->store('profile_pictures', 'public'); // เก็บไฟล์ในโฟลเดอร์ public/profile_pictures
-            $user->profile_picture_url = $path;
+        // ตรวจสอบว่าไฟล์ถูกอัพโหลดหรือไม่
+        if ($request->hasFile('profile_picture')) {
+            // สร้างชื่อไฟล์ที่ไม่ซ้ำ
+            $filename = Str::random(40) . '.' . $request->file('profile_picture')->getClientOriginalExtension();
+    
+            // เก็บไฟล์ในโฟลเดอร์ 'images/profile-pic' ใน disk 'public'
+            $path = $request->file('profile_picture')->storeAs('images/profile-pic', $filename, 'public');
+    
+            // บันทึก path ของไฟล์ที่เก็บไว้ในฐานข้อมูล
+            $user->profile_picture = $path;
+            $user->save();
         }
-        $request->user()->save();
-
+    
+        // อัพเดทข้อมูลอื่น ๆ
+        $user->fill($request->validated());
+        $user->save();
+    
         return redirect()->route('profile.show')->with('success', 'Profile updated successfully!');
     }
+    
 
 
     public function destroy(Request $request): RedirectResponse
