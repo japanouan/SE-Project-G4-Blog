@@ -4,6 +4,7 @@ use App\Http\Middleware\IsAdmin;
 use App\Http\Middleware\IsCustomer;
 use App\Http\Middleware\IsMakeUp;
 use App\Http\Middleware\IsOwnShop;
+use App\Http\Middleware\isActive;
 use App\Http\Middleware\IsPhotographer;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -22,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'is_shopowner' => IsOwnShop::class,
             'is_photographer' => IsPhotographer::class,
             'is_customer' => IsCustomer::class,
+            'is_active' => isActive::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

@@ -22,7 +22,7 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-
+Route::middleware(['is_active'])->group(function () {
 // make-up
 Route::prefix('make-upartist')->name('make-upartist.')->middleware('auth', 'is_makeup')->group(function () {
     Route::get('/dashboard', function () {})->name('dashboard');
@@ -125,7 +125,7 @@ Route::prefix('cartItem')->name('cartItem.')->group(function(){
     Route::get('/allItem',[CartItemController::class, 'index'])->name('allItem');
 });
 
-
+});
 
 
 require __DIR__ . '/auth.php';
