@@ -10,11 +10,15 @@
         <p class="text-gray-600">ไม่มีสินค้าในตะกร้า</p>
     @else
         <div class="space-y-4">
-            @foreach($outfits as $item)
+            @foreach($outfits as $index => $item)
+                @php
+                    $cartItem = $cartItems[$index] ?? null; // ดึงค่าจำนวนชุดจาก $cartItems
+                @endphp
+
                 <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow-md">
                     <!-- รูปสินค้า -->
                     <div class="flex items-center">
-                        <img src="#" class="w-24 h-24 rounded-lg object-cover">
+                        <img src="{{ asset('storage/' . $item->image) }}" class="w-24 h-24 rounded-lg object-cover">
                         <div class="ml-4">
                             <h3 class="text-lg font-semibold">{{ $item->name }}</h3>
                             <p class="text-green-600 font-bold">{{ number_format($item->price, 0) }}฿ /4 days</p>
@@ -27,7 +31,7 @@
                     <!-- จำนวนสินค้า -->
                     <div class="flex items-center">
                         <button class="px-2 py-1 border rounded-md bg-gray-200" onclick="decreaseQty('{{ $item->id }}')">-</button>
-                        <input type="text" id="qty-{{ $item->id }}" value="1" class="w-10 text-center border rounded-md mx-2" readonly>
+                        <input type="text" id="qty-{{ $item->id }}" value="{{ $cartItem->quantity ?? 1 }}" class="w-12 text-center border rounded-md" readonly>
                         <button class="px-2 py-1 border rounded-md bg-gray-200" onclick="increaseQty('{{ $item->id }}')">+</button>
                     </div>
 
