@@ -26,10 +26,11 @@ class CartItemController extends Controller
         $outfit = ThaiOutfit::findOrFail($idOutfit); // ใช้ findOrFail() เพื่อให้ error ถ้าหาไม่เจอ
 
         // ตรวจสอบก่อนว่ามีไอเท็มอยู่ในตะกร้าแล้วหรือไม่
-        CartItem::firstOrCreate([
-            'user_id' => $user->user_id,
+        $data=[
+            'userId' => $user->user_id,
             'outfit_id' => $outfit->outfit_id,
-        ]);
+        ];
+        CartItem::insert($data);
 
         return redirect("/orderdetail/outfit/{$outfit->outfit_id}")->with('success', 'เพิ่มลงตะกร้าเรียบร้อยแล้ว');
     }
