@@ -40,7 +40,7 @@ class AuthenticatedSessionController extends Controller
             } elseif (Auth::user()->userType === 'admin') {
                 return redirect()->route(str_replace(' ', '', Auth::user()->userType) . '.dashboard'); // ถ้าเป็นแอดมินไปที่ Dashboard
             } else {
-                return redirect('/home'); // ค่าเริ่มต้น ถ้าไม่มี role หรือเงื่อนไขอื่น
+                return redirect()->route(str_replace(' ', '', Auth::user()->userType) . '.dashboard'); // ค่าเริ่มต้น ถ้าไม่มี role หรือเงื่อนไขอื่น
             }
             
         }

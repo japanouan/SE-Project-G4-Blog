@@ -31,7 +31,9 @@
 
         <!-- Icons -->
         <div class="flex items-center space-x-4 text-white">
-            <i class="fa fa-shopping-cart text-xl"></i>
+            <a href="{{ route('cartItem.allItem') }}" class="relative">
+                <i class="fa fa-shopping-cart text-xl"></i>
+            </a>
             @guest
                 <a href="{{ route('login') }}" class="hover:underline">Login</a>
                 <a href="{{ route('register') }}" class="hover:underline">Register</a>
