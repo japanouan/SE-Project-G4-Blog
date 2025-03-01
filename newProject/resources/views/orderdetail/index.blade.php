@@ -1,48 +1,71 @@
 @extends('layouts.main')
 
 @section('content')
-<div class="container mt-4">
-    <div class="row">
+<div class="container mx-auto mt-8">
+    <div class="flex flex-wrap lg:flex-nowrap gap-8">
         <!-- รูปภาพสินค้า -->
-        <div class="col-md-5">
-            <img src="{{ asset('storage/' . $outfit->image) }}" class="img-fluid rounded" alt="{{ $outfit->name }}">
+        <div class="w-full lg:w-2/5">
+            <img src="{{ asset('storage/' . $outfit->image) }}" class="w-full h-auto rounded-lg shadow-md" alt="{{ $outfit->name }}">
         </div>
 
         <!-- รายละเอียดสินค้า -->
-        <div class="col-md-7">
-            <h3>ชื่อชุด: {{ $outfit->name }}</h3>
-            <p><strong>รหัสชุด:</strong> {{ $outfit->outfit_id }}</p>
-            <p><strong>ประเภทชุด:</strong> {{ $outfit->category }}</p>
-            <p><strong>ประเภทผ้า:</strong> {{ $outfit->fabric }}</p>
-            <p><strong>ราคาซื้อ:</strong> {{ number_format($outfit->price, 2) }} บาท</p>
-            <p><strong>ราคาขาย:</strong> {{ number_format($outfit->price, 2) }} บาท</p>
-            <p><strong>ราคามัดจำ:</strong> {{ number_format($outfit->price, 2) }} บาท</p>
+        <div class="w-full lg:w-3/5 bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-bold text-gray-800">{{ $outfit->name }}</h2>
+            <p class="text-gray-600 mt-1"><strong>รหัสชุด:</strong> {{ $outfit->outfit_id }}</p>
+            <p class="text-gray-600"><strong>ประเภทชุด:</strong> {{ $outfit->category }}</p>
+            <p class="text-gray-600"><strong>ประเภทผ้า:</strong> {{ $outfit->fabric }}</p>
+
+            <!-- ราคา -->
+            <div class="mt-4">
+                <p class="text-lg font-semibold">ราคาขาย: <span class="text-red-500">{{ number_format($outfit->price, 2) }} บาท</span></p>
+                <p class="text-gray-600">ราคามัดจำ: {{ number_format($outfit->deposit_price, 2) }} บาท</p>
+            </div>
 
             <!-- สีของชุด -->
-            <p><strong>สีชุด:</strong></p>
-            @foreach(explode(',', $outfit->colors) as $color)
-                <button class="btn btn-light">{{ trim($color) }}</button>
-            @endforeach
+            <p class="mt-4 font-semibold">สีชุด:</p>
+            <div class="flex gap-2 mt-2">
+                @foreach(explode(',', $outfit->colors) as $color)
+                    <button class="px-3 py-1 border rounded-md bg-gray-200 text-gray-700">{{ trim($color) }}</button>
+                @endforeach
+            </div>
 
             <!-- ขนาดชุด -->
-            <p class="mt-3"><strong>ขนาดชุด:</strong></p>
-            @foreach(explode(',', $outfit->sizes) as $size)
-                <button class="btn btn-outline-dark">{{ trim($size) }}</button>
-            @endforeach
+            <p class="mt-4 font-semibold">ขนาดชุด:</p>
+            <div class="flex gap-2 mt-2">
+                @foreach(explode(',', $outfit->sizes) as $size)
+                    <button class="px-3 py-1 border rounded-md bg-white text-gray-700 shadow-md">{{ trim($size) }}</button>
+                @endforeach
+            </div>
 
             <!-- จำนวนชุด -->
-            <p class="mt-3"><strong>จำนวนชุด:</strong></p>
-            <div class="d-flex align-items-center">
-                <button class="btn btn-outline-secondary" onclick="decreaseQty()">-</button>
-                <input type="text" id="quantity" value="1" class="form-control text-center mx-2" style="width: 50px;">
-                <button class="btn btn-outline-secondary" onclick="increaseQty()">+</button>
+            <p class="mt-4 font-semibold">จำนวนชุด:</p>
+            <div class="flex items-center gap-2">
+                <button class="px-3 py-2 border rounded-md bg-gray-200 text-gray-700" onclick="decreaseQty()">-</button>
+                <input type="text" id="quantity" value="1" class="w-12 text-center border rounded-md" readonly>
+                <button class="px-3 py-2 border rounded-md bg-gray-200 text-gray-700" onclick="increaseQty()">+</button>
             </div>
 
             <!-- ปุ่มเช่า ซื้อ และ เพิ่มลงตะกร้า -->
-            <div class="mt-4">
-                <button class="btn btn-success">เช่า</button>
-                <button class="btn btn-primary">ซื้อ</button>
-                <button class="btn btn-outline-success">เพิ่มลงตะกร้า</button>
+            <div class="mt-6 flex gap-4">
+                <a href="#" class="px-6 py-2 border border-green-500 text-green-500 rounded-md hover:bg-green-500 hover:text-white transition">
+                    เช่า
+                </a>
+
+                <a href="#" class="px-6 py-2 border border-blue-500 text-blue-500 rounded-md hover:bg-blue-500 hover:text-white transition">
+                    ซื้อ
+                </a>
+
+                <a href="{{ url('cartItem/addToCart/' . $outfit->outfit_id) }}" 
+                    class="px-6 py-2 border border-green-500 text-green-500 rounded-md hover:bg-green-500 hover:text-white transition">
+                        เพิ่มลงตะกร้า
+                </a>
+
+
+
+                <!-- ไอคอนหัวใจ -->
+                <button class="px-4 py-2 border rounded-full hover:bg-gray-100 transition">
+                    ❤️
+                </button>
             </div>
         </div>
     </div>
