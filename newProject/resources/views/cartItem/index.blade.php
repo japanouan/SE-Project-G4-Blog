@@ -18,10 +18,12 @@
                 <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow-md">
                     <!-- รูปสินค้า -->
                     <div class="flex items-center">
-                        <img src="{{ asset('storage/' . $item->image) }}" class="w-24 h-24 rounded-lg object-cover">
+                        <img src="{{ $item->image ? asset('storage/' . $item->image) : asset('images/default-placeholder.png') }}" 
+                        class="w-24 h-24 rounded-lg object-cover">
+
                         <div class="ml-4">
                             <h3 class="text-lg font-semibold">{{ $item->name }}</h3>
-                            <p class="text-green-600 font-bold">{{ number_format($item->price, 0) }}฿ /4 days</p>
+                            <p class="text-green-600 font-bold">{{ number_format($item->price, 0) }}฿ /1 days</p>
                         </div>
                     </div>
 

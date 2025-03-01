@@ -61,7 +61,7 @@ class OutfitController extends Controller
         ]);
         // Handle image upload
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('outfit_images', 'public');
+            $imagePath = $request->file('image')->store('images', 'public');
             $validated['image'] = $imagePath;
         }
         
