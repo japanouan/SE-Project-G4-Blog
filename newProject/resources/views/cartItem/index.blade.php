@@ -21,7 +21,7 @@
                         <img src="{{ asset('storage/' . $item->image) }}" class="w-24 h-24 rounded-lg object-cover">
                         <div class="ml-4">
                             <h3 class="text-lg font-semibold">{{ $item->name }}</h3>
-                            <p class="text-green-600 font-bold">{{ number_format($item->price, 0) }}฿ /4 days</p>
+                            <p class="text-green-600 font-bold">{{ number_format($item->price, 0) }}฿ /1 days</p>
                         </div>
                     </div>
 
