@@ -277,10 +277,12 @@
                 User Management
             </h1>
             
-            <button id="acceptanceButton" class="btn btn-primary">
-                <i class="fas fa-check-circle"></i>
-                Acceptance Queue
-            </button>
+            <form action="{{ route('admin.users.acceptance') }}" method="GET">
+                @csrf
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-check-circle mr-2"></i>Acceptance Queue
+                </button>
+            </form>
         </div>
         
         <div class="card">
@@ -543,33 +545,6 @@
             </div>
         </div>
     </div>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Acceptance button navigation
-            document.getElementById('acceptanceButton').addEventListener('click', function() {
-                window.location.href = "{{ route('admin.users.acceptance') }}";
-            });
-            
-            // Make filter chips work better visually
-            const filterChips = document.querySelectorAll('.filter-chip');
-            filterChips.forEach(chip => {
-                chip.addEventListener('click', function() {
-                    const checkbox = this.querySelector('input[type="checkbox"]');
-                    checkbox.checked = !checkbox.checked;
-                    this.classList.toggle('active', checkbox.checked);
-                });
-            });
-            
-            // Prevent the default behavior of checkboxes inside filter chips
-            const checkboxes = document.querySelectorAll('.filter-chip input[type="checkbox"]');
-            checkboxes.forEach(checkbox => {
-                checkbox.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
-            });
-        });
-    </script>
 </body>
 </html>
 

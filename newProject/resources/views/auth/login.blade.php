@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,6 +19,7 @@
         }
     </style>
 </head>
+
 <body class="flex items-center justify-center h-screen bg-[#8B9DF9]">
 
     <div class="text-center">
@@ -49,10 +51,11 @@
 
             <!-- ลิงก์สมัครสมาชิก -->
             <p class="mt-4 text-sm text-gray-600">
-                <a href="{{ route('register') }}" class="text-indigo-500 hover:underline">Sign Up</a>
+                Don't have an account? <a href="{{ route('register') }}" class="text-indigo-500 hover:underline">Sign Up</a>
             </p>
         </div>
     </div>
 
 </body>
+
 </html>
