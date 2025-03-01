@@ -17,7 +17,8 @@ class CartItemController extends Controller
     function index()
     {
         $user = Auth::user();
-        return view('cartItem.index', compact('user'));
+        $outfits = ThaiOutfit::where('userId', $user->user_id)->get();
+        return view('cartItem/index', compact('user'));
     }
 
     function addToCart($idOutfit)
