@@ -51,15 +51,26 @@
                     <h4 class="font-semibold mb-2">เงื่อนไขการเช่า:</h4>
                     <p class="bg-gray-50 p-3 rounded">{{ $shop->rental_terms }}</p>
                 </div>
-
-                <div class="mt-6 flex">
+                <div class="mt-6 flex flex-wrap gap-3">
                     <a href="{{ route('shopowner.shops.edit-my-shop', $shop->shop_id) }}" 
-                       class="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 mr-3">
-                       <i class="fa fa-edit mr-1"></i> แก้ไขข้อมูลร้านค้า
+                     class="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600">
+                     <i class="fa fa-edit mr-1"></i> แก้ไขข้อมูลร้านค้า
                     </a>
-                    <a href="#" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
-                       <i class="fa fa-tshirt mr-1"></i> จัดการชุด
-                    </a>
+                 @if($shop && $shop->status == 'active')
+                     <a href="{{ route('shopowner.outfits.index') }}" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                          <i class="fa fa-tshirt mr-1"></i> จัดการชุด
+                     </a>
+                     <a href="{{ route('shopowner.categories.index') }}" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">
+                          <i class="fa fa-tags mr-1"></i> จัดการหมวดหมู่
+                     </a>
+                 @elseif($shop)
+                     <button disabled class="px-4 py-2 bg-gray-400 text-white rounded-md cursor-not-allowed">
+                          <i class="fa fa-tshirt mr-1"></i> จัดการชุด (รอการอนุมัติร้านค้า)
+                     </button>
+                     <button disabled class="px-4 py-2 bg-gray-400 text-white rounded-md cursor-not-allowed">
+                          <i class="fa fa-tags mr-1"></i> จัดการหมวดหมู่ (รอการอนุมัติร้านค้า)
+                     </button>
+                 @endif
                 </div>
             </div>
         @endif

@@ -12,45 +12,67 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body class="bg-gray-100">
-
-    <!-- Sidebar -->
-    <div class="flex">
-        <div class="w-64 bg-gray-900 min-h-screen text-white">
-            <div class="p-5 text-lg font-bold">ThaiWijit - ร้านค้า</div>
-            <nav class="mt-5">
-                <a href="{{ route('dashboard') }}" class="block px-4 py-2 text-gray-300 hover:bg-gray-700">
-                    <i class="fa fa-home"></i> หน้าหลัก
-                </a>
-                <a href="{{ route('shopowner.shops.my-shop') }}" class="block px-4 py-2 text-gray-300 hover:bg-gray-700">
-                    <i class="fa fa-store"></i> ร้านค้าของฉัน
-                </a>
-                <a href="{{ route('shopowner.shops.create') }}" class="block px-4 py-2 text-gray-300 hover:bg-gray-700">
-                    <i class="fa fa-plus-circle"></i> ลงทะเบียนร้านค้า
-                </a>
-                <a href="#" class="block px-4 py-2 text-gray-300 hover:bg-gray-700">
-                    <i class="fa fa-tshirt"></i> จัดการชุด
-                </a>
-                <a href="#" class="block px-4 py-2 text-gray-300 hover:bg-gray-700">
-                    <i class="fa fa-calendar"></i> การจอง
-                </a>
-                <a href="#" class="block px-4 py-2 text-gray-300 hover:bg-gray-700">
-                    <i class="fa fa-comment"></i> รีวิว
-                </a>
-                <a href="#" class="block px-4 py-2 text-gray-300 hover:bg-gray-700">
-                    <i class="fa fa-chart-bar"></i> สถิติ
-                </a>
-                <a href="#" class="block px-4 py-2 text-gray-300 hover:bg-gray-700">
-                    <i class="fa fa-cog"></i> ตั้งค่า
-                </a>
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="w-full text-left block px-4 py-2 text-gray-300 hover:bg-gray-700">
-                        <i class="fa fa-sign-out-alt"></i> ออกจากระบบ
-                    </button>
-                </form>
-            </nav>
-        </div>
-
+      <!-- Sidebar -->
+      <div class="flex">
+          <div class="w-64 bg-gray-900 min-h-screen text-white">
+              <div class="p-5 text-lg font-bold">ThaiWijit - ร้านค้า</div>
+              <nav class="mt-5">
+                  <a href="{{ route('dashboard') }}" class="block px-4 py-2 text-gray-300 hover:bg-gray-700">
+                      <i class="fa fa-home"></i> หน้าหลัก
+                  </a>
+                  <a href="{{ route('shopowner.shops.my-shop') }}" class="block px-4 py-2 text-gray-300 hover:bg-gray-700">
+                      <i class="fa fa-store"></i> ร้านค้าของฉัน
+                  </a>
+                
+                  @php
+                      // Check if shop owner has registered any shop (regardless of status)
+                      $hasRegisteredShop = \App\Models\Shop::where('shop_owner_id', Auth::id())->exists();
+                      // Check for active shop (for other menu items)
+                      $userShop = \App\Models\Shop::where('shop_owner_id', Auth::id())->where('status', 'active')->first();
+                  @endphp
+                
+                  @if(!$hasRegisteredShop)
+                      <a href="{{ route('shopowner.shops.create') }}" class="block px-4 py-2 text-gray-300 hover:bg-gray-700">
+                          <i class="fa fa-plus-circle"></i> ลงทะเบียนร้านค้า
+                      </a>
+                  @endif
+                
+                  @if($userShop)
+                      <a href="{{ route('shopowner.outfits.index') }}" class="block px-4 py-2 text-gray-300 hover:bg-gray-700">
+                          <i class="fa fa-tshirt"></i> จัดการชุด
+                      </a>
+                      <a href="{{ route('shopowner.categories.index') }}" class="block px-4 py-2 text-gray-300 hover:bg-gray-700">
+                          <i class="fa fa-tags"></i> จัดการหมวดหมู่
+                      </a>
+                  @else
+                      <span class="block px-4 py-2 text-gray-500">
+                          <i class="fa fa-tshirt"></i> จัดการชุด (ต้องมีร้านค้าก่อน)
+                      </span>
+                      <span class="block px-4 py-2 text-gray-500">
+                          <i class="fa fa-tags"></i> จัดการหมวดหมู่ (ต้องมีร้านค้าก่อน)
+                      </span>
+                  @endif
+                
+                  <a href="#" class="block px-4 py-2 text-gray-300 hover:bg-gray-700">
+                      <i class="fa fa-calendar"></i> การจอง
+                  </a>
+                  <a href="#" class="block px-4 py-2 text-gray-300 hover:bg-gray-700">
+                      <i class="fa fa-comment"></i> รีวิว
+                  </a>
+                  <a href="#" class="block px-4 py-2 text-gray-300 hover:bg-gray-700">
+                      <i class="fa fa-chart-bar"></i> สถิติ
+                  </a>
+                  <a href="#" class="block px-4 py-2 text-gray-300 hover:bg-gray-700">
+                      <i class="fa fa-cog"></i> ตั้งค่า
+                  </a>
+                  <form method="POST" action="{{ route('logout') }}">
+                      @csrf
+                      <button type="submit" class="w-full text-left block px-4 py-2 text-gray-300 hover:bg-gray-700">
+                          <i class="fa fa-sign-out-alt"></i> ออกจากระบบ
+                      </button>
+                  </form>
+              </nav>
+          </div>
         <!-- Main Content -->
         <div class="flex-1">
             <!-- Navbar -->

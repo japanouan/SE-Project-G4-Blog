@@ -7,6 +7,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ShopController;
+use App\Http\Controllers\CategoryController;
 use Illuminate\Http\Request;
 
 
@@ -88,6 +89,17 @@ Route::prefix('shopowner')->name('shopowner.')->middleware('auth', 'is_shopowner
     Route::get('/shop/costumes', [ShopController::class, 'listCostumes'])->name('shop.costumes');
     Route::get('/shop/new-form', [ShopController::class, 'newForm'])->name('shop.new-form');
     Route::post('/shop/store-costume', [ShopController::class, 'storeCostume'])->name('shop.store-costume');
+
+    // Outfit Routes
+    Route::get('/outfits', [OutfitController::class, 'shopOwnerIndex'])->name('outfits.index');
+    Route::get('/outfits/create', [OutfitController::class, 'create'])->name('outfits.create');
+    Route::post('/outfits', [OutfitController::class, 'store'])->name('outfits.store');
+    Route::get('/outfits/{outfit}/edit', [OutfitController::class, 'edit'])->name('outfits.edit');
+    Route::put('/outfits/{outfit}', [OutfitController::class, 'update'])->name('outfits.update');
+    Route::delete('/outfits/{outfit}', [OutfitController::class, 'destroy'])->name('outfits.destroy');
+
+    // Category management routes
+    Route::resource('categories', CategoryController::class);
 });
 //auth
 Route::middleware('auth')->group(function () {
