@@ -1,36 +1,34 @@
-@extends('layouts.app')
+@extends('layouts.main')
 
 @section('content')
 <div class="container mt-4">
     <div class="row">
         <!-- รูปภาพสินค้า -->
         <div class="col-md-5">
-            <img src="{{ asset('storage/images/outfit.jpg') }}" class="img-fluid rounded" alt="ชุดงานแต่ง">
+            <img src="{{ asset('storage/' . $outfit->image) }}" class="img-fluid rounded" alt="{{ $outfit->name }}">
         </div>
 
         <!-- รายละเอียดสินค้า -->
         <div class="col-md-7">
-            <h3>ชื่อชุด: ชุดงานแต่ง</h3>
-            <p><strong>รหัสชุด:</strong> A001</p>
-            <p><strong>ประเภทชุด:</strong> สีบล</p>
-            <p><strong>ประเภทผ้า:</strong> ผ้าไหม</p>
-            <p><strong>ราคาซื้อ:</strong> 20,000.00 บาท</p>
-            <p><strong>ราคาขาย:</strong> 2,000.00 บาท</p>
-            <p><strong>ราคามัดจำ:</strong> 2,000.00 บาท</p>
+            <h3>ชื่อชุด: {{ $outfit->name }}</h3>
+            <p><strong>รหัสชุด:</strong> {{ $outfit->outfit_id }}</p>
+            <p><strong>ประเภทชุด:</strong> {{ $outfit->category }}</p>
+            <p><strong>ประเภทผ้า:</strong> {{ $outfit->fabric }}</p>
+            <p><strong>ราคาซื้อ:</strong> {{ number_format($outfit->price, 2) }} บาท</p>
+            <p><strong>ราคาขาย:</strong> {{ number_format($outfit->price, 2) }} บาท</p>
+            <p><strong>ราคามัดจำ:</strong> {{ number_format($outfit->price, 2) }} บาท</p>
 
             <!-- สีของชุด -->
             <p><strong>สีชุด:</strong></p>
-            <button class="btn btn-light">ขาว</button>
-            <button class="btn btn-light">สีบล</button>
-            <button class="btn btn-light">สีทอง</button>
-            <button class="btn btn-light">เงิน</button>
+            @foreach(explode(',', $outfit->colors) as $color)
+                <button class="btn btn-light">{{ trim($color) }}</button>
+            @endforeach
 
             <!-- ขนาดชุด -->
             <p class="mt-3"><strong>ขนาดชุด:</strong></p>
-            <button class="btn btn-outline-dark">S</button>
-            <button class="btn btn-outline-dark">M</button>
-            <button class="btn btn-outline-dark">L</button>
-            <button class="btn btn-outline-dark">XL</button>
+            @foreach(explode(',', $outfit->sizes) as $size)
+                <button class="btn btn-outline-dark">{{ trim($size) }}</button>
+            @endforeach
 
             <!-- จำนวนชุด -->
             <p class="mt-3"><strong>จำนวนชุด:</strong></p>
@@ -63,5 +61,5 @@
             qty.value = parseInt(qty.value) - 1;
         }
     }
-</script>
+</script>  
 @endsection
