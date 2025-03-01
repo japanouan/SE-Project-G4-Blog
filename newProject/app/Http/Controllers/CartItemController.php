@@ -20,7 +20,7 @@ class CartItemController extends Controller
         $cartItems = CartItem::where('userId', $user->user_id)->get();
         $outfitIds = $cartItems->pluck('outfit_id')->toArray();
         $outfits = ThaiOutfit::whereIn('outfit_id', $outfitIds)->get();
-        return view('cartItem/index', compact('outfits, cartItems'));
+        return view('cartItem/index', compact('outfits', 'cartItems'));
     }
 
     function addToCart($idOutfit)
