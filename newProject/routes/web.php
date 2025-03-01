@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CartItemController;
 use App\Http\Controllers\OrderDetailController;
 use App\Http\Controllers\OutfitController;
 use App\Http\Controllers\ProfileController;
@@ -105,6 +106,10 @@ Route::middleware(['auth', 'is_customer'])->group(function () {
 
 Route::prefix('orderdetail')->name('orderdetail.')->group(function(){
     Route::get('/outfit/{idOutfit}', [OrderDetailController::class, 'index'])->name('orderdetail.index');
+});
+
+Route::prefix('cartItem')->name('cartItem.')->group(function(){
+    Route::get('/addToCart/{idOutfit}', [CartItemController::class, 'addToCart'])->name('cart.add');
 });
 
 
