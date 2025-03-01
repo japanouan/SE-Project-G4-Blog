@@ -110,6 +110,7 @@ Route::prefix('orderdetail')->name('orderdetail.')->group(function(){
 
 Route::prefix('cartItem')->name('cartItem.')->group(function(){
     Route::get('/addToCart/{idOutfit}', [CartItemController::class, 'addToCart'])->name('cart.add');
+    Route::get('/allItem',[CartItemController::class, 'index'])->name('allItem');
 });
 
 
