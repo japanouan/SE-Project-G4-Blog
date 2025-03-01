@@ -34,7 +34,7 @@ class CartItemController extends Controller
     if (!$item) {
         // ถ้ายังไม่มีไอเท็มในตะกร้า -> เพิ่มใหม่
         CartItem::create([
-            'user_id' => $user->user_id, // ✅ ใช้ user_id ที่ถูกต้อง
+            'userId' => $user->user_id, // ✅ ใช้ user_id ที่ถูกต้อง
             'outfit_id' => $outfit->outfit_id,
             'quantity' => 1,
         ]);
