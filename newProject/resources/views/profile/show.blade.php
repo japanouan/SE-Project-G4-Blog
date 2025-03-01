@@ -4,12 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
 
-
-<x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Profile') }}
@@ -22,7 +21,7 @@
                 <!-- Profile Header with Name and Edit Button -->
                 <div class="profile-header flex items-center justify-between">
                     <div class="flex items-center">
-                        <img src="{{ $user->profilePicture }}" alt="Profile Picture" class="profile-picture rounded-full h-32 w-32 object-cover mr-6">
+                        <img src="{{ asset($user->profilePicture) }}" alt="Profile Picture" class="profile-picture rounded-full h-32 w-32 object-cover mr-6">
                         <div>
                             <h3 class="text-xl font-bold">{{ $user->name }}</h3>
                             <p class="text-sm text-gray-600">15 Wishlist | 2 Reviews</p>
@@ -45,7 +44,6 @@
             </div>
         </div>
     </div>
-</x-app-layout>
 
 </body>
 </html>
