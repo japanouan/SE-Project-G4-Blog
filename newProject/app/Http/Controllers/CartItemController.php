@@ -17,8 +17,10 @@ class CartItemController extends Controller
     function index()
     {
         $user = Auth::user();
-        $cartItems = ThaiOutfit::where('userId', $user->user_id)->get();
-        return view('cartItem/index', compact('user'));
+        $cartItems = CartItem::where('userId', $user->user_id)->get();
+        $outfitIds = $cartItems->pluck('outfit_id')->toArray();
+        $outfits = ThaiOutfit::whereIn('outfit_id', $outfitIds)->get();
+        return view('cartItem/index', compact('outfits'));
     }
 
     function addToCart($idOutfit)
