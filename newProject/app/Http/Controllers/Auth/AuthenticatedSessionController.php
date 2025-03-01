@@ -35,7 +35,14 @@ class AuthenticatedSessionController extends Controller
             Auth::login($user);
             $request->session()->regenerate();
 
-            return redirect()->route(str_replace(' ', '', Auth::user()->userType) . '.dashboard');
+            if (Auth::user()->userType === 'customer') {
+                return redirect('/outfit/all'); // ถ้าเป็นลูกค้าไปที่ Outfit
+            } elseif (Auth::user()->userType === 'admin') {
+                return redirect()->route(str_replace(' ', '', Auth::user()->userType) . '.dashboard'); // ถ้าเป็นแอดมินไปที่ Dashboard
+            } else {
+                return redirect('/home'); // ค่าเริ่มต้น ถ้าไม่มี role หรือเงื่อนไขอื่น
+            }
+            
         }
 
         return back()->withErrors([

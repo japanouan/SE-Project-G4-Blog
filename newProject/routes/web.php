@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\OrderDetailController;
 use App\Http\Controllers\OutfitController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -98,9 +99,15 @@ Route::middleware('auth')->group(function () {
 
 
 
-Route::prefix('outfit')->middleware(['auth', 'IsCustomer'])->group(function () {
-    Route::get('/all', [OutfitController::class, 'index'])->name('outfit.all');
+Route::middleware(['auth', 'is_customer'])->group(function () {
+    Route::get('/outfit/all', [OutfitController::class, 'index'])->name('outfit.all');
 });
+
+Route::prefix('orderdetail')->name('orderdetail.')->group(function(){
+    Route::get('/outfit/{idOutfit}', [OrderDetailController::class, 'index'])->name('orderdetail.index');
+});
+
+
 
 
 require __DIR__ . '/auth.php';

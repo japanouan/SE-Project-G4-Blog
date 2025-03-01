@@ -19,7 +19,7 @@ class IsCustomer
         // ตรวจสอบว่า user ที่ล็อกอินเป็น admin หรือไม่
         if (Auth::check() && Auth::user()->userType !== 'customer') {
             // ถ้าไม่ใช่ admin, ให้ redirect ไปที่หน้า dashboard หรือหน้าอื่นที่กำหนด
-            return redirect()->route('/all');
+            return redirect()->route('outfit.all');
         }
 
         return $next($request);
