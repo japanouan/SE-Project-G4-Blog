@@ -21,10 +21,10 @@
                 <!-- Profile Header with Name and Edit Button -->
                 <div class="profile-header flex items-center justify-between">
                     <div class="flex items-center">
+                        <!-- Profile Pic -->
                         <img src="{{ asset($user->profilePicture) }}" alt="Profile Picture" class="profile-picture rounded-full h-32 w-32 object-cover mr-6">
                         <div>
                             <h3 class="text-xl font-bold">{{ $user->name }}</h3>
-                            <p class="text-sm text-gray-600">15 Wishlist | 2 Reviews</p>
                         </div>
                     </div>
                     <a href="{{ route('profile.edit') }}" class="edit-profile-button text-blue-500 hover:text-blue-700">Edit Profile</a>
@@ -37,7 +37,6 @@
                         <p><strong>Name:</strong> {{ $user->name }}</p>
                         <p><strong>Email account:</strong> {{ $user->email }}</p>
                         <p><strong>Mobile number:</strong> {{ $user->phone ?? 'N/A' }}</p>
-                        <p><strong>Address:</strong> {{ $user->address ?? 'N/A' }}</p>
                         <p><strong>Gender:</strong> {{ $user->gender ?? 'N/A' }}</p>
                     </div>
                 </div>

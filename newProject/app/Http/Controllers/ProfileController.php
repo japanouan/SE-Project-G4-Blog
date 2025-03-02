@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules;
 
 class ProfileController extends Controller
 {
@@ -21,7 +24,7 @@ class ProfileController extends Controller
         return view('profile.show', compact('user'));
     }
 
-    
+
 
     public function edit(Request $request): View
     {
@@ -34,30 +37,55 @@ class ProfileController extends Controller
 
     public function update(Request $request)
     {
-        dd();
         // รับข้อมูลผู้ใช้ที่ล็อกอิน
         $user = $request->user();
+        // dd($request->all());
     
-        // ตรวจสอบว่าไฟล์ถูกอัพโหลดหรือไม่
-        if ($request->hasFile('profile_picture')) {
-            // สร้างชื่อไฟล์ที่ไม่ซ้ำ
-            $filename = Str::random(40) . '.' . $request->file('profile_picture')->getClientOriginalExtension();
+        // การตรวจสอบข้อมูล
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email',Rule::unique('Users','email')->ignore($user->user_id,'user_id'),], // ใช้ user_id แทน id
+            'phone' => ['required', 'numeric'],
+            'gender' => ['nullable', 'in:male,female,others'],
+            'profilePicture' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+            'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
+        ]);
+        // dd($request);
+        
+        
     
-            // เก็บไฟล์ในโฟลเดอร์ 'images/profile-pic' ใน disk 'public'
-            $path = $request->file('profile_picture')->storeAs('images/profile-pic', $filename, 'public');
-    
-            // บันทึก path ของไฟล์ที่เก็บไว้ในฐานข้อมูล
-            $user->profile_picture = $path;
-            $user->save();
+        $user->fill($request->except(['password', 'profilePicture'])); // ยกเว้น profilePicture ออกจาก fill()
+
+        // จัดการอัปโหลดรูปภาพแยกต่างหาก
+        if ($request->hasFile('profilePicture')) {
+            // ลบไฟล์เก่าถ้ามี
+            if ($user->profilePicture && file_exists(public_path($user->profilePicture))) {
+                unlink(public_path($user->profilePicture));
+            }
+        
+            // กำหนดชื่อไฟล์ใหม่แบบสุ่ม
+            $filename = Str::random(40) . '.' . $request->file('profilePicture')->getClientOriginalExtension();
+        
+            // ย้ายไฟล์ไปยังโฟลเดอร์ `public/images/profile-pic/`
+            $request->file('profilePicture')->move(public_path('images/profile-pic'), $filename);
+        
+            // บันทึกพาธของรูปใหม่
+            $user->profilePicture = 'images/profile-pic/' . $filename;
         }
-    
-        // อัพเดทข้อมูลอื่น ๆ
-        $user->fill($request->validated());
+        
+        // อัปเดตรหัสผ่านหากมีการส่งมา
+        if ($request->filled('password')) {
+            $user->password = bcrypt($request->password);
+        }
+        
+        // บันทึกการเปลี่ยนแปลง
         $user->save();
+        
     
         return redirect()->route('profile.show')->with('success', 'Profile updated successfully!');
     }
     
+
 
 
     public function destroy(Request $request): RedirectResponse
