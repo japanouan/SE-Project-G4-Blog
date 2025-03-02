@@ -63,22 +63,21 @@
                                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
-                
-                            <div class="md:col-span-2">
-                                <label for="image" class="block text-sm font-medium text-gray-700 mb-1">รูปภาพ</label>
-                                @if($outfit->image)
-                                    <div class="mb-3">
-                                        <img src="{{ asset('storage/' . $outfit->image) }}" alt="{{ $outfit->name }}" class="h-32 w-auto object-cover rounded">
-                                        <p class="text-xs mt-1 text-gray-500">รูปภาพปัจจุบัน (อัปโหลดรูปใหม่เพื่อเปลี่ยนแปลง)</p>
-                                    </div>
-                                @endif
-                                <input type="file" name="image" id="image" accept="image/*"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                @error('image')
-                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
-                
+                                              <div class="md:col-span-2">
+                                                  <label for="image" class="block text-sm font-medium text-gray-700 mb-1">รูปภาพ</label>
+                                                  @if($outfit->image)
+                                                      <div class="mb-3">
+                                                          <img src="{{ asset($outfit->image) }}" alt="{{ $outfit->name }}" class="h-32 w-auto object-cover rounded">
+                                                          <p class="text-xs mt-1 text-gray-500">รูปภาพปัจจุบัน (อัปโหลดรูปใหม่เพื่อเปลี่ยนแปลง)</p>
+                                                      </div>
+                                                  @endif
+                                                  <input type="file" name="image" id="image" accept="image/jpeg,image/png,image/jpg,image/gif"
+                                                      class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                                  <p class="text-xs text-gray-500 mt-1">รองรับไฟล์ .jpeg, .png, .jpg, .gif ขนาดสูงสุด 2MB</p>
+                                                  @error('image')
+                                                      <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                                  @enderror
+                                              </div>
                             <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">หมวดหมู่ *</label>
                                 <div class="mt-2 border rounded-md p-3 max-h-60 overflow-y-auto">

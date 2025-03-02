@@ -7,6 +7,7 @@ use App\Models\ThaiOutfit;
 use App\Models\OutfitCategory;
 use App\Models\ThaiOutfitCategory;
 use App\Models\Shop;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 
 class OutfitController extends Controller
@@ -53,25 +54,42 @@ class OutfitController extends Controller
             'description' => 'required|string',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'status' => 'required|in:active,inactive',
             'shop_id' => 'required|exists:Shops,shop_id',
             'categories' => 'required|array|min:1',
             'categories.*' => 'exists:OutfitCategories,category_id'
         ]);
-        // Handle image upload
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('images', 'public');
-            $validated['image'] = $imagePath;
+        
+        // Remove image from validated data as we'll handle it separately
+        if (isset($validated['image'])) {
+            unset($validated['image']);
         }
         
-        // Create outfit (will only include fields in $validated)
-        $outfit = ThaiOutfit::create($validated);
+        if ($request->hasFile('image')) {
+            // Generate random filename
+            $newFilename = Str::random(40) . '.' . $request->file('image')->getClientOriginalExtension();
+            
+            // Move file to public directory
+            $request->file('image')->move(public_path('images/outfits'), $newFilename);
+            
+            // Remove image from validated data
+            unset($validated['image']);
+            
+            // Create outfit without image first
+            $outfit = ThaiOutfit::create($validated);
+            
+            // Set and save image path
+            $outfit->image = 'images/outfits/' . $newFilename;
+            $outfit->save();
+        } else {
+            // Create outfit without image
+            $outfit = ThaiOutfit::create($validated);
+        }
         
-        // Attach categories - FIX HERE
+        // Attach categories
         if ($outfit) {
             foreach ($request->categories as $categoryId) {
-                // Don't set outfit_cate_id manually, let it auto-increment
                 $outfitCategory = new ThaiOutfitCategory();
                 $outfitCategory->outfit_id = $outfit->outfit_id;
                 $outfitCategory->category_id = $categoryId;
@@ -105,30 +123,41 @@ class OutfitController extends Controller
             'description' => 'required|string',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'status' => 'required|in:active,inactive',
             'categories' => 'required|array|min:1',
             'categories.*' => 'exists:OutfitCategories,category_id'
         ]);
         
-        // Handle image upload
-        if ($request->hasFile('image')) {
-            // Delete old image if exists
-            if ($outfit->image && Storage::disk('public')->exists($outfit->image)) {
-                Storage::disk('public')->delete($outfit->image);
-            }
-            
-            $imagePath = $request->file('image')->store('outfit_images', 'public');
-            $validated['image'] = $imagePath;
+        // Remove image from validated data
+        if (isset($validated['image'])) {
+            unset($validated['image']);
         }
         
-        // Update outfit
-        $outfit->update($validated);
+        // Handle image upload separately
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($outfit->image && file_exists(public_path($outfit->image))) {
+                unlink(public_path($outfit->image));
+            }
+            
+            // Generate random filename
+            $filename = Str::random(40) . '.' . $request->file('image')->getClientOriginalExtension();
+            
+            // Move file to public directory
+            $request->file('image')->move(public_path('images/outfits'), $filename);
+            
+            // Update outfit with new image path
+            $outfit->image = 'images/outfits/' . $filename;
+        }
         
-        // Update categories - FIX HERE
+        // Update outfit with other validated data
+        $outfit->fill($validated);
+        $outfit->save();
+        
+        // Update categories
         ThaiOutfitCategory::where('outfit_id', $id)->delete();
         foreach ($request->categories as $categoryId) {
-            // Don't set outfit_cate_id manually, let it auto-increment
             $outfitCategory = new ThaiOutfitCategory();
             $outfitCategory->outfit_id = $id;
             $outfitCategory->category_id = $categoryId;
