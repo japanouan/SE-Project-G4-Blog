@@ -166,7 +166,7 @@
                 </a>
             </div>
             <div class="menu-item" id="outfitMenuItem">
-                <a href="#" data-target="shops-content" data-url="{{ route('admin.outfits.adminindex') }}">
+                <a href="#" data-target="outfit-content" data-url="{{ route('admin.outfits.adminindex') }}">
                     <i class="fas fa-store mr-3"></i>
                     <span>Outfits</span>
                 </a>
@@ -214,6 +214,7 @@
             
             <!-- Shops Content Section (initially hidden) -->
             <div id="shops-content" class="content-section hidden"></div>
+            <div id="outfit-content" class="content-section hidden"></div>
         </div>
     </div>
     <script>
