@@ -153,4 +153,22 @@ class OutfitController extends Controller
         return redirect()->route('shopowner.outfits.index')
             ->with('success', 'ชุดถูกลบเรียบร้อยแล้ว');
     }
+
+    public function AdminIndex(Request $request)
+    {
+        $query = ThaiOutfit::query();
+
+        // ค้นหา shop_id, outfit_id หรือชื่อชุด
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where('shop_id', 'like', "%{$search}%")
+                ->orWhere('outfit_id', 'like', "%{$search}%")
+                ->orWhere('name', 'like', "%{$search}%");
+        }
+
+        // ดึงข้อมูลชุดทั้งหมด + ร้านค้า
+        $outfits = $query->with('shop')->paginate(10);
+
+        return view('admin.shops.outfits', compact('outfits'));
+    }
 }
