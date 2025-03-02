@@ -68,12 +68,15 @@ class OutfitController extends Controller
         // Create outfit (will only include fields in $validated)
         $outfit = ThaiOutfit::create($validated);
         
-        // Attach categories
-        foreach ($request->categories as $categoryId) {
-            ThaiOutfitCategory::create([
-                'outfit_id' => $outfit->outfit_id,
-                'category_id' => $categoryId
-            ]);
+        // Attach categories - FIX HERE
+        if ($outfit) {
+            foreach ($request->categories as $categoryId) {
+                // Don't set outfit_cate_id manually, let it auto-increment
+                $outfitCategory = new ThaiOutfitCategory();
+                $outfitCategory->outfit_id = $outfit->outfit_id;
+                $outfitCategory->category_id = $categoryId;
+                $outfitCategory->save();
+            }
         }
         
         return redirect()->route('shopowner.outfits.index')
@@ -122,13 +125,14 @@ class OutfitController extends Controller
         // Update outfit
         $outfit->update($validated);
         
-        // Update categories
+        // Update categories - FIX HERE
         ThaiOutfitCategory::where('outfit_id', $id)->delete();
         foreach ($request->categories as $categoryId) {
-            ThaiOutfitCategory::create([
-                'outfit_id' => $id,
-                'category_id' => $categoryId
-            ]);
+            // Don't set outfit_cate_id manually, let it auto-increment
+            $outfitCategory = new ThaiOutfitCategory();
+            $outfitCategory->outfit_id = $id;
+            $outfitCategory->category_id = $categoryId;
+            $outfitCategory->save();
         }
         
         return redirect()->route('shopowner.outfits.index')
