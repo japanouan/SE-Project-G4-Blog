@@ -36,18 +36,6 @@
             <x-input-error :messages="$errors->get('rental_terms')" class="mt-2" />
         </div>
 
-        <div>
-            <x-input-label for="depositfee" :value="__('depositfee')" />
-            <x-text-input id="depositfee" class="block mt-1 w-full" type="nunber" name="depositfee" :value="old('depositfee', $shop->depositfee)" required  />
-            <x-input-error :messages="$errors->get('depositfee')" class="mt-2" />
-        </div>
-
-        <div>
-            <x-input-label for="penaltyfee" :value="__('penaltyfee')" />
-            <x-text-input id="penaltyfee" class="block mt-1 w-full" type="nunber" name="penaltyfee" :value="old('penaltyfee', $shop->penaltyfee)" required  />
-            <x-input-error :messages="$errors->get('penaltyfee')" class="mt-2" />
-        </div>
-
         <div class="mt-4">
             <x-input-label for="status" :value="__('Status')" />
             <select id="statusSelect" name="status" class="block mt-1 w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
