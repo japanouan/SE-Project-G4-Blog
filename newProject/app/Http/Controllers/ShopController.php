@@ -121,8 +121,6 @@ public function store(Request $request)
         'shop_description' => 'required|string',
         'shop_location' => 'required|string',
         'rental_terms' => 'required|string',
-        'depositfee' => 'required|numeric|min:0',
-        'penaltyfee' => 'required|numeric|min:0',
     ]);
 
     $shop = new Shop();
@@ -130,8 +128,6 @@ public function store(Request $request)
     $shop->shop_description = $request->shop_description;
     $shop->shop_location = $request->shop_location;
     $shop->rental_terms = $request->rental_terms;
-    $shop->depositfee = $request->depositfee;
-    $shop->penaltyfee = $request->penaltyfee;
     $shop->status = 'inactive'; // รอการอนุมัติจาก admin
     $shop->is_newShop = true;
     $shop->shop_owner_id = auth()->id();
