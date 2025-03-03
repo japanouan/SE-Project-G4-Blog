@@ -149,14 +149,16 @@
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Search Bar -->
-            <form method="GET" action="{{ route('admin.shops.index') }}" class="mb-4 flex">
-                <input type="text" name="search" placeholder="ค้นหา Shop ID, Shop name"
-                    class="border p-2 w-full rounded-l-md"
-                    value="{{ request('search') }}">
-                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-r-md">ค้นหา</button>
-            </form>
+        <!-- Search Bar -->
+        <form method="GET" action="{{ route('admin.shops.index') }}" class="mb-4 flex">
+            <input type="text" name="search" placeholder="ค้นหา Shop ID, Shop name"
+                class="border p-2 w-full rounded-l-md"
+                value="{{ request('search') }}">
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-r-md">ค้นหา</button>
+        </form>
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
 
             <div class="table-container">
                 <table class="min-w-full divide-y divide-gray-200">
