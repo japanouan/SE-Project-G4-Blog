@@ -132,6 +132,11 @@ Route::prefix('orderdetail')->name('orderdetail.')->group(function(){
     Route::get('/outfit/{idOutfit}', [OrderDetailController::class, 'index'])->name('orderdetail.index');
 });
 
+//search
+Route::prefix('outfits')->name('outfits.')->group(function(){
+    Route::get('/search', [OutfitController::class, 'searchOutfits'])->name('search');
+});
+
 Route::prefix('cartItem')->name('cartItem.')->group(function(){
     Route::post('/addToCart', [CartItemController::class, 'addToCart'])->name('cart.add');
     Route::get('/allItem',[CartItemController::class, 'index'])->name('allItem');

@@ -43,13 +43,51 @@ class ThaiOutfit extends Model
     {
         return $this->sizeAndColors()->sum('amount') ?? 0;
     }
-    protected static function boot()
-{
-    parent::boot();
     
-    // When deleting an outfit, also delete related size and color combinations
-    static::deleting(function($outfit) {
-        $outfit->sizeAndColors()->delete();
-    });
-}
+    protected static function boot()
+    {
+        parent::boot();
+        
+        // When deleting an outfit, also delete related size and color combinations
+        static::deleting(function($outfit) {
+            $outfit->sizeAndColors()->delete();
+        });
+    }
+    public function scopeFilterByCategory($query, $categoryIds)
+    {
+        if (!empty($categoryIds) && $categoryIds[0] !== '') {
+            return $query->whereHas('categories', function($q) use ($categoryIds) {
+                $q->whereIn('OutfitCategories.category_id', (array)$categoryIds);
+            });
+        }
+        return $query;
+    }
+
+    public function scopeFilterBySize($query, $sizeIds)
+    {
+        if (!empty($sizeIds) && $sizeIds[0] !== '') {
+            return $query->whereHas('sizeAndColors', function($q) use ($sizeIds) {
+                $q->whereIn('size_id', (array)$sizeIds);
+            });
+        }
+        return $query;
+    }
+
+    public function scopeFilterByColor($query, $colorIds)
+    {
+        if (!empty($colorIds) && $colorIds[0] !== '') {
+            return $query->whereHas('sizeAndColors', function($q) use ($colorIds) {
+                $q->whereIn('color_id', (array)$colorIds);
+            });
+        }
+        return $query;
+    }
+
+    public function scopeFilterByStatus($query, $status)
+    {
+        if (!empty($status)) {
+            return $query->where('status', $status);
+        }
+        return $query;
+    }
 }

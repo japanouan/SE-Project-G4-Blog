@@ -65,8 +65,6 @@ class ShopController extends Controller
             'shop_description' => 'required|string',
             'shop_location' => 'required|string',
             'rental_terms' => 'required|string',
-            'depositfee' => 'required|numeric|min:0',
-            'penaltyfee' => 'required|numeric|min:0',
             'status' => 'required|in:active,inactive',
         ]);
 

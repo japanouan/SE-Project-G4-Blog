@@ -28,15 +28,77 @@ class OutfitController extends Controller
     {
         // Check if user has a shop first
         $shop = Shop::where('shop_owner_id', auth()->id())->first();
-
+    
         if (!$shop) {
             return redirect()->route('shopowner.shops.my-shop')
                 ->with('error', 'คุณยังไม่มีร้านค้า กรุณาลงทะเบียนร้านค้าก่อนจัดการชุด');
         }
-
-        $outfits = ThaiOutfit::where('shop_id', $shop->shop_id)->paginate(10);
-        return view('shopowner.outfits.index', compact('outfits'));
+    
+        $query = ThaiOutfit::where('shop_id', $shop->shop_id);
+    
+        // Search by name
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+    
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+    
+        // Filter by category
+        if ($request->filled('categories')) {
+            $categories = array_filter($request->categories, function($value) {
+                return $value !== null && $value !== '';
+            });
+            
+            if (!empty($categories)) {
+                $query->whereHas('categories', function($q) use ($categories) {
+                    $q->whereIn('OutfitCategories.category_id', $categories);
+                });
+            }
+        }
+    
+        // Filter by size
+        if ($request->filled('sizes')) {
+            $sizes = array_filter($request->sizes, function($value) {
+                return $value !== null && $value !== '';
+            });
+            
+            if (!empty($sizes)) {
+                $query->whereHas('sizeAndColors', function($q) use ($sizes) {
+                    $q->whereIn('size_id', $sizes);
+                });
+            }
+        }
+    
+        // Filter by color
+        if ($request->filled('colors')) {
+            $colors = array_filter($request->colors, function($value) {
+                return $value !== null && $value !== '';
+            });
+            
+            if (!empty($colors)) {
+                $query->whereHas('sizeAndColors', function($q) use ($colors) {
+                    $q->whereIn('color_id', $colors);
+                });
+            }
+        }
+    
+        // Sort by column
+        $orderBy = $request->input('orderBy', 'outfit_id');
+        $direction = $request->input('direction', 'asc');
+        $query->orderBy($orderBy, $direction);
+    
+        $outfits = $query->paginate(10)->withQueryString();
+        $categories = OutfitCategory::all();
+        $sizes = ThaiOutfitSize::all();
+        $colors = ThaiOutfitColor::all();
+    
+        return view('shopowner.outfits.index', compact('outfits', 'categories', 'sizes', 'colors'));
     }
+    
+    
 
     public function create()
     {
@@ -273,6 +335,10 @@ class OutfitController extends Controller
         return view('admin.outfits.outfits', compact('outfits'));
     }
 
+  
+    
+
+
     public function AdminEdit($id)
     {
         $outfit = ThaiOutfit::findOrFail($id);
@@ -285,28 +351,26 @@ class OutfitController extends Controller
 
         return view('admin.outfits.edit', compact('outfit', 'categories', 'outfitCategories'));
     }
-
-    public function searchOutfits($searchKey)
+    public function searchOutfits(Request $request)
     {
+        $searchKey = $request->searchkey;
         // ตรวจสอบว่ามีคีย์ค้นหาหรือไม่
         if (!$searchKey) {
             return response()->json(['message' => 'กรุณาใส่คำค้นหา'], 400);
         }
-    
         // ค้นหา Outfits โดยใช้ Model Outfit
         $outfits = ThaiOutfit::where('name', 'like', "%{$searchKey}%")
             ->orWhere('description', 'like', "%{$searchKey}%")
-            ->orWhereHas('category', function ($query) use ($searchKey) {
-                $query->where('name', 'like', "%{$searchKey}%");
-            })
-            ->get()->paginate(10);
-    
+            ->get();
+
+
         // ตรวจสอบว่าพบข้อมูลหรือไม่
         if ($outfits->isEmpty()) {
             return response()->json(['message' => 'ไม่พบผลลัพธ์ที่ตรงกับการค้นหา'], 404);
         }
-    
+
+
         return view('main', compact('outfits'));
-    }
-    
+    } 
+
 }
