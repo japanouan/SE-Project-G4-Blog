@@ -11,43 +11,37 @@ use Illuminate\Support\Facades\DB;
 class UserController extends Controller
 {
 
-
     // ฟังก์ชันแสดงรายการผู้ใช้
     public function index(Request $request)
     {
-        // รับค่าการจัดเรียง
-        $orderBy = $request->input('orderBy') ?: 'user_id';
-        $direction = $request->input('direction') ?: 'asc';
-
-
-        // รับค่า userType filter เป็น array (ถ้าไม่มีจะได้ array ว่าง)
-        if (!empty($request->input('userType'))) {
-            // ถ้ามีค่า userType ใน request ให้ใช้ค่านั้น
-            $userTypes = $request->input('userType');
-        } else {
-            // ถ้าไม่มีเลย ให้ใช้ array ว่าง
-            $userTypes = [];
-        }
-
-
+        // Get and sanitize sort parameters
+        $orderBy = in_array($request->input('orderBy'), ['user_id', 'name', 'email', 'phone', 'username', 'userType', 'status']) 
+            ? $request->input('orderBy') 
+            : 'user_id';
+            
+        $direction = in_array(strtolower($request->input('direction')), ['asc', 'desc']) 
+            ? strtolower($request->input('direction')) 
+            : 'asc';
+            
+        $userTypes = $request->input('userType', []);
+        
+        // Start query
         $query = User::query();
-        // dd($orderBy);
-
-        // กรองตาม userType ถ้ามีการเลือก
+        
+        // Apply filters
         if (!empty($userTypes) && is_array($userTypes)) {
             $query->whereIn('userType', $userTypes);
         }
-
-        // จัดเรียงตาม orderBy และ direction
+        
+        // Apply sort
         $query->orderBy($orderBy, $direction);
-        // dd($query);
-
+        
+        // Execute query
         $users = $query->get();
-        // dd($users);
-
-        return view('admin.users.index', compact('users'));
+        
+        // Pass all required variables to view for sorting and filtering to work
+        return view('admin.users.index', compact('users', 'orderBy', 'direction', 'userTypes'));
     }
-
 
 
     // ฟังก์ชันแสดงฟอร์มแก้ไขผู้ใช้
@@ -82,25 +76,49 @@ class UserController extends Controller
     }
 
 
-
     // ฟังก์ชันเปลี่ยนสถานะผู้ใช้
-    public function toggleStatus(Request $request, $user_id)
+    public function toggleStatus(Request $request, $id)
     {
-        $user = User::findOrFail($user_id);
-        $user->status = $request->status; // รับค่าจากฟอร์ม
-        $user->save();
-
-        $orderBy = $request->input('orderBy', 'user_id');
-        $direction = $request->input('direction', 'asc');
-        $userTypes = $request->input('userType', []);
-
-        return redirect()->route('admin.users.index', [
-            'orderBy'  => $orderBy,
-            'direction'=> $direction,
-            'userType' => $userTypes, // Laravel จะทำการแปลง array เป็น query string ให้เอง
-       ])->with('success', 'User status updated successfully!');
+        try {
+            $user = User::findOrFail($id);
+            $newStatus = $request->input('status');
+            
+            if (!in_array($newStatus, ['active', 'inactive'])) {
+                throw new \Exception('Invalid status value');
+            }
+            
+            $user->status = $newStatus;
+            $user->save();
+            
+            // If it's an AJAX request, return JSON response
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'User status updated successfully',
+                    'user' => [
+                        'id' => $user->user_id,
+                        'status' => $user->status
+                    ]
+                ]);
+            }
+            
+            // For non-AJAX requests, redirect back with parameters
+            return redirect()->route('admin.users.index', [
+                'orderBy' => $request->input('orderBy'),
+                'direction' => $request->input('direction'),
+                'userType' => $request->input('userType')
+            ])->with('success', 'User status updated successfully');
+        } catch (\Exception $e) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to update user status: ' . $e->getMessage()
+                ], 422);
+            }
+            
+            return back()->withErrors(['error' => 'Failed to update user status: ' . $e->getMessage()]);
+        }
     }
-
 
 
 
