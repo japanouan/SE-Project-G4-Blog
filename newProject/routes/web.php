@@ -67,8 +67,8 @@ Route::prefix('admin')->name('admin.')->middleware('auth', 'is_admin')->group(fu
 
     //crud outfit
     Route::get('/outfits', [OutfitController::class, 'AdminIndex'])->name('outfits.adminindex');
-    Route::get('/outfits/{id}/edit', [OutfitController::class, 'edit'])->name('outfits.edit');
-    Route::get('/outfits/{id}', [OutfitController::class, 'update'])->name('outfits.update');
+    Route::get('/outfits/{id}/edit', [OutfitController::class, 'AdminEdit'])->name('outfits.edit');
+    Route::PUT('/outfits/{id}', [OutfitController::class, 'update'])->name('outfits.update');
     Route::delete('/outfits/{id}', [OutfitController::class, 'destroy'])->name('outfits.destroy');
 
 });
