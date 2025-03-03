@@ -8,14 +8,15 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\CategoryController;
+use App\Models\CartItem;
 use Illuminate\Http\Request;
 
-
-
-
+use function Laravel\Prompts\search;
 
 Route::get('/', [OutfitController::class, 'index'])->name('outfits.index');
-
+Route::prefix('outfits')->name('outfits.')->group(function(){
+    Route::get('/search/{searchkey}',[OutfitController::class, 'searchOutfits'])->name('search');
+});
 
 
 Route::get('/dashboard', function () {
@@ -66,8 +67,8 @@ Route::prefix('admin')->name('admin.')->middleware('auth', 'is_admin')->group(fu
 
     //crud outfit
     Route::get('/outfits', [OutfitController::class, 'AdminIndex'])->name('outfits.adminindex');
-    Route::get('/outfits/{id}/edit', [OutfitController::class, 'edit'])->name('outfits.edit');
-    Route::get('/outfits/{id}', [OutfitController::class, 'update'])->name('outfits.update');
+    Route::get('/outfits/{id}/edit', [OutfitController::class, 'AdminEdit'])->name('outfits.edit');
+    Route::PUT('/outfits/{id}', [OutfitController::class, 'update'])->name('outfits.update');
     Route::delete('/outfits/{id}', [OutfitController::class, 'destroy'])->name('outfits.destroy');
 
 });
@@ -139,6 +140,9 @@ Route::prefix('outfits')->name('outfits.')->group(function(){
 Route::prefix('cartItem')->name('cartItem.')->group(function(){
     Route::post('/addToCart', [CartItemController::class, 'addToCart'])->name('cart.add');
     Route::get('/allItem',[CartItemController::class, 'index'])->name('allItem');
+
+    Route::get('/deleteItem/{idItem}', [CartItemController::class, 'deleteItem'])->name('deleteItem');
+    Route::get('/updateAmount/{idItem}', [CartItemController::class, 'updateItem'])->name('updateItem');
 });
 
 

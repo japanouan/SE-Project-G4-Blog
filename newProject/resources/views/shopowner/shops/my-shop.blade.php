@@ -35,11 +35,6 @@
                         <p class="mb-2"><i class="fa fa-store mr-2 text-blue-500"></i><strong>ชื่อร้าน:</strong> {{ $shop->shop_name }}</p>
                         <p class="mb-2"><i class="fa fa-map-marker-alt mr-2 text-blue-500"></i><strong>ที่ตั้ง:</strong> {{ $shop->shop_location }}</p>
                     </div>
-                    
-                    <div class="bg-gray-50 p-4 rounded-lg">
-                        <p class="mb-2"><i class="fa fa-money-bill-wave mr-2 text-blue-500"></i><strong>ค่ามัดจำ:</strong> {{ number_format($shop->depositfee, 2) }} บาท</p>
-                        <p class="mb-2"><i class="fa fa-exclamation-circle mr-2 text-blue-500"></i><strong>ค่าปรับ:</strong> {{ number_format($shop->penaltyfee, 2) }} บาท</p>
-                    </div>
                 </div>
                 
                 <div class="mb-4">
