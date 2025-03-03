@@ -17,11 +17,22 @@ class CartItemController extends Controller
     function index()
     {
         $user = Auth::user();
-        $cartItems = CartItem::where('userId', $user->user_id)->get();
+        
+        // ดึงข้อมูลรายการสินค้าที่อยู่ในตะกร้าของ User นั้นๆ
+        $cartItems = CartItem::where('userId', $user->user_id)
+                            ->orderBy('outfit_id') // จัดเรียงตาม outfit_id
+                            ->get();
+
+        // ดึงข้อมูลชุดไทยที่อยู่ในตะกร้าของ User
         $outfitIds = $cartItems->pluck('outfit_id')->toArray();
-        $outfits = ThaiOutfit::whereIn('outfit_id', $outfitIds)->get();
-        return view('cartItem/index', compact('outfits', 'cartItems'));
+        $outfits = ThaiOutfit::whereIn('outfit_id', $outfitIds)
+                            ->orderBy('outfit_id') // จัดเรียงให้ตรงกับ cartItems
+                            ->get();
+
+        // ส่งข้อมูลไปที่หน้า View
+        return view('cartItem.index', compact('outfits', 'cartItems'));
     }
+
 
     public function addToCart(Request $request)
     {
