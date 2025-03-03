@@ -5,7 +5,7 @@
     <div class="flex flex-wrap lg:flex-nowrap gap-8">
         <!-- รูปภาพสินค้า -->
         <div class="w-full lg:w-2/5">
-            <img src="{{ asset('storage/' . $outfit->image) }}" class="w-full h-auto rounded-lg shadow-md" alt="{{ $outfit->name }}">
+            <img src="{{ asset($outfit->image) }}" class="w-full h-auto rounded-lg shadow-md" alt="{{ $outfit->name }}">
         </div>
 
         <!-- รายละเอียดสินค้า -->

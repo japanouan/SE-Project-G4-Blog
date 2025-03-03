@@ -18,7 +18,7 @@
                 <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow-md">
                     <!-- รูปสินค้า -->
                     <div class="flex items-center">
-                        <img src="{{ $item->image ? asset('storage/' . $item->image) : asset('images/default-placeholder.png') }}" 
+                        <img src="{{ $item->image ? asset($item->image) : asset('images/default-placeholder.png') }}" 
                         class="w-24 h-24 rounded-lg object-cover">
 
                         <div class="ml-4">
