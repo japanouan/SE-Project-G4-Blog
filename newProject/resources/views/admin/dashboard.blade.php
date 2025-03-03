@@ -332,7 +332,7 @@ $(document).ready(function() {
         var formData = $(this).serialize();
         
         $.ajax({
-            url: "{{ route('admin.dashboard.users') }}",
+            url: "{{ route('admin.users.index') }}",
             type: 'GET',
             data: formData,
             beforeSend: function() {
