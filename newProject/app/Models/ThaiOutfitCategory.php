@@ -24,4 +24,15 @@ class ThaiOutfitCategory extends Model
     {
         return $this->belongsTo(OutfitCategory::class, 'category_id', 'category_id');
     }
+    public function categories()
+    {
+        return $this->hasManyThrough(
+            OutfitCategory::class,
+            ThaiOutfitCategory::class,
+            'outfit_id', // Foreign key on ThaiOutfitCategory table
+            'category_id', // Foreign key on OutfitCategory table
+            'outfit_id', // Local key on ThaiOutfit table
+            'category_id'  // Local key on ThaiOutfitCategory table
+        );
+    }
 }

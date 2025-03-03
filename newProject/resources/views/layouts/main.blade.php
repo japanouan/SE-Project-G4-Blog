@@ -14,7 +14,8 @@
 
     <!-- Navbar -->
     <header class="bg-indigo-300 p-4 flex items-center justify-between shadow-md">
-        <div class="text-white text-2xl font-bold">ThaiWijit</div>
+    <a href="{{ route('outfits.index') }}" class="text-white text-2xl font-bold hover:underline">ThaiWijit</a>
+
 
         <!-- Menu -->
         <nav class="flex space-x-6 text-white">
@@ -38,7 +39,7 @@
                 <a href="{{ route('login') }}" class="hover:underline">Login</a>
                 <a href="{{ route('register') }}" class="hover:underline">Register</a>
             @else
-                <a href="#" class="hover:underline">Profile</a>
+                <a href="{{ route('profile.index') }}" class="hover:underline">Profile</a>
                 <a href="{{ route('logout') }}" class="hover:underline"
                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
                 <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">

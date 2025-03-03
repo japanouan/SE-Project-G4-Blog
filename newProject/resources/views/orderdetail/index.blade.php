@@ -12,7 +12,12 @@
         <div class="w-full lg:w-3/5 bg-white p-6 rounded-lg shadow-lg">
             <h2 class="text-2xl font-bold text-gray-800">{{ $outfit->name }}</h2>
             <p class="text-gray-600 mt-1"><strong>รหัสชุด:</strong> {{ $outfit->outfit_id }}</p>
-            <p class="text-gray-600"><strong>ประเภทชุด:</strong> {{ $outfit->category }}</p>
+            <p><strong>หมวดหมู่:</strong>
+                @foreach($outfit->categories as $category)
+                    {{ $category->category_name }}{{ !$loop->last ? ', ' : '' }}
+                @endforeach
+            </p>
+
             <p class="text-gray-600"><strong>ประเภทผ้า:</strong> {{ $outfit->fabric }}</p>
 
             <!-- ราคา -->
@@ -38,7 +43,6 @@
             </div>
 
             <!-- จำนวนชุด -->
-            <!-- ฟอร์มเพิ่มสินค้าลงตะกร้า -->
             <form action="{{ url('cartItem/addToCart') }}" method="POST">
                 @csrf
                 <input type="hidden" name="outfit_id" value="{{ $outfit->outfit_id }}">
@@ -52,24 +56,24 @@
                     <button type="button" class="px-3 py-2 border rounded-md bg-gray-200 text-gray-700" onclick="increaseQty()">+</button>
                 </div>
 
-                <!-- ปุ่มเพิ่มลงตะกร้า -->
-                <button type="submit" 
-                    class="mt-4 px-6 py-2 border border-blue-500 text-blue-500 rounded-md hover:bg-blue-500 hover:text-white transition">
-                    เพิ่มลงตะกร้า
-                </button>
+                <!-- ปุ่มเช่า, ซื้อ, เพิ่มลงตะกร้า -->
+                <div class="mt-6 flex gap-4">
+                    <a href="{{ url('rental/create/' . $outfit->outfit_id) }}" 
+                        class="px-6 py-2 border border-green-500 text-green-500 rounded-md hover:bg-green-500 hover:text-white transition">
+                        เช่า
+                    </a>
+
+                    <a href="{{ url('purchase/create/' . $outfit->outfit_id) }}" 
+                        class="px-6 py-2 border border-blue-500 text-blue-500 rounded-md hover:bg-blue-500 hover:text-white transition">
+                        ซื้อ
+                    </a>
+
+                    <button type="submit" 
+                        class="px-6 py-2 border border-green-500 text-green-500 rounded-md hover:bg-green-500 hover:text-white transition">
+                        เพิ่มลงตะกร้า
+                    </button>
+                </div>
             </form>
-
-<!-- JavaScript อัปเดตค่าจำนวนสินค้า -->
-
-
-
-
-
-                <!-- ไอคอนหัวใจ -->
-                <button class="px-4 py-2 border rounded-full hover:bg-gray-100 transition">
-                    ❤️
-                </button>
-            </div>
         </div>
     </div>
 </div>
@@ -78,7 +82,7 @@
 <script>
     function increaseQty() {
         let qty = document.getElementById('quantity');
-        let qtyInput = document.getElementById('quantityInput'); // อัปเดตค่าใน hidden input
+        let qtyInput = document.getElementById('quantityInput');
         let newQty = parseInt(qty.value) + 1;
         qty.value = newQty;
         qtyInput.value = newQty;
@@ -86,7 +90,7 @@
 
     function decreaseQty() {
         let qty = document.getElementById('quantity');
-        let qtyInput = document.getElementById('quantityInput'); // อัปเดตค่าใน hidden input
+        let qtyInput = document.getElementById('quantityInput');
         if (qty.value > 1) {
             let newQty = parseInt(qty.value) - 1;
             qty.value = newQty;

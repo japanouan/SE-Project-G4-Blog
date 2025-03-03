@@ -109,8 +109,13 @@ Route::prefix('shopowner')->name('shopowner.')->middleware('auth', 'is_shopowner
 });
 //auth
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
-    Route::get('/profile-edit', [ProfileController::class, 'edit'])->name('profile.edit');
+
+    Route::get('/profile/show', [ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    //Customer
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::get('/profile/editCus', [ProfileController::class, 'editCus'])->name('profile.editCus');
+
     Route::patch('/profile-edit', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile-edit', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
@@ -130,6 +135,9 @@ Route::prefix('cartItem')->name('cartItem.')->group(function(){
     Route::post('/addToCart', [CartItemController::class, 'addToCart'])->name('cart.add');
     Route::get('/allItem',[CartItemController::class, 'index'])->name('allItem');
 });
+
+
+
 
 });
 

@@ -5,7 +5,6 @@
 @section('content')
     <div class="container mx-auto px-4 py-8">
         <h2 class="text-2xl font-bold mb-4">รายการชุดไทย</h2>
-        <a href="#" class="bg-green-500 text-white px-4 py-2 rounded-md mb-4 inline-block">เพิ่มชุดไทย</a>
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             @foreach ($outfits as $dress)
