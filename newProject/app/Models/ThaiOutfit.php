@@ -10,7 +10,7 @@ class ThaiOutfit extends Model
     protected $table = 'ThaiOutfits';
     protected $primaryKey = 'outfit_id';
     protected $guarded = ['outfit_id'];
-    protected $fillable = ['name', 'description', 'price', 'image', 'status', 'created_at','shop_id'];
+    protected $fillable = ['name', 'description', 'price', 'image', 'status', 'created_at', 'shop_id', 'depositfee', 'penaltyfee'];
 
     // Disable Laravel's automatic timestamp handling
     public $timestamps = false;

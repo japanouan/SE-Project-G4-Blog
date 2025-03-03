@@ -34,9 +34,27 @@
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>
+                
+                <div>
+                    <label for="depositfee" class="block text-sm font-medium text-gray-700 mb-1">ค่ามัดจำ (บาท) *</label>
+                    <input type="number" name="depositfee" id="depositfee" value="{{ old('depositfee', $outfit->depositfee) }}" min="0" step="0.01" required
+                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    @error('depositfee')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+                
+                <div>
+                    <label for="penaltyfee" class="block text-sm font-medium text-gray-700 mb-1">ค่าปรับ (บาท) *</label>
+                    <input type="number" name="penaltyfee" id="penaltyfee" value="{{ old('penaltyfee', $outfit->penaltyfee) }}" min="0" step="0.01" required
+                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    @error('penaltyfee')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
 
                 <div>
-                    <label for="status" class="block text-sm font-medium text-gray-700 mb-1">สถานะ *</label>
+                <label for="status" class="block text-sm font-medium text-gray-700 mb-1">สถานะ *</label>
                     <select name="status" id="status" required
                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                         <option value="active" {{ old('status', $outfit->status) == 'active' ? 'selected' : '' }}>พร้อมใช้งาน</option>
