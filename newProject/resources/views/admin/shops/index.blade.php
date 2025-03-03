@@ -130,14 +130,7 @@
                 <i class="fas fa-store mr-2 text-[#8B9DF9]"></i>Shop Management
             </h1>
 
-            <!-- Search Bar -->
-            <form method="GET" action="{{ route('admin.outfits.adminindex') }}" class="mb-4 flex">
-                <input type="text" name="search" placeholder="ค้นหา Shop ID, Outfit ID หรือ ชื่อชุด"
-                    class="border p-2 w-full rounded-l-md"
-                    value="{{ request('search') }}">
-                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-r-md">ค้นหา</button>
-            </form>
-            
+
             <form action="{{ route('admin.shops.acceptance') }}" method="GET">
                 @csrf
                 <button type="submit" class="btn btn-primary">
@@ -156,6 +149,14 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Search Bar -->
+            <form method="GET" action="{{ route('admin.shops.index') }}" class="mb-4 flex">
+                <input type="text" name="search" placeholder="ค้นหา Shop ID, Shop name"
+                    class="border p-2 w-full rounded-l-md"
+                    value="{{ request('search') }}">
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-r-md">ค้นหา</button>
+            </form>
 
             <div class="table-container">
                 <table class="min-w-full divide-y divide-gray-200">
