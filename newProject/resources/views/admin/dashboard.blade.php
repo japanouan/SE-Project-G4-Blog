@@ -133,7 +133,7 @@
             
             <!-- Dropdown menu -->
             <div class="dropdown-menu" id="userDropdown">
-                <a href="{{ route('profile.edit') }}">Profile</a>
+                <a href="{{ route('profile.show') }}">Profile</a>
                 <form method="POST" action="{{ route('logout') }}" id="logoutForm">
                     @csrf
                     <a href="#" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">
@@ -163,6 +163,12 @@
                 <a href="#" data-target="shops-content" data-url="{{ route('admin.shops.index') }}">
                     <i class="fas fa-store mr-3"></i>
                     <span>Shops</span>
+                </a>
+            </div>
+            <div class="menu-item" id="outfitMenuItem">
+                <a href="#" data-target="outfit-content" data-url="{{ route('admin.outfits.adminindex') }}">
+                    <i class="fas fa-store mr-3"></i>
+                    <span>Outfits</span>
                 </a>
             </div>
         </div>
@@ -208,6 +214,7 @@
             
             <!-- Shops Content Section (initially hidden) -->
             <div id="shops-content" class="content-section hidden"></div>
+            <div id="outfit-content" class="content-section hidden"></div>
         </div>
     </div>
     <script>

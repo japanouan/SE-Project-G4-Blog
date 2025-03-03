@@ -63,41 +63,42 @@
                                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
-                
-                            <div class="md:col-span-2">
-                                <label for="image" class="block text-sm font-medium text-gray-700 mb-1">รูปภาพ</label>
-                                @if($outfit->image)
-                                    <div class="mb-3">
-                                        <img src="{{ asset('storage/' . $outfit->image) }}" alt="{{ $outfit->name }}" class="h-32 w-auto object-cover rounded">
-                                        <p class="text-xs mt-1 text-gray-500">รูปภาพปัจจุบัน (อัปโหลดรูปใหม่เพื่อเปลี่ยนแปลง)</p>
-                                    </div>
-                                @endif
-                                <input type="file" name="image" id="image" accept="image/*"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                @error('image')
-                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
-                
+                                              <div class="md:col-span-2">
+                                                  <label for="image" class="block text-sm font-medium text-gray-700 mb-1">รูปภาพ</label>
+                                                  @if($outfit->image)
+                                                      <div class="mb-3">
+                                                          <img src="{{ asset($outfit->image) }}" alt="{{ $outfit->name }}" class="h-32 w-auto object-cover rounded">
+                                                          <p class="text-xs mt-1 text-gray-500">รูปภาพปัจจุบัน (อัปโหลดรูปใหม่เพื่อเปลี่ยนแปลง)</p>
+                                                      </div>
+                                                  @endif
+                                                  <input type="file" name="image" id="image" accept="image/jpeg,image/png,image/jpg,image/gif"
+                                                      class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                                  <p class="text-xs text-gray-500 mt-1">รองรับไฟล์ .jpeg, .png, .jpg, .gif ขนาดสูงสุด 2MB</p>
+                                                  @error('image')
+                                                      <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                                  @enderror
+                                              </div>
                             <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">หมวดหมู่ *</label>
-                                <div class="mt-2 grid grid-cols-2 md:grid-cols-4 gap-2">
-                                    @foreach($categories as $category)
-                                        <div class="flex items-center">
-                                            <input type="checkbox" name="categories[]" id="category_{{ $category->category_id }}" 
-                                                value="{{ $category->category_id }}" 
-                                                {{ in_array($category->category_id, old('categories', $outfitCategories)) ? 'checked' : '' }}
-                                                class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                            <label for="category_{{ $category->category_id }}" class="ml-2 text-sm text-gray-700">{{ $category->category_name }}</label>
-                                        </div>
-                                    @endforeach
+                                <div class="mt-2 border rounded-md p-3 max-h-60 overflow-y-auto">
+                                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                        @foreach($categories as $category)
+                                            <div class="flex items-center p-2 hover:bg-gray-50 rounded">
+                                                <input type="radio" name="categories[]" id="category_{{ $category->category_id }}" 
+                                                    value="{{ $category->category_id }}" 
+                                                    {{ in_array($category->category_id, old('categories', $outfitCategories)) ? 'checked' : '' }}
+                                                    class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                                <label for="category_{{ $category->category_id }}" class="ml-2 text-sm text-gray-700 cursor-pointer">{{ $category->category_name }}</label>
+                                            </div>
+                                        @endforeach
+                                    </div>
                                 </div>
+                                <p class="text-xs text-gray-500 mt-1">เลื่อนดูหมวดหมู่ทั้งหมด</p>
                                 @error('categories')
                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
                         </div>
-            
                         <div class="mt-6">
                             <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
                                 <i class="fa fa-save mr-2"></i> บันทึกการแก้ไข
