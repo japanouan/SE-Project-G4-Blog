@@ -24,11 +24,11 @@
             <a href="#" class="hover:underline">Jewelry</a>
         </nav>
 
-        <!-- Search Bar -->
-        <div class="relative w-1/3">
-            <input type="text" class="w-full p-2 pl-10 rounded-full border border-gray-300 text-black" placeholder="search">
-            <i class="fa fa-search absolute left-3 top-2.5 text-gray-400"></i>
-        </div>
+       <!-- ✅ แก้ไข Form ค้นหา -->
+       <form action="{{ route('outfits.search') }}" method="GET">
+            <input type="text" name="searchkey" placeholder="ค้นหาชุดไทย..." class="border px-4 py-2 rounded-lg">
+            <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-lg">ค้นหา</button>
+        </form>
 
         <!-- Icons -->
         <div class="flex items-center space-x-4 text-white">
