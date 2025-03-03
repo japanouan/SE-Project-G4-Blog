@@ -20,6 +20,11 @@ class ShopController extends Controller
 
         $query = Shop::query();
         // dd($orderBy);
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where('shop_id', 'like', "%{$search}%")
+                ->orWhere('shop_name', 'like', "%{$search}%");
+        }
 
         // จัดเรียงตาม orderBy และ direction
         $query->orderBy($orderBy, $direction);

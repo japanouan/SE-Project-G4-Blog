@@ -11,11 +11,13 @@
         .transition-all {
             transition: all 0.3s ease;
         }
+
         .table-container {
             overflow-x: auto;
             border-radius: 0.5rem;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
+
         .status-badge {
             padding: 0.25rem 0.75rem;
             border-radius: 9999px;
@@ -24,14 +26,17 @@
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
+
         .status-active {
             background-color: #DEF7EC;
             color: #03543E;
         }
+
         .status-inactive {
             background-color: #FDE8E8;
             color: #9B1C1C;
         }
+
         .btn {
             padding: 0.5rem 1rem;
             border-radius: 0.375rem;
@@ -40,42 +45,51 @@
             transition: all 0.2s;
             display: inline-block;
         }
+
         .btn-primary {
             background-color: #8B9DF9;
             color: white;
             border: none;
         }
+
         .btn-primary:hover {
             background-color: #7A8CE8;
             transform: translateY(-1px);
         }
+
         .btn-success {
             background-color: #10B981;
             color: white;
             border: none;
         }
+
         .btn-success:hover {
             background-color: #059669;
             transform: translateY(-1px);
         }
+
         .btn-danger {
             background-color: #EF4444;
             color: white;
             border: none;
         }
+
         .btn-danger:hover {
             background-color: #DC2626;
             transform: translateY(-1px);
         }
+
         .btn-info {
             background-color: #3B82F6;
             color: white;
             border: none;
         }
+
         .btn-info:hover {
             background-color: #2563EB;
             transform: translateY(-1px);
         }
+
         .header-cell button {
             background: transparent;
             border: none;
@@ -86,16 +100,20 @@
             padding: 0.75rem 1rem;
             cursor: pointer;
         }
+
         .header-cell button:hover {
             color: #8B9DF9;
         }
+
         .header-cell button i {
             margin-left: 0.5rem;
             font-size: 0.75rem;
         }
+
         .table-row:hover {
             background-color: #F9FAFB;
         }
+
         .truncate-text {
             max-width: 200px;
             white-space: nowrap;
@@ -111,7 +129,8 @@
             <h1 class="text-3xl font-bold text-gray-800">
                 <i class="fas fa-store mr-2 text-[#8B9DF9]"></i>Shop Management
             </h1>
-            
+
+
             <form action="{{ route('admin.shops.acceptance') }}" method="GET">
                 @csrf
                 <button type="submit" class="btn btn-primary">
@@ -130,6 +149,14 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Search Bar -->
+            <form method="GET" action="{{ route('admin.shops.index') }}" class="mb-4 flex">
+                <input type="text" name="search" placeholder="ค้นหา Shop ID, Shop name"
+                    class="border p-2 w-full rounded-l-md"
+                    value="{{ request('search') }}">
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-r-md">ค้นหา</button>
+            </form>
 
             <div class="table-container">
                 <table class="min-w-full divide-y divide-gray-200">
@@ -258,9 +285,9 @@
 
                                         <button type="submit" class="btn {{ $shop->status == 'active' ? 'btn-danger' : 'btn-success' }}">
                                             @if($shop->status == 'active')
-                                                <i class="fas fa-ban mr-1"></i> Deactivate
+                                            <i class="fas fa-ban mr-1"></i> Deactivate
                                             @else
-                                                <i class="fas fa-check-circle mr-1"></i> Activate
+                                            <i class="fas fa-check-circle mr-1"></i> Activate
                                             @endif
                                         </button>
                                     </form>
