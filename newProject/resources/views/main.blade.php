@@ -10,7 +10,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             @foreach ($outfits as $dress)
                 <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <img src="{{ asset('storage/' . $dress->image) }}" class="w-full h-60 object-cover" alt="{{ $dress->name }}">
+                    <img src="{{ asset($dress->image) }}" class="w-full h-60 object-cover" alt="{{ $dress->name }}">
                     <div class="p-4">
                         <h5 class="text-xl font-semibold">{{ $dress->name }}</h5>
                         <p class="text-gray-600">{{ $dress->description }}</p>
