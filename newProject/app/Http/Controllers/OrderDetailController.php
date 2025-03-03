@@ -11,13 +11,18 @@ use App\Models\ThaiOutfitSizeAndColor;
 class OrderDetailController extends Controller
 {
     public function index($idOutfit)
-    {
-        // Load outfit with its category names and size/color data
-        $outfit = ThaiOutfit::with(['categories'])->findOrFail($idOutfit);
-        $sizeAndColor = ThaiOutfitSizeAndColor::with(['size','color'])->findOrFail($idOutfit);
-        // ดึงข้อมูลขนาดและสีของชุด
-        return view('orderdetail.index', compact('outfit', 'sizeAndColor'));
-    }
+{
+    // Load outfit พร้อม category
+    $outfit = ThaiOutfit::with(['categories'])->findOrFail($idOutfit);
+
+    // ดึงข้อมูล size และ color ทั้งหมดที่เกี่ยวข้องกับ outfit นี้
+    $sizeAndColor = ThaiOutfitSizeAndColor::with(['size', 'color'])
+        ->where('outfit_id', $idOutfit)
+        ->get();
+
+    return view('orderdetail.index', compact('outfit', 'sizeAndColor'));
+}
+
     
 }
 
