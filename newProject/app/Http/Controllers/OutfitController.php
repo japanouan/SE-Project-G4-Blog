@@ -11,6 +11,7 @@ use App\Models\ThaiOutfitColor;
 use App\Models\ThaiOutfitSizeAndColor;
 use App\Models\Shop;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class OutfitController extends Controller
@@ -20,23 +21,23 @@ class OutfitController extends Controller
         $outfits = ThaiOutfit::paginate(10);
         return view('main', compact('outfits'));
     }
-    
+
     // SHOP OWNER METHODS
-    
+
     public function shopOwnerIndex(Request $request)
     {
         // Check if user has a shop first
         $shop = Shop::where('shop_owner_id', auth()->id())->first();
-        
+
         if (!$shop) {
             return redirect()->route('shopowner.shops.my-shop')
                 ->with('error', 'คุณยังไม่มีร้านค้า กรุณาลงทะเบียนร้านค้าก่อนจัดการชุด');
         }
-        
+
         $outfits = ThaiOutfit::where('shop_id', $shop->shop_id)->paginate(10);
         return view('shopowner.outfits.index', compact('outfits'));
     }
-    
+
     public function create()
     {
         // Check if user has a shop first
@@ -227,16 +228,16 @@ class OutfitController extends Controller
         return redirect()->route('shopowner.outfits.index')
             ->with('success', 'ชุดถูกอัปเดตเรียบร้อยแล้ว');
     }
-    
+
     public function destroy($id)
     {
         $outfit = ThaiOutfit::findOrFail($id);
-        
+
         // Delete image if exists
         if ($outfit->image && Storage::disk('public')->exists($outfit->image)) {
             Storage::disk('public')->delete($outfit->image);
         }
-        
+
         // Delete category relationships
         ThaiOutfitCategory::where('outfit_id', $id)->delete();
 
@@ -245,7 +246,7 @@ class OutfitController extends Controller
         
         // Delete outfit
         $outfit->delete();
-        
+
         return redirect()->route('shopowner.outfits.index')
             ->with('success', 'ชุดถูกลบเรียบร้อยแล้ว');
     }
@@ -265,6 +266,19 @@ class OutfitController extends Controller
         // ดึงข้อมูลชุดทั้งหมด + ร้านค้า
         $outfits = $query->with('shop')->paginate(10);
 
-        return view('admin.shops.outfits', compact('outfits'));
+        return view('admin.outfits.outfits', compact('outfits'));
+    }
+
+    public function AdminEdit($id)
+    {
+        $outfit = ThaiOutfit::findOrFail($id);
+        $categories = OutfitCategory::all();
+
+        // Get current categories
+        $outfitCategories = ThaiOutfitCategory::where('outfit_id', $id)
+            ->pluck('category_id')
+            ->toArray();
+
+        return view('admin.outfits.edit', compact('outfit', 'categories', 'outfitCategories'));
     }
 }

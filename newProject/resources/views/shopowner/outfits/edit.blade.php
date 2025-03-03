@@ -15,26 +15,26 @@
         <form action="{{ route('shopowner.outfits.update', $outfit->outfit_id) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-700 mb-1">ชื่อชุด *</label>
                     <input type="text" name="name" id="name" value="{{ old('name', $outfit->name) }}" required
                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                     @error('name')
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>
-                
+
                 <div>
                     <label for="price" class="block text-sm font-medium text-gray-700 mb-1">ราคา (บาท) *</label>
                     <input type="number" name="price" id="price" value="{{ old('price', $outfit->price) }}" min="0" step="0.01" required
                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                     @error('price')
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>
-                
+
                 <div>
                     <label for="status" class="block text-sm font-medium text-gray-700 mb-1">สถานะ *</label>
                     <select name="status" id="status" required
