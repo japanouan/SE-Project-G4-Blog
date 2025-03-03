@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\ThaiOutfit;
 use App\Models\CartItem;
 use App\Models\User;
+use App\Models\ThaiOutfitSizeAndColor;
 
 class CartItemController extends Controller
 {
@@ -29,6 +30,8 @@ class CartItemController extends Controller
         $outfits = ThaiOutfit::whereIn('outfit_id', $outfitIds)
                             ->orderBy('outfit_id') // จัดเรียงให้ตรงกับ cartItems
                             ->get();
+
+        
 
         // ส่งข้อมูลไปที่หน้า View
         return view('cartItem.index', compact('outfits', 'cartItems'));
