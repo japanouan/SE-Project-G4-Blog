@@ -25,29 +25,47 @@
             </div>
 
             <!-- สีของชุด -->
-            <h2>{{ $outfit->name }}</h2>
-
-                @foreach($outfit->sizesAndColors as $item)
-                    <p>Size: {{ $item->size->size }}</p>
-                    <p>Color: {{ $item->color->color }}</p>
-                    <p>Stock: {{ $item->amount }}</p>
+            <p class="mt-4 font-semibold">สีชุด:</p>
+            <div class="flex gap-2 mt-2">
+                @foreach($outfit->sizesAndColors->unique('color_id') as $item)
+                    <button type="button" class="color-option px-3 py-1 border rounded-md bg-gray-200 text-gray-700"
+                        data-color-id="{{ $item->color_id }}">
+                        {{ $item->color->color }}
+                    </button>
                 @endforeach
+            </div>
 
-                <p>รวมสต็อกทั้งหมด: {{ $outfit->total_stock }}</p>
+            <!-- ขนาดของชุด -->
+            <p class="mt-4 font-semibold">ขนาดชุด:</p>
+            <div class="flex gap-2 mt-2">
+                @foreach($outfit->sizesAndColors->unique('size_id') as $item)
+                    <button type="button" class="size-option px-3 py-1 border rounded-md bg-gray-200 text-gray-700"
+                        data-size-id="{{ $item->size_id }}">
+                        {{ $item->size->size }}
+                    </button>
+                @endforeach
+            </div>
 
             <!-- จำนวนชุด -->
-            <form action="{{ url('cartItem/addToCart') }}" method="POST">
+            <p class="mt-4 font-semibold">จำนวนชุด: <span id="stockAmount">0</span></p>
+            <div class="flex items-center gap-2">
+                <button type="button" class="px-3 py-2 border rounded-md bg-gray-200 text-gray-700" onclick="decreaseQty()">-</button>
+                <input type="text" id="quantity" value="1" class="w-12 text-center border rounded-md" readonly>
+                <button type="button" class="px-3 py-2 border rounded-md bg-gray-200 text-gray-700" onclick="increaseQty()">+</button>
+            </div>
+
+            <!-- Input ซ่อนค่า size และ color ที่เลือก -->
+            <input type="hidden" name="selected_size" id="selectedSize">
+            <input type="hidden" name="selected_color" id="selectedColor">
+
+
+
+            <!-- จำนวนชุด -->
+                <form action="{{ url('cartItem/addToCart') }}" method="POST">
                 @csrf
                 <input type="hidden" name="outfit_id" value="{{ $outfit->outfit_id }}">
                 <input type="hidden" id="quantityInput" name="quantity" value="1">
 
-                <!-- จำนวนชุด -->
-                <p class="mt-4 font-semibold">จำนวนชุด:</p>
-                <div class="flex items-center gap-2">
-                    <button type="button" class="px-3 py-2 border rounded-md bg-gray-200 text-gray-700" onclick="decreaseQty()">-</button>
-                    <input type="text" id="quantity" value="1" class="w-12 text-center border rounded-md" readonly>
-                    <button type="button" class="px-3 py-2 border rounded-md bg-gray-200 text-gray-700" onclick="increaseQty()">+</button>
-                </div>
 
                 <!-- ปุ่มเช่า, ซื้อ, เพิ่มลงตะกร้า -->
                 <div class="mt-6 flex gap-4">
@@ -73,22 +91,63 @@
 
 <!-- JavaScript เพิ่ม-ลดจำนวนสินค้า -->
 <script>
+   
+
+    document.addEventListener("DOMContentLoaded", function() {
+        let selectedColor = null;
+        let selectedSize = null;
+        function updateStockDisplay() {
+            if (selectedColor && selectedSize) {
+                let stockItem = stockData.find(item => 
+                    item.color_id == selectedColor && item.size_id == selectedSize
+                );
+
+                let stockAmount = stockItem ? stockItem.amount : 0;
+                document.getElementById("stockAmount").innerText = stockAmount;
+            } else {
+                document.getElementById("stockAmount").innerText = "0";
+            }
+        }
+
+        document.querySelectorAll(".color-option").forEach(button => {
+            button.addEventListener("click", function() {
+                selectedColor = this.getAttribute("data-color-id");
+                document.getElementById("selectedColor").value = selectedColor;
+
+                document.querySelectorAll(".color-option").forEach(btn => btn.classList.remove("bg-blue-500", "text-white"));
+                this.classList.add("bg-blue-500", "text-white");
+
+                updateStockDisplay();
+            });
+        });
+
+        document.querySelectorAll(".size-option").forEach(button => {
+            button.addEventListener("click", function() {
+                selectedSize = this.getAttribute("data-size-id");
+                document.getElementById("selectedSize").value = selectedSize;
+
+                document.querySelectorAll(".size-option").forEach(btn => btn.classList.remove("bg-blue-500", "text-white"));
+                this.classList.add("bg-blue-500", "text-white");
+
+                updateStockDisplay();
+            });
+        });
+    });
+
     function increaseQty() {
         let qty = document.getElementById('quantity');
-        let qtyInput = document.getElementById('quantityInput');
-        let newQty = parseInt(qty.value) + 1;
-        qty.value = newQty;
-        qtyInput.value = newQty;
+        let stock = parseInt(document.getElementById('stockAmount').innerText);
+        if (parseInt(qty.value) < stock) {
+            qty.value = parseInt(qty.value) + 1;
+        }
     }
 
     function decreaseQty() {
         let qty = document.getElementById('quantity');
-        let qtyInput = document.getElementById('quantityInput');
-        if (qty.value > 1) {
-            let newQty = parseInt(qty.value) - 1;
-            qty.value = newQty;
-            qtyInput.value = newQty;
+        if (parseInt(qty.value) > 1) {
+            qty.value = parseInt(qty.value) - 1;
         }
     }
 </script>
+
 @endsection

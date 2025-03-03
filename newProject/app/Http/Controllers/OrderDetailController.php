@@ -13,10 +13,14 @@ class OrderDetailController extends Controller
 {
     public function index($idOutfit)
     {
-        $outfit = ThaiOutfit::with(['categories', 'sizesAndColors'])->findOrFail($idOutfit);
+        $outfit = ThaiOutfit::with(['categories', 'sizesAndColors.size', 'sizesAndColors.color'])
+                            ->findOrFail($idOutfit);
 
+        
         return view('orderdetail.index', compact('outfit'));
     }
+
+
 
 
 
