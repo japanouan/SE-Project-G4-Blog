@@ -38,27 +38,30 @@
             </div>
 
             <!-- จำนวนชุด -->
-            <p class="mt-4 font-semibold">จำนวนชุด:</p>
-            <div class="flex items-center gap-2">
-                <button class="px-3 py-2 border rounded-md bg-gray-200 text-gray-700" onclick="decreaseQty()">-</button>
-                <input type="text" id="quantity" value="1" class="w-12 text-center border rounded-md" readonly>
-                <button class="px-3 py-2 border rounded-md bg-gray-200 text-gray-700" onclick="increaseQty()">+</button>
-            </div>
+            <!-- ฟอร์มเพิ่มสินค้าลงตะกร้า -->
+            <form action="{{ url('cartItem/addToCart') }}" method="POST">
+                @csrf
+                <input type="hidden" name="outfit_id" value="{{ $outfit->outfit_id }}">
+                <input type="hidden" id="quantityInput" name="quantity" value="1">
 
-            <!-- ปุ่มเช่า ซื้อ และ เพิ่มลงตะกร้า -->
-            <div class="mt-6 flex gap-4">
-                <a href="#" class="px-6 py-2 border border-green-500 text-green-500 rounded-md hover:bg-green-500 hover:text-white transition">
-                    เช่า
-                </a>
+                <!-- จำนวนชุด -->
+                <p class="mt-4 font-semibold">จำนวนชุด:</p>
+                <div class="flex items-center gap-2">
+                    <button type="button" class="px-3 py-2 border rounded-md bg-gray-200 text-gray-700" onclick="decreaseQty()">-</button>
+                    <input type="text" id="quantity" value="1" class="w-12 text-center border rounded-md" readonly>
+                    <button type="button" class="px-3 py-2 border rounded-md bg-gray-200 text-gray-700" onclick="increaseQty()">+</button>
+                </div>
 
-                <a href="#" class="px-6 py-2 border border-blue-500 text-blue-500 rounded-md hover:bg-blue-500 hover:text-white transition">
-                    ซื้อ
-                </a>
+                <!-- ปุ่มเพิ่มลงตะกร้า -->
+                <button type="submit" 
+                    class="mt-4 px-6 py-2 border border-blue-500 text-blue-500 rounded-md hover:bg-blue-500 hover:text-white transition">
+                    เพิ่มลงตะกร้า
+                </button>
+            </form>
 
-                <a href="{{ url('cartItem/addToCart/' . $outfit->outfit_id) }}" 
-                    class="px-6 py-2 border border-green-500 text-green-500 rounded-md hover:bg-green-500 hover:text-white transition">
-                        เพิ่มลงตะกร้า
-                    </a>
+<!-- JavaScript อัปเดตค่าจำนวนสินค้า -->
+
+
 
 
 
@@ -75,14 +78,20 @@
 <script>
     function increaseQty() {
         let qty = document.getElementById('quantity');
-        qty.value = parseInt(qty.value) + 1;
+        let qtyInput = document.getElementById('quantityInput'); // อัปเดตค่าใน hidden input
+        let newQty = parseInt(qty.value) + 1;
+        qty.value = newQty;
+        qtyInput.value = newQty;
     }
 
     function decreaseQty() {
         let qty = document.getElementById('quantity');
+        let qtyInput = document.getElementById('quantityInput'); // อัปเดตค่าใน hidden input
         if (qty.value > 1) {
-            qty.value = parseInt(qty.value) - 1;
+            let newQty = parseInt(qty.value) - 1;
+            qty.value = newQty;
+            qtyInput.value = newQty;
         }
     }
-</script>  
+</script>
 @endsection

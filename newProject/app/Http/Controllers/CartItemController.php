@@ -23,28 +23,34 @@ class CartItemController extends Controller
         return view('cartItem/index', compact('outfits', 'cartItems'));
     }
 
-    function addToCart($idOutfit)
-{
-    $user = Auth::user();
-    $outfit = ThaiOutfit::findOrFail($idOutfit); // ใช้ findOrFail() เพื่อให้ error ถ้าหาไม่เจอ
+    public function addToCart(Request $request)
+    {
+        // ตรวจสอบว่าผู้ใช้ล็อกอินหรือไม่
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'กรุณาเข้าสู่ระบบก่อนเพิ่มลงตะกร้า');
+        }
 
-    // ตรวจสอบก่อนว่ามีไอเท็มอยู่ในตะกร้าแล้วหรือไม่
-    $item = CartItem::where('outfit_id', $idOutfit)->where('userId', $user->user_id)->first();
+        $user = Auth::user();
+        $outfit_id = $request->input('outfit_id');
+        $quantity = $request->input('quantity', 1); // ถ้าไม่ได้ส่งมา ให้เป็น 1
 
-    if (!$item) {
-        // ถ้ายังไม่มีไอเท็มในตะกร้า -> เพิ่มใหม่
-        CartItem::create([
-            'userId' => $user->user_id, // ✅ ใช้ user_id ที่ถูกต้อง
-            'outfit_id' => $outfit->outfit_id,
-            'quantity' => 1,
-        ]);
-    } else {
-        // ถ้ามีอยู่แล้ว -> เพิ่มจำนวนสินค้า
-        CartItem::find($item->cart_item_id)->update([
-            'quantity' => $item->quantity + 1,
-        ]);
+        // ตรวจสอบว่ามีสินค้านี้อยู่ในตะกร้าแล้วหรือไม่
+        $item = CartItem::where('outfit_id', $outfit_id)
+                        ->where('userId', $user->user_id)
+                        ->first();
+
+        if ($item) {
+            // ถ้ามีสินค้าอยู่แล้ว เพิ่มจำนวน
+            $item->increment('quantity', $quantity);
+        } else {
+            // ถ้ายังไม่มี ให้เพิ่มใหม่
+            CartItem::create([
+                'userId' => $user->user_id,
+                'outfit_id' => $outfit_id,
+                'quantity' => $quantity,
+            ]);
+        }
+
+        return redirect()->back()->with('success', "เพิ่มสินค้า ID: $outfit_id จำนวน: $quantity ลงตะกร้าแล้ว!");
     }
-
-    return redirect("/orderdetail/outfit/{$outfit->outfit_id}")->with('success', 'เพิ่มลงตะกร้าเรียบร้อยแล้ว');
-}
 }
