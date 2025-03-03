@@ -335,10 +335,6 @@ class OutfitController extends Controller
         return view('admin.outfits.outfits', compact('outfits'));
     }
 
-  
-    
-
-
     public function AdminEdit($id)
     {
         $outfit = ThaiOutfit::findOrFail($id);

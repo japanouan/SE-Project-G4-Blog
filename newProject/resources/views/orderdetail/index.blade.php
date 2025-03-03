@@ -18,8 +18,6 @@
                 @endforeach
             </p>
 
-            <p class="text-gray-600"><strong>ประเภทผ้า:</strong> {{ $outfit->fabric }}</p>
-
             <!-- ราคา -->
             <div class="mt-4">
                 <p class="text-lg font-semibold">ราคาขาย: <span class="text-red-500">{{ number_format($outfit->price, 2) }} บาท</span></p>
@@ -27,20 +25,15 @@
             </div>
 
             <!-- สีของชุด -->
-            <p class="mt-4 font-semibold">สีชุด:</p>
-            <div class="flex gap-2 mt-2">
-                @foreach(explode(',', $outfit->colors) as $color)
-                    <button class="px-3 py-1 border rounded-md bg-gray-200 text-gray-700">{{ trim($color) }}</button>
-                @endforeach
-            </div>
+            <h2>{{ $outfit->name }}</h2>
 
-            <!-- ขนาดชุด -->
-            <p class="mt-4 font-semibold">ขนาดชุด:</p>
-            <div class="flex gap-2 mt-2">
-                @foreach(explode(',', $outfit->sizes) as $size)
-                    <button class="px-3 py-1 border rounded-md bg-white text-gray-700 shadow-md">{{ trim($size) }}</button>
+                @foreach($outfit->sizesAndColors as $item)
+                    <p>Size: {{ $item->size->size }}</p>
+                    <p>Color: {{ $item->color->color }}</p>
+                    <p>Stock: {{ $item->amount }}</p>
                 @endforeach
-            </div>
+
+                <p>รวมสต็อกทั้งหมด: {{ $outfit->total_stock }}</p>
 
             <!-- จำนวนชุด -->
             <form action="{{ url('cartItem/addToCart') }}" method="POST">

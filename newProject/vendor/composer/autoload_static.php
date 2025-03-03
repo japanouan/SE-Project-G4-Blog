@@ -537,6 +537,7 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
     );
 
     public static $classMap = array (
+        'App\\Http\\Controllers\\Admin\\UserController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/UserController.php',
         'App\\Http\\Controllers\\Auth\\AuthenticatedSessionController' => __DIR__ . '/../..' . '/app/Http/Controllers/Auth/AuthenticatedSessionController.php',
         'App\\Http\\Controllers\\Auth\\ConfirmPasswordController' => __DIR__ . '/../..' . '/app/Http/Controllers/Auth/ConfirmPasswordController.php',
         'App\\Http\\Controllers\\Auth\\ConfirmablePasswordController' => __DIR__ . '/../..' . '/app/Http/Controllers/Auth/ConfirmablePasswordController.php',
@@ -587,6 +588,9 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
         'App\\Models\\Shop' => __DIR__ . '/../..' . '/app/Models/Shop.php',
         'App\\Models\\ThaiOutfit' => __DIR__ . '/../..' . '/app/Models/ThaiOutfit.php',
         'App\\Models\\ThaiOutfitCategory' => __DIR__ . '/../..' . '/app/Models/ThaiOutfitCategory.php',
+        'App\\Models\\ThaiOutfitColor' => __DIR__ . '/../..' . '/app/Models/ThaiOutfitColor.php',
+        'App\\Models\\ThaiOutfitSize' => __DIR__ . '/../..' . '/app/Models/ThaiOutfitSize.php',
+        'App\\Models\\ThaiOutfitSizeAndColor' => __DIR__ . '/../..' . '/app/Models/ThaiOutfitSizeAndColor.php',
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
         'App\\View\\Components\\AppLayout' => __DIR__ . '/../..' . '/app/View/Components/AppLayout.php',
