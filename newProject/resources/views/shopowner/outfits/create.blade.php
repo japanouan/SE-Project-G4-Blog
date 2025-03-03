@@ -35,6 +35,24 @@
                 </div>
                 
                 <div>
+                    <label for="depositfee" class="block text-sm font-medium text-gray-700 mb-1">ค่ามัดจำ (บาท) *</label>
+                    <input type="number" name="depositfee" id="depositfee" value="{{ old('depositfee', 0) }}" min="0" step="0.01" required
+                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    @error('depositfee')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+                
+                <div>
+                    <label for="penaltyfee" class="block text-sm font-medium text-gray-700 mb-1">ค่าปรับ (บาท) *</label>
+                    <input type="number" name="penaltyfee" id="penaltyfee" value="{{ old('penaltyfee', 0) }}" min="0" step="0.01" required
+                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    @error('penaltyfee')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+                
+                <div>
                     <label for="status" class="block text-sm font-medium text-gray-700 mb-1">สถานะ *</label>
                     <select name="status" id="status" required
                          class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
@@ -49,7 +67,7 @@
                 <div class="md:col-span-2">
                     <label for="description" class="block text-sm font-medium text-gray-700 mb-1">รายละเอียด *</label>
                     <textarea name="description" id="description" rows="4" required
-                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">{{ old('description') }}</textarea>
+                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">{{ old('description') }}</textarea>
                     @error('description')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
@@ -75,7 +93,7 @@
                                         value="{{ $category->category_id }}" 
                                         {{ in_array($category->category_id, old('categories', [])) ? 'checked' : '' }}
                                         class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                        <label for="category_{{ $category->category_id }}" class="ml-2 text-sm text-gray-700 cursor-pointer">{{ $category->category_name }}</label>
+                                    <label for="category_{{ $category->category_id }}" class="ml-2 text-sm text-gray-700 cursor-pointer">{{ $category->category_name }}</label>
                                 </div>
                             @endforeach
                         </div>
