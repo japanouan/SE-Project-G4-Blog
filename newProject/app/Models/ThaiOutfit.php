@@ -33,9 +33,10 @@ class ThaiOutfit extends Model
     }
     
     // Get all size and color combinations for this outfit
-    public function sizeAndColors()
+    public function sizesAndColors()
     {
-        return $this->hasMany(ThaiOutfitSizeAndColor::class, 'outfit_id', 'outfit_id');
+        return $this->hasMany(ThaiOutfitSizeAndColor::class, 'outfit_id', 'outfit_id')
+            ->with(['size', 'color']);
     }
     
     // Get total stock (sum of all size/color combinations)
