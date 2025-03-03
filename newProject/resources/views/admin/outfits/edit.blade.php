@@ -1,18 +1,22 @@
-@extends('layouts.shopowner-layout')
-
-@section('title', 'แก้ไขชุด')
-
-@section('content')
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>แก้ไขชุดโง่วๆ</title>
+</head>
+<body>
 <div class="container mx-auto">
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold">แก้ไขชุด: {{ $outfit->name }}</h2>
-        <a href="{{ route('shopowner.outfits.index') }}" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">
+        <a href="{{ route('admin.outfits.adminindex') }}" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">
             <i class="fa fa-arrow-left mr-2"></i> กลับ
         </a>
     </div>
 
     <div class="bg-white shadow-md rounded-lg overflow-hidden p-6">
-        <form action="{{ route('shopowner.outfits.update', $outfit->outfit_id) }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('admin.outfits.update', $outfit->outfit_id) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
@@ -107,4 +111,5 @@
         </form>
     </div>
 </div>
-@endsection
+</body>
+</html>
