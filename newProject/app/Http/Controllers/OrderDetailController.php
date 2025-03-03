@@ -13,11 +13,10 @@ class OrderDetailController extends Controller
     public function index($idOutfit)
     {
         // Load outfit with its category names and size/color data
-        $outfit = ThaiOutfit::with(['categories', 'sizeAndColors.size', 'sizeAndColors.color'])
-            ->findOrFail($idOutfit);
-    
+        $outfit = ThaiOutfit::with(['categories'])->findOrFail($idOutfit);
+        $sizeAndColor = ThaiOutfitSizeAndColor::with(['size','color'])->findOrFail($idOutfit);
         // ดึงข้อมูลขนาดและสีของชุด
-        return view('orderdetail.index', compact('outfit'));
+        return view('orderdetail.index', compact('outfit', 'sizeAndColor'));
     }
     
 }
