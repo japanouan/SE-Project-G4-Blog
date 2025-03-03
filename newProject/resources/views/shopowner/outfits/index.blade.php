@@ -26,6 +26,7 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่อชุด</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ราคา</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">คงเหลือ</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ขนาดและสี</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">สถานะ</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">การจัดการ</th>
                     </tr>
@@ -49,7 +50,30 @@
                             <div class="text-sm text-gray-900">{{ number_format($outfit->price, 2) }} บาท</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">{{ $outfit->stock }}</div>
+                            <div class="text-sm text-gray-900">{{ $outfit->sizeAndColors->sum('amount') }}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm text-gray-900">
+                                <button type="button" class="text-blue-600 hover:text-blue-800" 
+                                        onclick="toggleVariants('variants-{{ $outfit->outfit_id }}')">
+                                    แสดงรายละเอียด <i class="fa fa-chevron-down"></i>
+                                </button>
+                                <div id="variants-{{ $outfit->outfit_id }}" class="hidden mt-2">
+                                    @if($outfit->sizeAndColors->count() > 0)
+                                        <div class="text-xs p-2 bg-gray-50 rounded">
+                                            @foreach($outfit->sizeAndColors as $variant)
+                                                <div class="mb-1">
+                                                    <span class="font-medium">{{ $variant->size->size }}</span> - 
+                                                    <span class="font-medium">{{ $variant->color->color }}</span>: 
+                                                    <span>{{ $variant->amount }} ชิ้น</span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <div class="text-xs text-gray-500">ไม่มีข้อมูลขนาดและสี</div>
+                                    @endif
+                                </div>
+                            </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             @if($outfit->status == 'active')
@@ -89,4 +113,15 @@
         @endif
     </div>
 </div>
+
+<script>
+    function toggleVariants(id) {
+        const variantsElement = document.getElementById(id);
+        if (variantsElement.classList.contains('hidden')) {
+            variantsElement.classList.remove('hidden');
+        } else {
+            variantsElement.classList.add('hidden');
+        }
+    }
+</script>
 @endsection
