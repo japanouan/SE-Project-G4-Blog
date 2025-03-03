@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\ThaiOutfit;
 use App\Models\CartItem;
+use App\Models\User;
 
 class CartItemController extends Controller
 {
@@ -64,4 +65,42 @@ class CartItemController extends Controller
 
         return redirect()->back()->with('success', "เพิ่มสินค้า ID: $outfit_id จำนวน: $quantity ลงตะกร้าแล้ว!");
     }
+
+    public function deleteItem($cart_id){
+        CartItem::findOrFail($cart_id)->delete();
+        return redirect()->back()->with('success', "ลบ Item ออกจากร้านค้าสำเร็จ");
+    }
+
+    public function updateItem(Request $request)
+{
+    $user = Auth::user();
+    $outfit_id = $request->input('outfit_id');
+    $quantity = $request->input('quantity', 1);
+
+    // ตรวจสอบว่ามี outfit_id หรือไม่
+    if (!$outfit_id) {
+        return response()->json(['message' => 'กรุณาระบุชุดที่ต้องการอัปเดต'], 400);
+    }
+
+    // ค้นหาไอเท็มในตะกร้าของผู้ใช้
+    $item = CartItem::where('outfit_id', $outfit_id)
+        ->where('userId', $user->user_id)
+        ->first();
+
+    if (!$item) {
+        return response()->json(['message' => 'ไม่พบสินค้าในตะกร้า'], 404);
+    }
+
+    // ตรวจสอบว่าจำนวนต้องเป็นค่าบวก
+    if ($quantity < 1) {
+        return response()->json(['message' => 'จำนวนต้องมากกว่าหรือเท่ากับ 1'], 400);
+    }
+
+    // อัปเดตจำนวนสินค้า
+    $item->quantity = $quantity;
+    $item->save();
+
+    return redirect()->back()->with('success', "update Item ร้านค้าสำเร็จ");
+}
+
 }

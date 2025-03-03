@@ -347,4 +347,28 @@ class OutfitController extends Controller
 
         return view('admin.outfits.edit', compact('outfit', 'categories', 'outfitCategories'));
     }
+
+    public function searchOutfits($searchKey)
+    {
+        // ตรวจสอบว่ามีคีย์ค้นหาหรือไม่
+        if (!$searchKey) {
+            return response()->json(['message' => 'กรุณาใส่คำค้นหา'], 400);
+        }
+    
+        // ค้นหา Outfits โดยใช้ Model Outfit
+        $outfits = ThaiOutfit::where('name', 'like', "%{$searchKey}%")
+            ->orWhere('description', 'like', "%{$searchKey}%")
+            ->orWhereHas('category', function ($query) use ($searchKey) {
+                $query->where('name', 'like', "%{$searchKey}%");
+            })
+            ->get()->paginate(10);
+    
+        // ตรวจสอบว่าพบข้อมูลหรือไม่
+        if ($outfits->isEmpty()) {
+            return response()->json(['message' => 'ไม่พบผลลัพธ์ที่ตรงกับการค้นหา'], 404);
+        }
+    
+        return view('main', compact('outfits'));
+    }
+    
 }
