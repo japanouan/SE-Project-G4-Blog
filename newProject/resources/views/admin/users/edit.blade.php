@@ -10,7 +10,7 @@
         </a>
     </div>
 
-    <form method="POST" action="{{ route('admin.users.update', $user->user_id) }}">
+    <form method="POST" action="{{ route('admin.users.update', $user->user_id) }}" id="user-edit-form">
         @csrf
         @method('PUT')
 
@@ -58,9 +58,11 @@
             <x-input-error :messages="$errors->get('status')" class="mt-2" />
         </div>
 
+        <input type="hidden" name="is_ajax" value="1">
+
         <div class="flex items-center justify-between mt-4">
-            <a href="{{ route('admin.dashboard') }}" 
-               class="inline-flex items-center px-4 py-2 bg-gray-300 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-400 active:bg-gray-500 focus:outline-none focus:border-gray-500 focus:ring ring-gray-300 disabled:opacity-25 transition ease-in-out duration-150">
+            <a href="{{ route('admin.dashboard') }}"
+               class="cancel-edit inline-flex items-center px-4 py-2 bg-gray-300 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-400 active:bg-gray-500 focus:outline-none focus:border-gray-500 focus:ring ring-gray-300 disabled:opacity-25 transition ease-in-out duration-150">
                 <i class="fas fa-times mr-2"></i> Cancel
             </a>
             
@@ -69,19 +71,4 @@
             </x-primary-button>
         </div>
     </form>
-
-    <!-- Hidden inputs to preserve sorting/filtering parameters when submitting the form -->
-    @if(request()->has('orderBy'))
-        <input type="hidden" name="redirect_orderBy" value="{{ request('orderBy') }}">
-    @endif
-
-    @if(request()->has('direction'))
-        <input type="hidden" name="redirect_direction" value="{{ request('direction') }}">
-    @endif
-
-    @if(request()->has('userType'))
-        @foreach(request('userType') as $type)
-            <input type="hidden" name="redirect_userType[]" value="{{ $type }}">
-        @endforeach
-    @endif
 </x-guest-layout>
