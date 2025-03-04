@@ -26,6 +26,7 @@ class ProfileController extends Controller
 
     public function index()
     {
+        
         $user = Auth::user(); 
         return view('profile.index', compact('user'));
     }
@@ -90,7 +91,10 @@ class ProfileController extends Controller
         // บันทึกการเปลี่ยนแปลง
         $user->save();
         
-    
+        if(Auth::user() -> userType == 'customer')
+        {
+            return redirect()->route('profile.index')->with('success', 'Profile updated successfully!');
+        }
         return redirect()->route('profile.show')->with('success', 'Profile updated successfully!');
     }
     
