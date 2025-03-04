@@ -2,16 +2,20 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ThaiOutfitSizeAndColor extends Model
 {
+    use HasFactory;
     protected $table = 'Thaioutfit_SizeAndColor';
     protected $primaryKey = 'sizeDetail_id';
     protected $guarded = ['sizeDetail_id'];
     protected $fillable = ['outfit_id', 'size_id', 'color_id', 'amount'];
     
     public $timestamps = false;
+    
+
     
     // Get the outfit this combination belongs to
     public function outfit()
@@ -30,4 +34,5 @@ class ThaiOutfitSizeAndColor extends Model
     {
         return $this->belongsTo(ThaiOutfitColor::class, 'color_id', 'color_id');
     }
+    
 }

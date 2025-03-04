@@ -6,6 +6,7 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'App\\Http\\Controllers\\Admin\\UserController' => $baseDir . '/app/Http/Controllers/Admin/UserController.php',
     'App\\Http\\Controllers\\Auth\\AuthenticatedSessionController' => $baseDir . '/app/Http/Controllers/Auth/AuthenticatedSessionController.php',
     'App\\Http\\Controllers\\Auth\\ConfirmPasswordController' => $baseDir . '/app/Http/Controllers/Auth/ConfirmPasswordController.php',
     'App\\Http\\Controllers\\Auth\\ConfirmablePasswordController' => $baseDir . '/app/Http/Controllers/Auth/ConfirmablePasswordController.php',
@@ -56,6 +57,9 @@ return array(
     'App\\Models\\Shop' => $baseDir . '/app/Models/Shop.php',
     'App\\Models\\ThaiOutfit' => $baseDir . '/app/Models/ThaiOutfit.php',
     'App\\Models\\ThaiOutfitCategory' => $baseDir . '/app/Models/ThaiOutfitCategory.php',
+    'App\\Models\\ThaiOutfitColor' => $baseDir . '/app/Models/ThaiOutfitColor.php',
+    'App\\Models\\ThaiOutfitSize' => $baseDir . '/app/Models/ThaiOutfitSize.php',
+    'App\\Models\\ThaiOutfitSizeAndColor' => $baseDir . '/app/Models/ThaiOutfitSizeAndColor.php',
     'App\\Models\\User' => $baseDir . '/app/Models/User.php',
     'App\\Providers\\AppServiceProvider' => $baseDir . '/app/Providers/AppServiceProvider.php',
     'App\\View\\Components\\AppLayout' => $baseDir . '/app/View/Components/AppLayout.php',
