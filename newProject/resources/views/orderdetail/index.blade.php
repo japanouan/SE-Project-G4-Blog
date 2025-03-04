@@ -27,7 +27,7 @@
             <!-- สีของชุด -->
             <p class="mt-4 font-semibold">สีชุด:</p>
             <div class="flex gap-2 mt-2">
-                @foreach($outfit->sizesAndColors->unique('color_id') as $item)
+                @foreach($outfit->sizeAndColors->unique('color_id') as $item)
                     <button type="button" class="color-option px-3 py-1 border rounded-md bg-gray-200 text-gray-700"
                         data-color-id="{{ $item->color_id }}">
                         {{ $item->color->color }}
@@ -38,7 +38,7 @@
             <!-- ขนาดของชุด -->
             <p class="mt-4 font-semibold">ขนาดชุด:</p>
             <div class="flex gap-2 mt-2">
-                @foreach($outfit->sizesAndColors->unique('size_id') as $item)
+                @foreach($outfit->sizeAndColors->unique('size_id') as $item)
                     <button type="button" class="size-option px-3 py-1 border rounded-md bg-gray-200 text-gray-700"
                         data-size-id="{{ $item->size_id }}">
                         {{ $item->size->size }}
