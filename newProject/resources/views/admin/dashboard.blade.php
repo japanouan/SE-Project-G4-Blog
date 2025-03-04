@@ -329,6 +329,9 @@
             <!-- Add this after your other content sections (after users-content, shops-content, etc.) -->
             <div id="user-edit-content" class="content-section hidden bg-white overflow-hidden shadow-sm rounded-lg p-6"></div>
 
+            <!-- Add this after your other content sections (after users-content, shops-content, etc.) -->
+            <div id="shop-edit-content" class="content-section hidden bg-white overflow-hidden shadow-sm rounded-lg p-6"></div>
+
         </div>
     </div>
 
@@ -819,6 +822,87 @@ $(document).on('click', 'a[href*="admin/users"][href*="edit"]', function(e) {
         }
     });
 });
+
+// This targets forms with edit in their action URL within the shops content
+$(document).on('click', '#shops-content form[action*="edit"] button, #shops-content .btn-info', function(e) {
+        e.preventDefault();
+        console.log("Shop edit button clicked, loading form...");
+        
+        // Get the parent form
+        const $form = $(this).closest('form');
+        const url = $form.attr('action');
+        
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: $form.serialize(),
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                // Hide all content sections
+                $('.content-section').hide();
+                
+                // Process the full HTML response
+                const $response = $(response);
+                
+                // Find the form - adjust the selector to match your actual form
+                const $form = $response.find('form');
+                
+                if ($form.length) {
+                    console.log("Shop form found in response");
+                    
+                    // Show edit content section and insert the form
+                    $('#shop-edit-content').html($form).show();
+                    
+                    // Setup form submission via AJAX
+                    $('#shop-edit-content form').on('submit', function(e) {
+                        e.preventDefault();
+                        
+                        const formData = $(this).serialize();
+                        const formAction = $(this).attr('action');
+                        
+                        $.ajax({
+                            url: formAction,
+                            type: 'POST',
+                            data: formData,
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            success: function(response) {
+                                alert('Shop updated successfully');
+                                
+                                // Reload shops table
+                                loadContent("{{ route('admin.shops.index') }}", 'shops-content');
+                            },
+                            error: function(xhr) {
+                                console.error('Error updating shop:', xhr.responseText);
+                                alert('Error updating shop. See console for details.');
+                            }
+                        });
+                    });
+                    
+                    // Handle cancel button click
+                    $('#shop-edit-content').on('click', '.cancel-edit, a[href*="admin/dashboard"]', function(e) {
+                        e.preventDefault();
+                        
+                        // Hide edit form and show shops list
+                        $('#shop-edit-content').hide();
+                        $('#shops-content').show();
+                    });
+                } else {
+                    console.error("Form not found in response");
+                    alert("Error: Could not find the shop edit form in the response");
+                    $('#shops-content').show();
+                }
+            },
+            error: function(xhr) {
+                console.error('Error loading shop edit form:', xhr.responseText);
+                alert('Error loading shop edit form. See console for details.');
+                $('#shops-content').show();
+            }
+        });
+    });
 
             
             // Set dashboard as active by default

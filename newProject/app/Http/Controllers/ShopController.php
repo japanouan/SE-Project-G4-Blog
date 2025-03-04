@@ -65,24 +65,29 @@ class ShopController extends Controller
         return view('admin.shops.edit', compact('shop'));
     }
 
-    public function update(Request $request, $shop_id)
+    public function update(Request $request, $id)
     {
-        $request->validate([
-            'shop_name' => 'required|string|max:255',
-            'shop_description' => 'required|string',
-            'shop_location' => 'required|string',
-            'rental_terms' => 'required|string',
-            'status' => 'required|in:active,inactive',
-        ]);
-
-
-
-        // ค้นหาผู้ใช้และอัปเดตข้อมูล
-        $shop = shop::find($shop_id);
-        $shop->update($request->all());
-
-        return redirect()->route('admin.shops.index')->with('success', 'shop updated successfully!');
+    $shop = Shop::findOrFail($id);
+    
+    $validated = $request->validate([
+        'shop_name' => 'required|string|max:255',
+        'shop_description' => 'required|string',
+        'shop_location' => 'required|string|max:255',
+        'rental_terms' => 'required|string',
+        'status' => 'required|string|in:active,inactive',
+    ]);
+    
+    $shop->fill($validated);
+    $shop->save();
+    
+    // Check if request is AJAX
+    if ($request->ajax() || $request->has('is_ajax')) {
+        return response()->json(['success' => true, 'message' => 'Shop updated successfully']);
     }
+    
+    // Normal redirect for non-AJAX requests
+    return redirect()->route('admin.dashboard')->with('success', 'Shop updated successfully');
+}
 
 
 
