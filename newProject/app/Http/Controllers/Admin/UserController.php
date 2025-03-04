@@ -129,34 +129,35 @@ class UserController extends Controller
      * @return \Illuminate\Http\RedirectResponse
      */
     public function update(Request $request, $id)
-    {
-        $user = User::findOrFail($id);
+{
+    $user = User::findOrFail($id);
     
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => [
-                'required',
-                'string',
-                'email',
-                'max:255',
-                Rule::unique('users')->ignore($user->user_id, 'user_id'),
-            ],
-            'phone' => 'required|string|max:15',
-            'userType' => 'required|string',
-            'status' => 'required|string|in:active,inactive',
-        ]);
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => [
+            'required',
+            'string',
+            'email',
+            'max:255',
+            Rule::unique('users')->ignore($user->user_id, 'user_id'),
+        ],
+        'phone' => 'required|string|max:15',
+        'userType' => 'required|string',
+        'status' => 'required|string|in:active,inactive',
+    ]);
     
-        $user->name = $request->name;
-        $user->email = $request->email;
-        $user->phone = $request->phone;
-        $user->userType = $request->userType;
-        $user->status = $request->status;
-        $user->save();
+    $user->fill($validated);
+    $user->save();
     
-        // Redirect to dashboard instead of users.index
-        return redirect()->route('admin.dashboard')
-                     ->with('success', 'User updated successfully');
+    // Check if request is AJAX
+    if ($request->ajax() || $request->has('is_ajax')) {
+        return response()->json(['success' => true, 'message' => 'User updated successfully']);
     }
+    
+    // Normal redirect for non-AJAX requests
+    return redirect()->route('admin.dashboard')->with('success', 'User updated successfully');
+}
+
     /**
      * Remove the specified user from storage.
      *

@@ -18,12 +18,12 @@
             min-height: 100vh;
         }
         .header {
-            width: 100%; /* Full width of screen */
+            width: 100%;
             height: 71px;
             background-color: #000;
             display: flex;
             align-items: center;
-            justify-content: space-between; /* Space between logo and user info */
+            justify-content: space-between;
             padding: 0 20px;
             position: fixed;
             top: 0;
@@ -45,24 +45,19 @@
             top: 71px;
             left: 0;
             color: white;
-            transition: transform 0.3s ease-in-out; /* Add transition for smooth animation */
-            z-index: 90; /* Ensure sidebar appears above content */
+            transition: transform 0.3s ease-in-out;
+            z-index: 90;
         }
-        
-        /* New class for collapsed sidebar */
         .sidebar-collapsed {
-            transform: translateX(-100%); /* Move sidebar off-screen */
+            transform: translateX(-100%);
         }
-        
         .content {
             margin-left: 259px;
             margin-top: 71px;
             padding: 20px;
             flex: 1;
-            transition: margin-left 0.3s ease-in-out; /* Add transition for content */
+            transition: margin-left 0.3s ease-in-out;
         }
-        
-        /* New class for content when sidebar is collapsed */
         .content-expanded {
             margin-left: 0;
         }
@@ -113,9 +108,113 @@
         .dropdown-menu a:hover {
             background-color: #f5f5f5;
         }
+
+        /* Badge Styles for Users */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .badge-status-active {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        .badge-status-inactive {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+
+        /* Status Badge Styles for Shops */
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .status-active {
+            background-color: #DEF7EC;
+            color: #03543E;
+        }
+        .status-inactive {
+            background-color: #FDE8E8;
+            color: #9B1C1C;
+        }
+
+        /* Button Styles */
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            text-align: center;
+            transition: all 0.2s;
+            display: inline-block;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background-color: #8B9DF9;
+            color: white;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #7A8CE8;
+            transform: translateY(-1px);
+        }
+        .btn-success {
+            background-color: #10B981;
+            color: white;
+            border: none;
+        }
+        .btn-success:hover {
+            background-color: #059669;
+            transform: translateY(-1px);
+        }
+        .btn-danger {
+            background-color: #EF4444;
+            color: white;
+            border: none;
+        }
+        .btn-danger:hover {
+            background-color: #DC2626;
+            transform: translateY(-1px);
+        }
+        .btn-info {
+            background-color: #3B82F6;
+            color: white;
+            border: none;
+        }
+        .btn-info:hover {
+            background-color: #2563EB;
+            transform: translateY(-1px);
+        }
+
+        /* Loading indicator */
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: none;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
+    <!-- Loading indicator -->
+    <div class="loading" id="loadingIndicator">
+        <i class="fas fa-spinner fa-spin fa-2x"></i>
+        <span class="ml-2">Loading...</span>
+    </div>
+
     <!-- Header -->
     <div class="header">
         <div class="flex items-center">
@@ -167,7 +266,7 @@
             </div>
             <div class="menu-item" id="outfitMenuItem">
                 <a href="#" data-target="outfit-content" data-url="{{ route('admin.outfits.adminindex') }}">
-                    <i class="fas fa-store mr-3"></i>
+                    <i class="fas fa-tshirt mr-3"></i>
                     <span>Outfits</span>
                 </a>
             </div>
@@ -175,7 +274,7 @@
     </div>
     
     <!-- Content -->
-    <div class="content">
+    <div class="content" id="mainContent">
         <div class="max-w-7xl mx-auto">
             <!-- Dashboard Home Content -->
             <div id="dashboard-home" class="content-section dashboard-home">
@@ -184,8 +283,8 @@
                         <h1 class="text-2xl font-bold mb-4">Admin Dashboard</h1>
                         <p class="mb-4">{{ __("You're logged in!") }}</p>
                         
-                        <!-- Dashboard content goes here -->
-                        <div class="grid grid-cols-2 gap-4 mt-6">
+                        <!-- Dashboard content -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
                             <div class="bg-gray-100 p-4 rounded-lg">
                                 <h2 class="text-lg font-semibold mb-2">User Management</h2>
                                 <p>Manage all users in the system</p>
@@ -204,6 +303,15 @@
                                     View Shops
                                 </button>
                             </div>
+                            <div class="bg-gray-100 p-4 rounded-lg">
+                                <h2 class="text-lg font-semibold mb-2">Outfit Management</h2>
+                                <p>Manage all outfits in the platform</p>
+                                <button class="load-content mt-2 inline-block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" 
+                                        data-target="outfit-content" 
+                                        data-url="{{ route('admin.outfits.adminindex') }}">
+                                    View Outfits
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -214,15 +322,24 @@
             
             <!-- Shops Content Section (initially hidden) -->
             <div id="shops-content" class="content-section hidden"></div>
+            
+            <!-- Outfit Content Section (initially hidden) -->
             <div id="outfit-content" class="content-section hidden"></div>
+
+            <!-- Add this after your other content sections (after users-content, shops-content, etc.) -->
+            <div id="user-edit-content" class="content-section hidden bg-white overflow-hidden shadow-sm rounded-lg p-6"></div>
+
         </div>
     </div>
+
     <script>
         $(document).ready(function() {
+            // ===== SIDEBAR & MENU FUNCTIONS =====
+            
             // Toggle sidebar visibility with animation
             $('#menuToggle').click(function() {
                 $('#sidebar').toggleClass('sidebar-collapsed');
-                $('.content').toggleClass('content-expanded');
+                $('#mainContent').toggleClass('content-expanded');
                 
                 // Change menu icon based on sidebar state
                 if ($('#sidebar').hasClass('sidebar-collapsed')) {
@@ -248,8 +365,8 @@
                 e.stopPropagation();
             });
             
-            // Handle sidebar menu item clicks
-            $('.sidebar .menu-item a').click(function(e) {
+            // Handle dashboard menu item clicks to load content
+            $('.sidebar .menu-item a, .load-content').click(function(e) {
                 e.preventDefault();
                 
                 const target = $(this).data('target');
@@ -264,16 +381,18 @@
                     return;
                 }
                 
-                // Load content from URL if AJAX is implemented
-                if (url) {
-                    // If you have AJAX content loading
+                                // Load content via AJAX
+                                if (url) {
                     loadContent(url, target);
                 }
             });
             
-            // Function to load content if you're using AJAX
+            // ===== CONTENT LOADING FUNCTIONS =====
+            
+            // Function to load content via AJAX
             function loadContent(url, targetId) {
-                // Show loading indicator if you have one
+                // Show loading indicator
+                $('#loadingIndicator').show();
                 
                 $.ajax({
                     url: url,
@@ -291,101 +410,298 @@
                         
                         // Add active class to clicked menu item
                         $('[data-target="' + targetId + '"]').closest('.menu-item').addClass('active');
+                        
+                        // Hide loading indicator
+                        $('#loadingIndicator').hide();
                     },
                     error: function(xhr, status, error) {
                         console.error('Error loading content:', error);
+                        $('#loadingIndicator').hide();
                         alert('Error loading content. Please try again.');
                     }
                 });
             }
             
-            // Set dashboard as active by default
-            $('#dashboardMenuItem').addClass('active');
-        });
-    </script>
-</body>
-</html>
-
-<form id="filter-form" action="javascript:void(0);">
-    <input type="hidden" name="orderBy" value="{{ request('orderBy') }}">
-    <input type="hidden" name="direction" value="{{ request('direction') }}">
-
-    <div class="filters-container">
-        <label class="filter-chip {{ is_array(request('userType')) && in_array('admin', request('userType')) ? 'active' : '' }}">
-            <input type="checkbox" name="userType[]" value="admin" {{ is_array(request('userType')) && in_array('admin', request('userType')) ? 'checked' : '' }}>
-            <i class="fas fa-user-shield"></i> Admin
-        </label>
-        <!-- Other filters remain the same -->
-    </div>
-
-    <button type="submit" class="btn btn-primary">
-        <i class="fas fa-filter"></i> Apply Filter
-    </button>
-</form>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-$(document).ready(function() {
-    // Handle filter form submission
-    $('#filter-form').on('submit', function(e) {
-        e.preventDefault();
-        var formData = $(this).serialize();
-        
-        $.ajax({
-            url: "{{ route('admin.users.index') }}",
-            type: 'GET',
-            data: formData,
-            beforeSend: function() {
-                // Optional loading indicator
-                $('#users-table-container').css('opacity', '0.5');
-            },
-            success: function(response) {
-                // Update just the table HTML
-                $('#users-table-container').html(response);
-                $('#users-table-container').css('opacity', '1');
-            },
-            error: function(xhr) {
-                console.error('Error:', xhr.responseText);
-                $('#users-table-container').css('opacity', '1');
-            }
-        });
-    });
-    
-    // Updated status toggle handler
-    $(document).on('submit', 'form[action*="toggleStatus"]', function(e) {
-        e.preventDefault(); // Prevent normal form submission
-        
-        var $form = $(this);
-        var userId = $form.attr('action').split('/').pop(); // Extract user ID from the URL
-        
-        // Show loading state
-        $form.find('button').prop('disabled', true).css('opacity', '0.7');
-        
-        // Make the AJAX request to toggle status
-        $.ajax({
-            url: $form.attr('action'),
-            type: 'POST',
-            data: $form.serialize(),
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            success: function(response) {
-                console.log("Status toggled successfully");
+            // ===== EVENT DELEGATION HANDLERS =====
+            
+            // Handle filter form submission
+            $(document).on('submit', '#filter-form', function(e) {
+                e.preventDefault();
                 
-                // Instead of reloading the entire table with sorting parameters,
-                // simply update the specific row or status indicator
-                if (response.success) {
-                    // Find the status cell for this user
-                    var $userRow = $('tr[data-user-id="' + userId + '"]');
+                var data = {};
+                var $form = $(this);
+                
+                // Get all form values including hidden inputs
+                $form.find('input').each(function() {
+                    var $input = $(this);
+                    var name = $input.attr('name');
                     
-                    if ($userRow.length) {
-                        // Update the status badge
-                        var $statusCell = $userRow.find('td:has(.badge-status-active, .badge-status-inactive)');
-                        var newStatus = response.user.status;
+                    if ($input.attr('type') === 'checkbox' && !$input.prop('checked')) {
+                        return; // Skip unchecked checkboxes
+                    }
+                    
+                    if (name && name.endsWith('[]')) {
+                        // Handle array inputs
+                        var baseName = name.slice(0, -2);
+                        if (!data[baseName]) {
+                            data[baseName] = [];
+                        }
+                        data[baseName].push($input.val());
+                    } else if (name) {
+                        data[name] = $input.val();
+                    }
+                });
+                
+                // Determine target URL based on visible content
+                var contentSection;
+                var targetUrl;
+                
+                if ($('#users-content').is(':visible')) {
+                    contentSection = 'users-content';
+                    targetUrl = "{{ route('admin.users.index') }}";
+                } else if ($('#shops-content').is(':visible')) {
+                    contentSection = 'shops-content';
+                    targetUrl = "{{ route('admin.shops.index') }}";
+                } else if ($('#outfit-content').is(':visible')) {
+                    contentSection = 'outfit-content';
+                    targetUrl = "{{ route('admin.outfits.adminindex') }}";
+                }
+                
+                if (!contentSection || !targetUrl) return;
+                
+                // Show loading state
+                $('#' + contentSection).css('opacity', '0.5');
+                
+                $.ajax({
+                    url: targetUrl,
+                    type: 'GET',
+                    data: data,
+                    success: function(response) {
+                        $('#' + contentSection).html(response).css('opacity', '1');
+                        
+                        // Create a proper query string
+                        var queryString = Object.keys(data).map(function(key) {
+                            if (Array.isArray(data[key])) {
+                                return data[key].map(function(value) {
+                                    return key + '[]=' + encodeURIComponent(value);
+                                }).join('&');
+                            }
+                            return key + '=' + encodeURIComponent(data[key]);
+                        }).join('&');
+                        
+                        // Update URL without reloading
+                        var newUrl = window.location.pathname + '?' + queryString;
+                        window.history.pushState({}, '', newUrl);
+                    },
+                    error: function(xhr) {
+                        console.error('Error:', xhr.responseText);
+                        $('#' + contentSection).css('opacity', '1');
+                        alert('An error occurred while filtering data.');
+                    }
+                });
+            });
+            
+            // Handle table sort actions for both users and shops
+            $(document).on('click', '.sort-btn, .header-cell button', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                var form = $(this).closest('form');
+                var orderBy = form.find('input[name="orderBy"]').val();
+                var direction = form.find('input[name="direction"]').val();
+                
+                // Determine the current content section
+                var contentSection;
+                var targetUrl;
+                
+                if ($('#users-content').is(':visible')) {
+                    contentSection = 'users-content';
+                    targetUrl = "{{ route('admin.users.index') }}";
+                } else if ($('#shops-content').is(':visible')) {
+                    contentSection = 'shops-content';
+                    targetUrl = "{{ route('admin.shops.index') }}";
+                } else if ($('#outfit-content').is(':visible')) {
+                    contentSection = 'outfit-content';
+                    targetUrl = "{{ route('admin.outfits.adminindex') }}";
+                }
+                
+                if (!contentSection || !targetUrl) return;
+                
+                // Collect any active filters and search terms
+                var data = {
+                    orderBy: orderBy,
+                    direction: direction
+                };
+                
+                // Include search term if present
+                var searchInput = $('input[name="search"]');
+                if (searchInput.length && searchInput.val()) {
+                    data.search = searchInput.val();
+                }
+                
+                // Include any filter checkboxes
+                $('input[name$="[]"]:checked').each(function() {
+                    var name = $(this).attr('name');
+                    var baseName = name.slice(0, -2);
+                    
+                    if (!data[baseName]) {
+                        data[baseName] = [];
+                    }
+                    data[baseName].push($(this).val());
+                });
+                
+                // Show loading state
+                $('#' + contentSection).css('opacity', '0.5');
+                
+                $.ajax({
+                    url: targetUrl,
+                    type: 'GET',
+                    data: data,
+                    success: function(response) {
+                        $('#' + contentSection).html(response).css('opacity', '1');
+                        
+                        // Update URL without reloading
+                        var queryParams = $.param(data, true);
+                        var newUrl = window.location.pathname + '?' + queryParams;
+                        history.pushState(null, '', newUrl);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("AJAX error:", status, error);
+                        $('#' + contentSection).css('opacity', '1');
+                        alert('An error occurred while sorting the data.');
+                    }
+                });
+            });
+            
+            // Handle search form submission
+            $(document).on('submit', 'form[action*="index"]', function(e) {
+                // Only process search forms with search input
+                if (!$(this).find('input[name="search"]').length) return;
+                
+                e.preventDefault();
+                
+                var $form = $(this);
+                var search = $form.find('input[name="search"]').val();
+                
+                // Determine the current content section
+                var contentSection;
+                var targetUrl = $form.attr('action');
+                
+                if (targetUrl.includes('users')) {
+                    contentSection = 'users-content';
+                } else if (targetUrl.includes('shops')) {
+                    contentSection = 'shops-content';
+                } else if (targetUrl.includes('outfits')) {
+                    contentSection = 'outfit-content';
+                }
+                
+                if (!contentSection) return;
+                
+                // Collect existing sort parameters if any
+                var data = { search: search };
+                
+                var orderByInput = $('input[name="orderBy"]:first');
+                var directionInput = $('input[name="direction"]:first');
+                
+                if (orderByInput.length && directionInput.length) {
+                    data.orderBy = orderByInput.val();
+                    data.direction = directionInput.val();
+                }
+                
+                // Show loading state
+                $('#' + contentSection).css('opacity', '0.5');
+                
+                $.ajax({
+                    url: targetUrl,
+                    type: 'GET',
+                    data: data,
+                    success: function(response) {
+                        $('#' + contentSection).html(response).css('opacity', '1');
+                        
+                        // Update URL
+                        var queryParams = $.param(data);
+                        var newUrl = window.location.pathname + '?' + queryParams;
+                        history.pushState(null, '', newUrl);
+                    },
+                    error: function(xhr) {
+                        console.error('Error searching:', xhr.responseText);
+                        $('#' + contentSection).css('opacity', '1');
+                        alert('An error occurred while searching.');
+                    }
+                });
+            });
+            
+            // Handle status toggle submissions - updated version
+$(document).on('submit', 'form[action*="toggleStatus"]', function(e) {
+    e.preventDefault();
+    
+    var $form = $(this);
+    var actionUrl = $form.attr('action');
+    var isShop = actionUrl.includes('shops');
+    
+    // Extract ID from the URL - this is more reliable
+    var id = actionUrl.split('/').pop();
+    var newStatus = $form.find('input[name="status"]').val();
+    
+    // Show loading state on the button
+    $form.find('button').prop('disabled', true).css('opacity', '0.7');
+    
+    $.ajax({
+        url: actionUrl,
+        type: 'POST',
+        data: $form.serialize(),
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function(response) {
+            if (response.success) {
+                // For shops, update the row status and button
+                if (isShop) {
+                    // First try to find the row by first cell content matching shop_id
+                    var $row = $('tr td:first-child').filter(function() {
+                        return $(this).text().trim() === id;
+                    }).closest('tr');
+                    
+                    if ($row.length) {
+                        // Find the status cell - it has the status-badge class
+                        var $statusCell = $row.find('td span.status-badge').parent();
+                        
+                        if (newStatus === 'active') {
+                            $statusCell.html('<span class="status-badge status-active">active</span>');
+                            // Update button to be a deactivate button
+                            $form.find('input[name="status"]').val('inactive');
+                            $form.find('button')
+                                .removeClass('btn-success')
+                                .addClass('btn-danger')
+                                .html('<i class="fas fa-ban mr-1"></i> Deactivate');
+                        } else {
+                            $statusCell.html('<span class="status-badge status-inactive">inactive</span>');
+                            // Update button to be an activate button
+                            $form.find('input[name="status"]').val('active');
+                            $form.find('button')
+                                .removeClass('btn-danger')
+                                .addClass('btn-success')
+                                .html('<i class="fas fa-check-circle mr-1"></i> Activate');
+                        }
+                    } else {
+                        // If we can't find the row, just reload the content
+                        var currentSection = isShop ? 'shops-content' : 'users-content';
+                        var refreshUrl = isShop ? "{{ route('admin.shops.index') }}" : "{{ route('admin.users.index') }}";
+                        loadContent(refreshUrl, currentSection);
+                        return;
+                    }
+                } else {
+                    // User status update
+                    var $row = $('tr td:first-child').filter(function() {
+                        return $(this).text().trim() === id;
+                    }).closest('tr');
+                    
+                    if ($row.length) {
+                        var $statusCell = $row.find('td:has(.badge-status-active, .badge-status-inactive)');
                         
                         if (newStatus === 'active') {
                             $statusCell.html('<span class="badge badge-status-active"><i class="fas fa-check-circle mr-1"></i> active</span>');
-                            // Update the button to be a deactivate button
+                            // Update button to be a deactivate button
                             $form.find('input[name="status"]').val('inactive');
                             $form.find('button')
                                 .removeClass('btn-success')
@@ -393,238 +709,121 @@ $(document).ready(function() {
                                 .html('<i class="fas fa-ban"></i> Deactivate');
                         } else {
                             $statusCell.html('<span class="badge badge-status-inactive"><i class="fas fa-times-circle mr-1"></i> inactive</span>');
-                            // Update the button to be an activate button
+                            // Update button to be an activate button
                             $form.find('input[name="status"]').val('active');
                             $form.find('button')
                                 .removeClass('btn-danger')
                                 .addClass('btn-success')
                                 .html('<i class="fas fa-check"></i> Activate');
                         }
-                        
-                        // Re-enable the button
-                        $form.find('button').prop('disabled', false).css('opacity', '1');
                     } else {
-                        // If we can't find the row, refresh the whole table but maintain current state
-                        refreshUserTable();
+                        // If we can't find the row, just reload the content
+                        loadContent("{{ route('admin.users.index') }}", 'users-content');
+                        return;
                     }
-                } else {
-                    // In case of error in the response
-                    alert("Failed to update user status.");
-                    $form.find('button').prop('disabled', false).css('opacity', '1');
                 }
-            },
-            error: function(xhr) {
-                console.error("Error toggling status:", xhr.responseText);
-                $form.find('button').prop('disabled', false).css('opacity', '1');
-                alert("Failed to update user status. Please try again.");
-            }
-        });
-    });
-    
-    // Helper function to refresh the user table while preserving current state
-    function refreshUserTable() {
-        var contentSection = 'users-content';
-        var refreshUrl = "{{ route('admin.users.index') }}";
-        
-        // Get the current URL parameters instead of extracting from form elements
-        var currentUrl = new URL(window.location.href);
-        var searchParams = currentUrl.searchParams;
-        var refreshData = {};
-        
-        // Only include parameters that already exist in the URL
-        if (searchParams.has('orderBy')) refreshData.orderBy = searchParams.get('orderBy');
-        if (searchParams.has('direction')) refreshData.direction = searchParams.get('direction');
-        
-        // Handle multiple userType[] parameters
-        var userTypes = searchParams.getAll('userType[]');
-        if (userTypes.length > 0) {
-            refreshData.userType = userTypes;
-        }
-        
-        $.ajax({
-            url: refreshUrl,
-            type: 'GET',
-            data: refreshData,
-            success: function(response) {
-                $('#' + contentSection).html(response);
-            },
-            error: function(xhr) {
-                console.error("Error refreshing table:", xhr.responseText);
-            }
-        });
-    }
-});
-</script>
-<script>
-$(document).ready(function() {
-    // More specific selector for sort buttons in table headers
-    $(document).on('click', 'th .sort-btn', function(e) {
-        e.preventDefault(); // Prevent default form submission
-        e.stopPropagation(); // Stop event bubbling
-        
-        console.log("Sort button clicked"); // Debug log
-        
-        // Get the parent form
-        var form = $(this).closest('form');
-        
-        // Get the order parameters
-        var orderBy = form.find('input[name="orderBy"]').val();
-        var direction = form.find('input[name="direction"]').val();
-        
-        console.log("Sorting by:", orderBy, "Direction:", direction); // Debug log
-        
-        // Determine the current content section
-        var contentSection;
-        var targetUrl;
-        
-        if ($('#users-content').is(':visible')) {
-            contentSection = 'users-content';
-            targetUrl = "{{ route('admin.users.index') }}";
-        } else if ($('#shops-content').is(':visible')) {
-            contentSection = 'shops-content';
-            targetUrl = "{{ route('admin.shops.index') }}";
-        } else if ($('#outfit-content').is(':visible')) {
-            contentSection = 'outfit-content';
-            targetUrl = "{{ route('admin.outfits.adminindex') }}";
-        }
-        
-        if (!contentSection || !targetUrl) {
-            console.log("Content section not determined"); // Debug log
-            return;
-        }
-        
-        // Collect any active filters
-        var data = {
-            orderBy: orderBy,
-            direction: direction
-        };
-        
-        // If there are filter checkboxes, include them
-        $('input[name="userType[]"]:checked').each(function() {
-            if (!data.userType) {
-                data.userType = [];
-            }
-            data.userType.push($(this).val());
-        });
-        
-        console.log("AJAX data:", data); // Debug log
-        
-        // Make the AJAX request
-        $.ajax({
-            url: targetUrl,
-            type: 'GET',
-            data: data,
-            beforeSend: function() {
-                $('#' + contentSection).css('opacity', '0.5');
-            },
-            success: function(response) {
-                console.log("AJAX success"); // Debug log
-                $('#' + contentSection).html(response).css('opacity', '1');
-                
-                // Update URL without reloading
-                var queryParams = $.param(data, true); // true enables traditional encoding for arrays
-                var newUrl = window.location.pathname + '?' + queryParams;
-                history.pushState(null, '', newUrl);
-            },
-            error: function(xhr, status, error) {
-                console.error("AJAX error:", status, error); // Debug log
-                $('#' + contentSection).css('opacity', '1');
-                alert('An error occurred while sorting the data.');
-            }
-        });
-    });
-    
-    // Also fix the form submission handlers for the forms in table headers
-    $(document).on('submit', 'th form', function(e) {
-        e.preventDefault(); // Prevent regular form submission
-        $(this).find('.sort-btn').trigger('click'); // Trigger the click handler instead
-    });
-});
-</script>
-<script>
-$(document).ready(function() {
-    // Also update the filter form submission to use the same approach
-    $(document).on('submit', '#filter-form', function(e) {
-        e.preventDefault();
-        
-        var data = {};
-        var $form = $(this);
-        
-        // Get all form values including hidden inputs
-        $form.find('input').each(function() {
-            var $input = $(this);
-            var name = $input.attr('name');
-            
-            if ($input.attr('type') === 'checkbox' && !$input.prop('checked')) {
-                return; // Skip unchecked checkboxes
-            }
-            
-            if (name.endsWith('[]')) {
-                // Handle array inputs
-                var baseName = name.slice(0, -2);
-                if (!data[baseName]) {
-                    data[baseName] = [];
-                }
-                data[baseName].push($input.val());
             } else {
-                data[name] = $input.val();
+                console.error("Status toggle failed:", response);
+                alert("Failed to update status. Please try again.");
             }
-        });
-        
-        // Determine target URL based on visible content
-        var contentSection;
-        var targetUrl;
-        
-        if ($('#users-content').is(':visible')) {
-            contentSection = 'users-content';
-            targetUrl = "{{ route('admin.users.index') }}";
-        } else if ($('#shops-content').is(':visible')) {
-            contentSection = 'shops-content';
-            targetUrl = "{{ route('admin.shops.index') }}";
-        } else if ($('#outfit-content').is(':visible')) {
-            contentSection = 'outfit-content';
-            targetUrl = "{{ route('admin.outfits.adminindex') }}";
+            
+            // Always re-enable the button
+            $form.find('button').prop('disabled', false).css('opacity', '1');
+        },
+        error: function(xhr) {
+            console.error("Error toggling status:", xhr.responseText);
+            $form.find('button').prop('disabled', false).css('opacity', '1');
+            alert("Failed to update status. Please try again.");
         }
-        
-        if (!contentSection || !targetUrl) return;
-        
-        $.ajax({
-            url: targetUrl,
-            type: 'GET',
-            data: data,
-            beforeSend: function() {
-                $('#' + contentSection).css('opacity', '0.5');
-            },
-            success: function(response) {
-                $('#' + contentSection).html(response).css('opacity', '1');
-                
-                // Create a proper query string
-                var queryString = Object.keys(data).map(function(key) {
-                    if (Array.isArray(data[key])) {
-                        return data[key].map(function(value) {
-                            return key + '[]=' + encodeURIComponent(value);
-                        }).join('&');
-                    }
-                    return key + '=' + encodeURIComponent(data[key]);
-                }).join('&');
-                
-                // Update URL without reloading
-                var newUrl = window.location.pathname + '?' + queryString;
-                window.history.pushState({}, '', newUrl);
-                
-                console.log('Filter applied successfully');
-            },
-            error: function(xhr) {
-                console.error('Error:', xhr.responseText);
-                $('#' + contentSection).css('opacity', '1');
-                alert('An error occurred while filtering data.');
-            }
-        });
-    });
-    
-    // Debug logging for click events on sort buttons
-    $(document).on('click', '.sort-btn, .header-cell button', function() {
-        console.log('Sort button clicked:', $(this).text().trim());
     });
 });
-</script>
+
+// Add this to your existing JavaScript section in dashboard.blade.php
+$(document).on('click', 'a[href*="admin/users"][href*="edit"]', function(e) {
+    e.preventDefault();
+    
+    const url = $(this).attr('href');
+    
+    // Show loading indicator
+    $('#loadingIndicator').show();
+    
+    // Load edit form via AJAX
+    $.ajax({
+        url: url,
+        type: 'GET',
+        dataType: 'html',
+        success: function(response) {
+            // Hide all content sections
+            $('.content-section').hide();
+            
+            // Extract just the form content from the response (we don't want the entire page)
+            const formContent = $(response).find('form').first();
+            
+            // Show edit form section and fill with form content
+            $('#user-edit-content').html(formContent).show();
+            
+            // Add custom submit handler for the form
+            $('#user-edit-content form').on('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = $(this).serialize();
+                const formAction = $(this).attr('action');
+                
+                // Show loading indicator
+                $('#loadingIndicator').show();
+                
+                // Submit form via AJAX
+                $.ajax({
+                    url: formAction,
+                    type: 'POST',
+                    data: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        // Hide loading indicator
+                        $('#loadingIndicator').hide();
+                        
+                        // Show success message
+                        alert('User updated successfully');
+                        
+                        // Reload users table
+                        loadContent("{{ route('admin.users.index') }}", 'users-content');
+                    },
+                    error: function(xhr) {
+                        // Hide loading indicator
+                        $('#loadingIndicator').hide();
+                        
+                        // Show error message
+                        alert('Error updating user: ' + xhr.responseText);
+                    }
+                });
+            });
+            
+            // Add cancel button handler
+            $('#user-edit-content').on('click', 'a[href*="admin/dashboard"]', function(e) {
+                e.preventDefault();
+                
+                // Hide edit form and show users table
+                $('#user-edit-content').hide();
+                $('#users-content').show();
+            });
+            
+            // Hide loading indicator
+            $('#loadingIndicator').hide();
+        },
+        error: function(xhr) {
+            console.error('Error loading edit form:', xhr.responseText);
+            $('#loadingIndicator').hide();
+            alert('Error loading edit form. Please try again.');
+        }
+    });
+});
+
+            
+            // Set dashboard as active by default
+            $('#dashboardMenuItem').addClass('active');
+        });
+    </script>
+</body>
+</html>
