@@ -50,7 +50,6 @@ class ProfileController extends Controller
     {
         // รับข้อมูลผู้ใช้ที่ล็อกอิน
         $user = $request->user();
-        // dd($request->all());
     
         // การตรวจสอบข้อมูล
         $request->validate([
@@ -61,7 +60,6 @@ class ProfileController extends Controller
             'profilePicture' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
             'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
         ]);
-        // dd($request);
         
         
     
