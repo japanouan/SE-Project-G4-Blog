@@ -21,7 +21,8 @@
             <!-- ราคา -->
             <div class="mt-4">
                 <p class="text-lg font-semibold">ราคาขาย: <span class="text-red-500">{{ number_format($outfit->price, 2) }} บาท</span></p>
-                <p class="text-gray-600">ราคามัดจำ: {{ number_format($outfit->deposit_price, 2) }} บาท</p>
+                <p class="text-gray-600">ราคามัดจำ: {{ number_format($outfit->depositfee, 2) }} บาท</p>
+                <p class="text-gray-600">ค่าปรับ: {{ number_format($outfit->penaltyfee, 2) }} บาท</p>
             </div>
 
             <!-- สีของชุด -->
@@ -58,16 +59,12 @@
             <input type="hidden" name="selected_size" id="selectedSize">
             <input type="hidden" name="selected_color" id="selectedColor">
 
-
-
-            <!-- จำนวนชุด -->
-                <form action="{{ url('cartItem/addToCart') }}" method="POST">
+            <!-- ปุ่มเช่า, ซื้อ, เพิ่มลงตะกร้า -->
+            <form action="{{ url('cartItem/addToCart') }}" method="POST">
                 @csrf
                 <input type="hidden" name="outfit_id" value="{{ $outfit->outfit_id }}">
                 <input type="hidden" id="quantityInput" name="quantity" value="1">
 
-
-                <!-- ปุ่มเช่า, ซื้อ, เพิ่มลงตะกร้า -->
                 <div class="mt-6 flex gap-4">
                     <a href="{{ url('rental/create/' . $outfit->outfit_id) }}" 
                         class="px-6 py-2 border border-green-500 text-green-500 rounded-md hover:bg-green-500 hover:text-white transition">
@@ -89,13 +86,16 @@
     </div>
 </div>
 
-<!-- JavaScript เพิ่ม-ลดจำนวนสินค้า -->
+<!-- JavaScript -->
 <script>
-   
+    let stockData = @json($outfit->sizeAndColors);
 
     document.addEventListener("DOMContentLoaded", function() {
+        console.log("Stock Data Loaded:", stockData);
+
         let selectedColor = null;
         let selectedSize = null;
+
         function updateStockDisplay() {
             if (selectedColor && selectedSize) {
                 let stockItem = stockData.find(item => 
@@ -104,6 +104,8 @@
 
                 let stockAmount = stockItem ? stockItem.amount : 0;
                 document.getElementById("stockAmount").innerText = stockAmount;
+
+                console.log("Updated Stock Amount:", stockAmount);
             } else {
                 document.getElementById("stockAmount").innerText = "0";
             }
@@ -136,9 +138,12 @@
 
     function increaseQty() {
         let qty = document.getElementById('quantity');
-        let stock = parseInt(document.getElementById('stockAmount').innerText);
-        if (parseInt(qty.value) < stock) {
+        let stock = parseInt(document.getElementById('stockAmount').innerText) || 0;
+
+        if (stock > 0 && parseInt(qty.value) < stock) {
             qty.value = parseInt(qty.value) + 1;
+        } else {
+            console.log("Cannot increase, stock:", stock, "current qty:", qty.value);
         }
     }
 

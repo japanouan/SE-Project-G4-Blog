@@ -40,14 +40,21 @@ class ShopController extends Controller
 
     public function toggleStatus(Request $request, $shop_id)
     {
-        $shop = Shop::findOrFail($shop_id);
-        $shop->status = $request->status; // รับค่าจากฟอร์ม
-        $shop->save();
-
-        $orderBy = $request->input('orderBy', 'shop_id');
-        $direction = $request->input('direction', 'asc');
-
-        return redirect()->route('admin.shops.index')->with('success', 'Shop status updated successfully!');
+        try {
+            $shop = Shop::findOrFail($shop_id);
+            $shop->status = $request->status;
+            $shop->save();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Shop status updated successfully!'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error updating shop status: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
 
