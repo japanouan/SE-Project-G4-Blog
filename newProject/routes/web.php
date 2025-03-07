@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\SelectServiceController;
 use App\Models\CartItem;
+use App\Models\SelectService;
 use Illuminate\Http\Request;
 
 use function Laravel\Prompts\search;
@@ -24,9 +26,11 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['is_active'])->group(function () {
+
+
 // make-up
 Route::prefix('make-upartist')->name('make-upartist.')->middleware('auth', 'is_makeup')->group(function () {
-    Route::get('/dashboard', function () {})->name('dashboard');
+    Route::get('/', [SelectServiceController::class, 'index'])->name('dashboard');
 
     Route::get('/users', function () {})->name('users');
 });
@@ -76,7 +80,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth', 'is_admin')->group(fu
 
 // photographer
 Route::prefix('photographer')->name('photographer.')->middleware('auth', 'is_photographer')->group(function () {
-    Route::get('/dashboard', function () {})->name('dashboard');
+    Route::get('/', [SelectServiceController::class, 'index'])->name('dashboard');
 
     Route::get('/users', function () {})->name('users');
 });
