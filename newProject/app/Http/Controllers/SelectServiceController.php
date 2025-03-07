@@ -26,7 +26,11 @@ class SelectServiceController extends Controller
             ->where('SelectServices.service_type', $userType) // กรองเฉพาะงานที่ตรงกับ userType
             ->groupBy('SelectServices.select_service_id', 'SelectServices.customer_count')
             ->havingRaw('staff_count < required_staff') // แสดงเฉพาะงานที่ยังขาดช่าง
+            ->whereNull('ss.select_staff_detail_id') // กรองงานที่ยังไม่มีช่างรับ
             ->get();
+            // ->toSql(); // แสดง query SQL
+
+            // dd($services);  // ใช้ dd() เพื่อแสดงผล query ที่สร้างขึ้น
 
         return view('makeup/work_list', compact('services'));
     }
