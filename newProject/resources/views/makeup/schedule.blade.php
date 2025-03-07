@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rider Schedule</title>
+    <title>{{ucwords(strtolower($works[0]->selectService->service_type))}} Schedule</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <style>
         body {
@@ -38,7 +38,7 @@
 <body>
 
     <div class="container mt-4">
-        <h2 class="text-center mb-4">Rider Schedule</h2>
+        <h2 class="text-center mb-4">{{ucwords(strtolower($works[0]->selectService->service_type))}} Schedule</h2>
         <a href="{{ route(str_replace(' ', '', $works[0]->selectService->service_type) . '.work-list') }}"><strong>Go To Work List</strong></a>
 
 
