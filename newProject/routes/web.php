@@ -9,6 +9,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SelectServiceController;
+use App\Http\Controllers\SelectStaffDetailController;
 use App\Models\CartItem;
 use App\Models\SelectService;
 use Illuminate\Http\Request;
@@ -30,14 +31,16 @@ Route::middleware(['is_active'])->group(function () {
 
 // make-up
 Route::prefix('make-upartist')->name('make-upartist.')->middleware('auth', 'is_makeup')->group(function () {
-    Route::get('/', [SelectServiceController::class, 'index'])->name('dashboard');
+    Route::get('/', [SelectStaffDetailController::class, 'index'])->name('dashboard');
+    Route::get('/work-list', [SelectServiceController::class, 'index'])->name('work-list');
 
     Route::post('/accept-job', [SelectServiceController::class, 'acceptJob'])->name('accept-job');
 });
 
 // photographer
 Route::prefix('photographer')->name('photographer.')->middleware('auth', 'is_photographer')->group(function () {
-    Route::get('/', [SelectServiceController::class, 'index'])->name('dashboard');
+    Route::get('/', [SelectStaffDetailController::class, 'index'])->name('dashboard');
+    Route::get('/work-list', [SelectServiceController::class, 'index'])->name('work-list');
 
     Route::post('/accept-job', [SelectServiceController::class, 'acceptJob'])->name('accept-job');
 });

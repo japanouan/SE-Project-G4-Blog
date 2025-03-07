@@ -12,4 +12,9 @@ class SelectStaffDetail extends Model
     const UPDATED_AT = null;
     public $timestamps = true;
     protected $fillable = ['earning', 'created_at', 'select_service_id', 'staff_id'];
+
+    public function selectService()
+    {
+        return $this->belongsTo(SelectService::class, 'select_service_id', 'select_service_id');
+    }
 }
