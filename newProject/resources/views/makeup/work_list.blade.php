@@ -33,6 +33,7 @@
             background-color: #218838;
         }
     </style>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <body>
@@ -47,7 +48,7 @@
         @endif
 
         @foreach ($services as $service)
-        <div class="job-card">
+        <div class="job-card" id="job-{{ $service->select_service_id }}">
             <h3>Booking ID: {{ $service->booking_id }}</h3>
             <p><strong>ประเภทงาน:</strong> {{ $service->service_type }}</p>
             <p><strong>จำนวนลูกค้า:</strong> {{ $service->customer_count }}</p>
@@ -60,7 +61,8 @@
             @endif
 
             @if (Auth::user()->userType === $service->service_type)
-            <button class="btn-accept-job" onclick="acceptJob({{$service->select_service_id}})">รับงาน</button>
+            <button class="btn-accept-job" onclick="acceptJob({{$service->select_service_id}},'{{ $service->service_type }}')">รับงาน</button>
+            <div id="response-{{ $service->select_service_id }}"></div> <!-- Add response div -->
             @endif
         </div>
         @endforeach
@@ -68,9 +70,51 @@
     </div>
 
     <script>
-        function acceptJob(serviceId) {
-            alert("คุณกำลังรับงาน ID: " + serviceId);
-            // คุณสามารถเปลี่ยน alert ให้เป็น AJAX Request เพื่อให้ช่างกดรับงานได้จริง
+        function acceptJob(serviceId,userType) {
+            // ป้องกันการกดซ้ำโดยปิดปุ่มชั่วคราว
+            const button = document.querySelector(`#job-${serviceId} .btn-accept-job`);
+            const cleanedUserType = userType.replace(/\s+/g, ''); // ลบช่องว่างทั้งหมด
+            const url = `/${cleanedUserType}/accept-job`;  // ดึง URL จาก route name
+            button.disabled = true;
+
+            // สร้างข้อมูลที่จะส่งไปยังเซิร์ฟเวอร์
+            const data = {
+                select_service_id: serviceId
+            };
+
+            // ส่ง AJAX request ด้วย fetch
+            fetch(url, { // name or url in route
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content // สำหรับ Laravel CSRF protection
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('เกิดข้อผิดพลาดในการรับงาน');
+                }
+                return response.json();
+            })
+            .then(result => {
+                // อัปเดตหน้าเว็บเมื่อสำเร็จ
+                const responseDiv = document.getElementById(`response-${serviceId}`);
+                responseDiv.innerHTML = '<span class="text-success">รับงานสำเร็จ!</span>';
+                
+                // อัปเดตจำนวนช่างที่รับงาน (ถ้าต้องการ)
+                const staffCountElement = document.querySelector(`#job-${serviceId} p:nth-child(4)`);
+                staffCountElement.innerHTML = `<strong>ช่างที่รับแล้ว:</strong> ${result.staff_count} / ${result.required_staff}`;
+
+                // ถ้าต้องการซ่อนปุ่มหลังรับงาน
+                button.style.display = 'none';
+            })
+            .catch(error => {
+                // แสดงข้อผิดพลาด
+                const responseDiv = document.getElementById(`response-${serviceId}`);
+                responseDiv.innerHTML = `<span class="text-danger">${error.message}</span>`;
+                button.disabled = false; // เปิดปุ่มกลับมาใช้งาน
+            });
         }
     </script>
 

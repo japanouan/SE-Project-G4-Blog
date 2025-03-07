@@ -32,7 +32,14 @@ Route::middleware(['is_active'])->group(function () {
 Route::prefix('make-upartist')->name('make-upartist.')->middleware('auth', 'is_makeup')->group(function () {
     Route::get('/', [SelectServiceController::class, 'index'])->name('dashboard');
 
-    Route::get('/users', function () {})->name('users');
+    Route::post('/accept-job', [SelectServiceController::class, 'acceptJob'])->name('accept-job');
+});
+
+// photographer
+Route::prefix('photographer')->name('photographer.')->middleware('auth', 'is_photographer')->group(function () {
+    Route::get('/', [SelectServiceController::class, 'index'])->name('dashboard');
+
+    Route::post('/accept-job', [SelectServiceController::class, 'acceptJob'])->name('accept-job');
 });
 
 
@@ -78,12 +85,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth', 'is_admin')->group(fu
 });
 
 
-// photographer
-Route::prefix('photographer')->name('photographer.')->middleware('auth', 'is_photographer')->group(function () {
-    Route::get('/', [SelectServiceController::class, 'index'])->name('dashboard');
 
-    Route::get('/users', function () {})->name('users');
-});
 
 // shop owner
 Route::prefix('shopowner')->name('shopowner.')->middleware('auth', 'is_shopowner')->group(function () {
