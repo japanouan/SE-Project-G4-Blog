@@ -11,7 +11,7 @@ class SelectStaffDetail extends Model
     protected $guarded = ['select_staff_detail_id'];
     const UPDATED_AT = null;
     public $timestamps = true;
-    protected $fillable = ['earning', 'created_at', 'select_service_id', 'staff_id'];
+    protected $fillable = ['customer_count','earning', 'created_at', 'select_service_id', 'staff_id'];
 
     public function selectService()
     {

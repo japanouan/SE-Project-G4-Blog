@@ -11,18 +11,34 @@ use App\Models\SelectStaffDetail;
 class SelectStaffDetailController extends Controller
 {
     public function index()
-    {
-        $user_id = Auth::user()->user_id; // ดึง userType ของผู้ใช้ที่ล็อกอิน
-
-        $works = SelectStaffDetail::with('selectService.address') // ใช้ . ระหว่างชื่อความสัมพันธ์
-        ->where('SelectStaffDetails.staff_id', $user_id)
+{
+    $user_id = Auth::id();
+    $works = SelectStaffDetail::with('selectService.address')
+        ->where('staff_id', $user_id)
         ->get();
 
-            // ->toSql(); // แสดง query SQL
+    $works = $works->sortBy('selectService.reservation_date');
+    // dd($works);
+    return view('work.schedule', compact('works'));
+}
 
-            // dd($works);  // ใช้ dd() เพื่อแสดงผล query ที่สร้างขึ้น
-            $works = $works->sortBy('selectService.reservation_date');
+public function finishJob(Request $request)
+{
+    $staff_detail = SelectStaffDetail::findOrFail(decrypt($request->id));
 
-        return view('makeup/schedule', compact('works'));
+    if ($staff_detail->finished_time == null) {
+        $staff_detail->finished_time = now();
+        $staff_detail->save();
     }
+
+    return redirect()->route('Auth::user->userType.dashboard')->with('success', 'งานถูกทำเสร็จเรียบร้อย!');
+}
+
+
+    public function show($id) {
+        $decryptedId = decrypt($id); // ถอดรหัสค่า ID ที่เข้ารหัสมา
+        $work = SelectStaffDetail::with('selectService.address')->findOrFail($decryptedId);
+        return view('work.work-details', compact('work'));
+    }
+    
 }
