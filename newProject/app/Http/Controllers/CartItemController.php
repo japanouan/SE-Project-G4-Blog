@@ -19,19 +19,24 @@ class CartItemController extends Controller
     function index()
     {
         $user = Auth::user();
-        
-        // ดึงข้อมูลรายการสินค้าที่อยู่ในตะกร้าของ User นั้นๆ
+
+// ดึงข้อมูลรายการสินค้าที่อยู่ในตะกร้าของ User นั้นๆ
         $cartItems = CartItem::where('userId', $user->user_id)
-                            ->orderBy('outfit_id') // จัดเรียงตาม outfit_id
+                            ->orderBy('outfit_id')
                             ->get();
 
-        // ดึงข้อมูลชุดไทยที่อยู่ในตะกร้าของ User
+        // ดึง outfit_id ทั้งหมดจาก cartItems
         $outfitIds = $cartItems->pluck('outfit_id')->toArray();
-        $outfits = ThaiOutfit::whereIn('outfit_id', $outfitIds)
-                            ->orderBy('outfit_id') // จัดเรียงให้ตรงกับ cartItems
-                            ->get();
 
-        
+        // ดึงข้อมูลชุดไทยที่อยู่ในตะกร้า
+        if (!empty($outfitIds)) {
+            $outfits = ThaiOutfit::with(['categories', 'sizeAndColors.size', 'sizeAndColors.color'])
+                                ->whereIn('outfit_id', $outfitIds)
+                                ->orderBy('outfit_id')
+                                ->get();
+        } else {
+            $outfits = collect(); // คืนค่า Collection ว่าง
+        }
 
         // ส่งข้อมูลไปที่หน้า View
         return view('cartItem.index', compact('outfits', 'cartItems'));
@@ -48,7 +53,7 @@ class CartItemController extends Controller
         $user = Auth::user();
         $outfit_id = $request->input('outfit_id');
         $quantity = $request->input('quantity', 1); // ถ้าไม่ได้ส่งมา ให้เป็น 1
-
+        
         // ตรวจสอบว่ามีสินค้านี้อยู่ในตะกร้าแล้วหรือไม่
         $item = CartItem::where('outfit_id', $outfit_id)
                         ->where('userId', $user->user_id)
