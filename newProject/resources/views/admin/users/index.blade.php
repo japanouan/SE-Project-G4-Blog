@@ -439,6 +439,8 @@
             </div>
         </div>
 
+        
+
         <div class="card">
             <div class="card-header">
                 <i class="fas fa-table card-header-icon"></i>
@@ -472,7 +474,7 @@
                                     @if(request()->has('userType'))
                                     @foreach(request('userType') as $type)
                                     <input type="hidden" name="userType[]" value="{{ $type }}">
-                                    @endforeach
+                                 @endforeach
                                     @endif
                                     <button type="submit" class="sort-btn">
                                         Name
