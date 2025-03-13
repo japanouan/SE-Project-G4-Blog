@@ -27,8 +27,10 @@
                         </div>
                     </div>
 
-                    <!-- Frame Label -->
-                    <p class="text-gray-500">Frame {{ $item->id }}</p>
+                    <<div class="ml-4">
+                        <h3 class="text-lg font-semibold">{{ $item->color->color_name ?? 'ไม่ระบุสี' }}</h3>
+                    </div>
+
 
                     <!-- จำนวนสินค้า -->
                     <div class="flex items-center">
