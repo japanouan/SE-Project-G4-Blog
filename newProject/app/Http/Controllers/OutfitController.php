@@ -350,23 +350,24 @@ class OutfitController extends Controller
     public function searchOutfits(Request $request)
     {
         $searchKey = $request->searchkey;
+
         // ตรวจสอบว่ามีคีย์ค้นหาหรือไม่
         if (!$searchKey) {
-            return response()->json(['message' => 'กรุณาใส่คำค้นหา'], 400);
+            return redirect()->back()->with('alert', 'กรุณาใส่คำค้นหา');
         }
+
         // ค้นหา Outfits โดยใช้ Model Outfit
         $outfits = ThaiOutfit::where('name', 'like', "%{$searchKey}%")
             ->orWhere('description', 'like', "%{$searchKey}%")
             ->get();
 
-
         // ตรวจสอบว่าพบข้อมูลหรือไม่
         if ($outfits->isEmpty()) {
-            return response()->json(['message' => 'ไม่พบผลลัพธ์ที่ตรงกับการค้นหา'], 404);
+            return redirect()->back()->with('alert', 'ไม่พบผลลัพธ์ที่ตรงกับการค้นหา');
         }
 
-
         return view('main', compact('outfits'));
-    } 
+    }
+
 
 }
