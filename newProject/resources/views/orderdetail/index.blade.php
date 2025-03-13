@@ -60,7 +60,7 @@
             <input type="hidden" name="selected_color" id="selectedColor">
 
             <!-- ปุ่มเช่า, ซื้อ, เพิ่มลงตะกร้า -->
-            <form action="{{ url('cartItem/addToCart') }}" method="POST">
+            <form action="{{ url('cartItem/addToCart') }}" method="POST" onsubmit="return validateForm()">
                 @csrf
                 <input type="hidden" name="outfit_id" value="{{ $outfit->outfit_id }}">
                 <input type="hidden" id="quantityInput" name="quantity" value="1">
@@ -89,12 +89,11 @@
 <!-- JavaScript -->
 <script>
     let stockData = @json($outfit->sizeAndColors);
+    let selectedColor = null;
+    let selectedSize = null;
 
     document.addEventListener("DOMContentLoaded", function() {
         console.log("Stock Data Loaded:", stockData);
-
-        let selectedColor = null;
-        let selectedSize = null;
 
         function updateStockDisplay() {
             if (selectedColor && selectedSize) {
@@ -142,8 +141,7 @@
 
         if (stock > 0 && parseInt(qty.value) < stock) {
             qty.value = parseInt(qty.value) + 1;
-        } else {
-            console.log("Cannot increase, stock:", stock, "current qty:", qty.value);
+            document.getElementById('quantityInput').value = qty.value;
         }
     }
 
@@ -151,7 +149,20 @@
         let qty = document.getElementById('quantity');
         if (parseInt(qty.value) > 1) {
             qty.value = parseInt(qty.value) - 1;
+            document.getElementById('quantityInput').value = qty.value;
         }
+    }
+
+    function validateForm() {
+        if (!selectedColor || !selectedSize) {
+            alert("กรุณาเลือกสีและขนาดก่อนเพิ่มลงตะกร้า!");
+            return false;
+        }
+        if (parseInt(document.getElementById('stockAmount').innerText) <= 0) {
+            alert("สินค้าหมดสต็อก!");
+            return false;
+        }
+        return true;
     }
 </script>
 
