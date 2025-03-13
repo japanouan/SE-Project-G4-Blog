@@ -6,37 +6,47 @@
 <div class="container mx-auto p-6">
     <h2 class="text-xl font-bold mb-6">Shopping Cart</h2>
 
-    @if($outfits->isEmpty())
+    @if($cartItems->isEmpty())
         <p class="text-gray-600">ไม่มีสินค้าในตะกร้า</p>
     @else
         <div class="space-y-4">
-            @foreach($outfits as $index => $item)
-                @php
-                    $cartItem = $cartItems[$index] ?? null; // ดึงค่าจำนวนชุดจาก $cartItems
-                @endphp
-
+            @foreach($cartItems as $cartItem)
                 <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow-md">
                     <!-- รูปสินค้า -->
                     <div class="flex items-center">
-                        <img src="{{ $item->image ? asset($item->image) : asset('images/default-placeholder.png') }}" 
+                        <img src="{{ $cartItem->outfit->image ? asset($cartItem->outfit->image) : asset('images/default-placeholder.png') }}" 
                         class="w-24 h-24 rounded-lg object-cover">
 
                         <div class="ml-4">
-                            <h3 class="text-lg font-semibold">{{ $item->name }}</h3>
-                            <p class="text-green-600 font-bold">{{ number_format($item->price, 0) }}฿ /1 days</p>
+                            <h3 class="text-lg font-semibold">{{ $cartItem->outfit->name }}</h3>
+                            <p class="text-green-600 font-bold">{{ number_format($cartItem->outfit->price, 0) }}฿ /1 days</p>
                         </div>
                     </div>
 
-                    <<div class="ml-4">
-                        <h3 class="text-lg font-semibold">{{ $item->color->color_name ?? 'ไม่ระบุสี' }}</h3>
+                    <!-- สีของชุด -->
+                    <div class="ml-4">
+                        <p class="text-md font-semibold">สี: 
+                            <span class="text-gray-700">
+                                {{ $cartItem->color->color ?? 'ไม่ระบุสี' }}
+                            </span>
+                        </p>
                     </div>
 
 
+                    <!-- ขนาดของชุด -->
+                    <div class="ml-4">
+                        <p class="text-md font-semibold">ขนาด: 
+                            <span class="text-gray-700">
+                                {{ $cartItem->size->size ?? 'ไม่ระบุขนาด' }}
+                            </span>
+                        </p>
+                    </div>
+
                     <!-- จำนวนสินค้า -->
                     <div class="flex items-center">
-                        <button class="px-2 py-1 border rounded-md bg-gray-200" onclick="decreaseQty('{{ $item->id }}')">-</button>
-                        <input type="text" id="qty-{{ $item->id }}" value="{{ $cartItem->quantity ?? 1 }}" class="w-12 text-center border rounded-md" readonly>
-                        <button class="px-2 py-1 border rounded-md bg-gray-200" onclick="increaseQty('{{ $item->id }}')">+</button>
+                        <button class="px-2 py-1 border rounded-md bg-gray-200" onclick="decreaseQty('{{ $cartItem->id }}')">-</button>
+                        <input type="text" id="qty-{{ $cartItem->id }}" value="{{ $cartItem->quantity }}" class="w-12 text-center border rounded-md" readonly>
+                        <button class="px-2 py-1 border rounded-md bg-gray-200" onclick="increaseQty('{{ $cartItem->id }}')">+</button>
                     </div>
 
                     <!-- Checkbox -->

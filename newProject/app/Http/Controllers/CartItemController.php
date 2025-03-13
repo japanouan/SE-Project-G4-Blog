@@ -19,25 +19,18 @@ class CartItemController extends Controller
     public function index()
     {
         $user = Auth::user();
-    
-        // ดึงข้อมูลรายการสินค้าที่อยู่ในตะกร้าของ User นั้นๆ
-        $cartItems = CartItem::where('userId', $user->user_id)
+
+        // ดึงข้อมูลรายการสินค้าที่อยู่ในตะกร้าของ User นั้นๆ พร้อมกับ Outfit, Size และ Color
+        $cartItems = CartItem::with(['outfit', 'size', 'color']) // ✅ ดึงข้อมูลสัมพันธ์
+                            ->where('userId', $user->user_id)
                             ->orderBy('outfit_id')
                             ->get();
-    
-        // ดึงข้อมูลชุดไทยที่อยู่ในตะกร้า (รวม size และ color)
-        if ($cartItems->isNotEmpty()) {
-            $outfits = ThaiOutfit::with(['categories', 'sizeAndColors.size', 'sizeAndColors.color'])
-                                ->whereIn('outfit_id', $cartItems->pluck('outfit_id'))
-                                ->orderBy('outfit_id')
-                                ->get();
-        } else {
-            $outfits = collect(); // คืนค่า Collection ว่าง
-        }
-    
+
         // ส่งข้อมูลไปที่หน้า View
-        return view('cartItem.index', compact('outfits', 'cartItems'));
+        return view('cartItem.index', compact('cartItems'));
     }
+
+
     
 
     
@@ -48,6 +41,8 @@ class CartItemController extends Controller
         if (!Auth::check()) {
             return redirect()->route('login')->with('error', 'กรุณาเข้าสู่ระบบก่อนเพิ่มลงตะกร้า');
         }
+
+        
     
         $user = Auth::user();
         $outfit_id = $request->input('outfit_id');

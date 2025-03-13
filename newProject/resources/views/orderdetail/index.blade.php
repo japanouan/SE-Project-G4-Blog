@@ -12,10 +12,8 @@
         <div class="w-full lg:w-3/5 bg-white p-6 rounded-lg shadow-lg">
             <h2 class="text-2xl font-bold text-gray-800">{{ $outfit->name }}</h2>
             <p class="text-gray-600 mt-1"><strong>รหัสชุด:</strong> {{ $outfit->outfit_id }}</p>
-            <p><strong>หมวดหมู่:</strong>
-                @foreach($outfit->categories as $category)
-                    {{ $category->category_name }}{{ !$loop->last ? ', ' : '' }}
-                @endforeach
+            <p><strong>หมวดหมู่:</strong> 
+                {{ $outfit->categories->pluck('category_name')->join(', ') }}
             </p>
 
             <!-- ราคา -->
@@ -55,14 +53,18 @@
                 <button type="button" class="px-3 py-2 border rounded-md bg-gray-200 text-gray-700" onclick="increaseQty()">+</button>
             </div>
 
-            <!-- Input ซ่อนค่า size และ color ที่เลือก -->
-            <input type="hidden" name="selected_size" id="selectedSize">
-            <input type="hidden" name="selected_color" id="selectedColor">
+            <!-- <input type="hidden" name="size_id" id="selectedSize" value="{{ $item->size_id }}">
+            <input type="hidden" name="color_id" id="selectedColor" value="{{ $item->color_id }}"> -->
+
 
             <!-- ปุ่มเช่า, ซื้อ, เพิ่มลงตะกร้า -->
+            <!-- ฟอร์มเพิ่มสินค้าลงตะกร้า -->
             <form action="{{ url('cartItem/addToCart') }}" method="POST" onsubmit="return validateForm()">
                 @csrf
                 <input type="hidden" name="outfit_id" value="{{ $outfit->outfit_id }}">
+                <input type="hidden" name="size_id" id="selectedSize" value="">
+                <input type="hidden" name="color_id" id="selectedColor" value="">
+
                 <input type="hidden" id="quantityInput" name="quantity" value="1">
 
                 <div class="mt-6 flex gap-4">
@@ -70,70 +72,72 @@
                         class="px-6 py-2 border border-green-500 text-green-500 rounded-md hover:bg-green-500 hover:text-white transition">
                         เช่า
                     </a>
-
-                    <a href="{{ url('purchase/create/' . $outfit->outfit_id) }}" 
-                        class="px-6 py-2 border border-blue-500 text-blue-500 rounded-md hover:bg-blue-500 hover:text-white transition">
-                        ซื้อ
-                    </a>
-
                     <button type="submit" 
-                        class="px-6 py-2 border border-green-500 text-green-500 rounded-md hover:bg-green-500 hover:text-white transition">
+                        class="px-6 py-2 border border-blue-500 text-blue-500 rounded-md hover:bg-blue-500 hover:text-white transition">
                         เพิ่มลงตะกร้า
                     </button>
                 </div>
             </form>
+
         </div>
     </div>
 </div>
 
 <!-- JavaScript -->
 <script>
+    document.addEventListener("DOMContentLoaded", function() {
     let stockData = @json($outfit->sizeAndColors);
     let selectedColor = null;
     let selectedSize = null;
 
-    document.addEventListener("DOMContentLoaded", function() {
-        console.log("Stock Data Loaded:", stockData);
+    console.log("Stock Data Loaded:", stockData); // ✅ Debugging: ตรวจสอบข้อมูลสต็อก
 
-        function updateStockDisplay() {
-            if (selectedColor && selectedSize) {
-                let stockItem = stockData.find(item => 
-                    item.color_id == selectedColor && item.size_id == selectedSize
-                );
+    function updateStockDisplay() {
+        console.log("Updating stock display..."); // ✅ Debugging
 
-                let stockAmount = stockItem ? stockItem.amount : 0;
-                document.getElementById("stockAmount").innerText = stockAmount;
+        if (selectedColor && selectedSize) {
+            let stockItem = stockData.find(item => 
+                item.color_id == selectedColor && item.size_id == selectedSize
+            );
 
-                console.log("Updated Stock Amount:", stockAmount);
-            } else {
-                document.getElementById("stockAmount").innerText = "0";
-            }
+            let stockAmount = stockItem ? stockItem.amount : 0;
+            console.log("Stock for selected size and color:", stockAmount); // ✅ Debugging
+
+            document.getElementById("stockAmount").innerText = stockAmount;
+        } else {
+            document.getElementById("stockAmount").innerText = "0";
         }
+    }
 
-        document.querySelectorAll(".color-option").forEach(button => {
-            button.addEventListener("click", function() {
-                selectedColor = this.getAttribute("data-color-id");
-                document.getElementById("selectedColor").value = selectedColor;
+    // เมื่อกดปุ่มเลือกสี
+    document.querySelectorAll(".color-option").forEach(button => {
+        button.addEventListener("click", function() {
+            selectedColor = this.getAttribute("data-color-id");
+            document.getElementById("selectedColor").value = selectedColor; // ✅ อัปเดตค่า
+            console.log("Selected Color ID:", selectedColor); // ✅ Debugging
 
-                document.querySelectorAll(".color-option").forEach(btn => btn.classList.remove("bg-blue-500", "text-white"));
-                this.classList.add("bg-blue-500", "text-white");
+            document.querySelectorAll(".color-option").forEach(btn => btn.classList.remove("bg-blue-500", "text-white"));
+            this.classList.add("bg-blue-500", "text-white");
 
-                updateStockDisplay();
-            });
-        });
-
-        document.querySelectorAll(".size-option").forEach(button => {
-            button.addEventListener("click", function() {
-                selectedSize = this.getAttribute("data-size-id");
-                document.getElementById("selectedSize").value = selectedSize;
-
-                document.querySelectorAll(".size-option").forEach(btn => btn.classList.remove("bg-blue-500", "text-white"));
-                this.classList.add("bg-blue-500", "text-white");
-
-                updateStockDisplay();
-            });
+            updateStockDisplay();
         });
     });
+
+    // เมื่อกดปุ่มเลือกขนาด
+    document.querySelectorAll(".size-option").forEach(button => {
+        button.addEventListener("click", function() {
+            selectedSize = this.getAttribute("data-size-id");
+            document.getElementById("selectedSize").value = selectedSize; // ✅ อัปเดตค่า
+            console.log("Selected Size ID:", selectedSize); // ✅ Debugging
+
+            document.querySelectorAll(".size-option").forEach(btn => btn.classList.remove("bg-blue-500", "text-white"));
+            this.classList.add("bg-blue-500", "text-white");
+
+            updateStockDisplay();
+        });
+    });
+});
+
 
     function increaseQty() {
         let qty = document.getElementById('quantity');
@@ -164,6 +168,21 @@
         }
         return true;
     }
+
+    document.querySelectorAll(".color-option").forEach(button => {
+    button.addEventListener("click", function() {
+        selectedColor = this.getAttribute("data-color-id");
+        document.getElementById("selectedColor").value = selectedColor;
+    });
+    });
+
+    document.querySelectorAll(".size-option").forEach(button => {
+        button.addEventListener("click", function() {
+            selectedSize = this.getAttribute("data-size-id");
+            document.getElementById("selectedSize").value = selectedSize;
+        });
+    });
+
 </script>
 
 @endsection
