@@ -158,7 +158,8 @@ Route::prefix('cartItem')->name('cartItem.')->group(function(){
     Route::delete('/deleteItem', [CartItemController::class, 'deleteItem'])->name('deleteItem');
 
 
-    Route::get('/updateAmount/{idItem}', [CartItemController::class, 'updateItem'])->name('updateItem');
+    Route::post('/updateAmount', [CartItemController::class, 'updateItem'])->name('updateItem');
+
 });
 
 

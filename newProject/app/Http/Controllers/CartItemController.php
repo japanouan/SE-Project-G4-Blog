@@ -17,24 +17,32 @@ class CartItemController extends Controller
     }
     
     public function index()
-    {
-        $user = Auth::user();
+{
+    $user = Auth::user();
 
-        // ดึงข้อมูลรายการสินค้าที่อยู่ในตะกร้าของ User นั้นๆ พร้อมกับ Outfit, Size และ Color
-        $cartItems = CartItem::with(['outfit', 'size', 'color']) // ✅ ดึงข้อมูลสัมพันธ์
-                            ->where('userId', $user->user_id)
-                            ->orderBy('outfit_id')
-                            ->get();
-        
-    $sizeAndColor = ThaiOutfitSizeAndColor::where('outfit_id', $cartItems->outfit_id)
-    ->where('size_id', $cartItems->size_id)
-    ->where('color_id', $cartItems->color_id)
-    ->orderBy('outfit_id')
-    ->first();
+    // ดึงข้อมูลสินค้าทั้งหมดในตะกร้าของ User นั้นๆ
+    $cartItems = CartItem::with(['outfit', 'size', 'color'])
+                        ->where('userId', $user->user_id)
+                        ->orderBy('outfit_id')
+                        ->get();
 
-        // ส่งข้อมูลไปที่หน้า View
-        return view('cartItem.index', compact('cartItems'));
+    // ดึงข้อมูล stock_quantity ของแต่ละชุดที่เลือกในตะกร้า
+    foreach ($cartItems as $cartItem) {
+        $cartItem->sizeAndColor = ThaiOutfitSizeAndColor::where('outfit_id', $cartItem->outfit_id)
+            ->where('size_id', $cartItem->size_id)
+            ->where('color_id', $cartItem->color_id)
+            ->first();
+
+        // ✅ ตรวจสอบว่าค่าถูกต้องหรือไม่
+        if (!$cartItem->sizeAndColor) {
+            $cartItem->sizeAndColor = (object) ['amount' => 0]; // กำหนดค่าเริ่มต้นให้เป็น 0
+        }
     }
+
+    return view('cartItem.index', compact('cartItems'));
+}
+
+
 
 
     
@@ -99,22 +107,43 @@ class CartItemController extends Controller
 
 
     public function updateItem(Request $request)
-{
-    $cartItem = CartItem::find($request->cart_id);
+    {
+        $cartItem = CartItem::find($request->cart_id);
 
-    if (!$cartItem) {
-        return response()->json(['success' => false, 'message' => 'ไม่พบสินค้าที่ต้องการอัปเดต'], 404);
+        if (!$cartItem) {
+            return response()->json(['success' => false, 'message' => 'ไม่พบสินค้าที่ต้องการอัปเดต'], 404);
+        }
+
+        // ดึงข้อมูล stock_quantity จาก ThaiOutfitSizeAndColor
+        $sizeAndColor = ThaiOutfitSizeAndColor::where('outfit_id', $cartItem->outfit_id)
+            ->where('size_id', $cartItem->size_id)
+            ->where('color_id', $cartItem->color_id)
+            ->first();
+
+        if (!$sizeAndColor || $sizeAndColor->amount === null) {
+            return response()->json(['success' => false, 'message' => 'ไม่พบข้อมูลสต็อกสินค้า'], 404);
+        }
+
+        // ตรวจสอบว่าจำนวนใหม่ไม่เกิน stock_quantity
+        if ($request->quantity > $sizeAndColor->amount) {
+            return response()->json([
+                'success' => false,
+                'message' => 'จำนวนสินค้าเกินจากที่มีในสต็อก! คงเหลือ: ' . $sizeAndColor->amount
+            ], 400);
+        }
+
+        if ($request->quantity < 1) {
+            return response()->json(['success' => false, 'message' => 'จำนวนสินค้าต้องไม่น้อยกว่า 1'], 400);
+        }
+
+        // อัปเดตจำนวนสินค้า
+        $cartItem->quantity = $request->quantity;
+        $cartItem->save();
+
+        return response()->json(['success' => true, 'message' => 'อัปเดตจำนวนสินค้าเรียบร้อย']);
     }
 
-    if ($request->quantity < 1) {
-        return response()->json(['success' => false, 'message' => 'จำนวนสินค้าต้องไม่น้อยกว่า 1'], 400);
-    }
 
-    $cartItem->quantity = $request->quantity;
-    $cartItem->save();
-
-    return response()->json(['success' => true, 'message' => 'อัปเดตจำนวนสินค้าเรียบร้อย']);
-}
-
+    
 
 }

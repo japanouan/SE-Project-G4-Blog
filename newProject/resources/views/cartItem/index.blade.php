@@ -45,12 +45,24 @@
                         </p>
                     </div>
 
-                    <!-- จำนวนสินค้า -->
+                    <p class="text-sm text-gray-500">คงเหลือ: {{ $cartItem->sizeAndColor->amount ?? 'ไม่ระบุ' }}</p>
+
+               
+
+
+                   <!-- จำนวนสินค้า -->
                     <div class="flex items-center">
-                        <button class="px-2 py-1 border rounded-md bg-gray-200" onclick="decreaseQty('{{ $cartItem->id }}')">-</button>
-                        <input type="text" id="qty-{{ $cartItem->id }}" value="{{ $cartItem->quantity }}" class="w-12 text-center border rounded-md" readonly>
-                        <button class="px-2 py-1 border rounded-md bg-gray-200" onclick="increaseQty('{{ $cartItem->id }}')">+</button>
+                        <button class="px-2 py-1 border rounded-md bg-gray-200" 
+                            onclick="updateQty('{{ $cartItem->cart_item_id }}', -1, '{{ $cartItem->sizeAndColor->amount ?? 0 }}')">-</button>
+
+                        <input type="text" id="qty-{{ $cartItem->cart_item_id }}" 
+                            value="{{ $cartItem->quantity }}" 
+                            class="w-12 text-center border rounded-md" readonly>
+
+                        <button class="px-2 py-1 border rounded-md bg-gray-200" 
+                            onclick="updateQty('{{ $cartItem->cart_item_id }}', 1, '{{ $cartItem->sizeAndColor->amount ?? 0 }}')">+</button>
                     </div>
+
 
                     <!-- Checkbox -->
                     <input type="checkbox" class="w-5 h-5 border-gray-300 rounded">
@@ -84,16 +96,49 @@
 
 <!-- JavaScript เพิ่ม-ลดจำนวน -->
 <script>
-    function increaseQty(id) {
-        let qty = document.getElementById('qty-' + id);
-        qty.value = parseInt(qty.value) + 1;
+    function updateQty(cartId, change, maxStock) {
+    let qtyInput = document.getElementById('qty-' + cartId);
+    let newQty = parseInt(qtyInput.value) + change;
+
+    if (newQty < 1) {
+        alert("จำนวนสินค้าต้องไม่น้อยกว่า 1");
+        return;
+    }
+    if (newQty > maxStock) {
+        alert("จำนวนสินค้าเกินจากที่มีในสต็อก! คงเหลือ: " + maxStock);
+        return;
     }
 
-    function decreaseQty(id) {
-        let qty = document.getElementById('qty-' + id);
-        if (qty.value > 1) {
-            qty.value = parseInt(qty.value) - 1;
+    // ตรวจสอบค่าที่ส่งไป
+    console.log("กำลังส่งข้อมูล: ", { cart_id: cartId, quantity: newQty });
+
+    fetch("{{ route('cartItem.updateItem') }}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": "{{ csrf_token() }}",
+        },
+        body: JSON.stringify({
+            cart_id: cartId,
+            quantity: newQty
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("ค่าที่ตอบกลับจากเซิร์ฟเวอร์:", data);
+        if (data.success) {
+            qtyInput.value = newQty;
+        } else {
+            alert(data.message);
         }
-    }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+    });
+}
+
 </script>
+
+
+
 @endsection
