@@ -143,7 +143,10 @@ Route::middleware(['auth', 'is_customer'])->group(function () {
 });
 
 Route::prefix('orderdetail')->name('orderdetail.')->group(function(){
-    Route::get('/outfit/{idOutfit}', [OrderDetailController::class, 'index'])->name('orderdetail.index');
+    Route::get('/outfit/{idOutfit}', [OrderDetailController::class, 'index'])->name('index');
+    Route::get('/orderdetail/viewAddTo/{cartItemId}', [OrderDetailController::class, 'viewAddTo'])->name('viewAddTo');
+    Route::post('/orderdetail/addTo', [OrderDetailController::class, 'addTo'])->name('addTo');
+
 });
 
 //search
