@@ -155,7 +155,9 @@ Route::prefix('cartItem')->name('cartItem.')->group(function(){
     Route::post('/addToCart', [CartItemController::class, 'addToCart'])->name('cart.add');
     Route::get('/allItem',[CartItemController::class, 'index'])->name('allItem');
 
-    Route::get('/deleteItem/{idItem}', [CartItemController::class, 'deleteItem'])->name('deleteItem');
+    Route::delete('/deleteItem', [CartItemController::class, 'deleteItem'])->name('deleteItem');
+
+
     Route::get('/updateAmount/{idItem}', [CartItemController::class, 'updateItem'])->name('updateItem');
 });
 

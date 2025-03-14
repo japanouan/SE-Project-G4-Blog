@@ -27,4 +27,6 @@ class CartItem extends Model
     {
         return $this->belongsTo(ThaiOutfitColor::class, 'color_id', 'color_id');
     }
+
+    
 }

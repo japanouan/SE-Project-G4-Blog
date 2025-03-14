@@ -12,6 +12,9 @@
         <div class="space-y-4">
             @foreach($cartItems as $cartItem)
                 <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow-md">
+
+                
+
                     <!-- รูปสินค้า -->
                     <div class="flex items-center">
                         <img src="{{ $cartItem->outfit->image ? asset($cartItem->outfit->image) : asset('images/default-placeholder.png') }}" 
@@ -52,14 +55,20 @@
                     <!-- Checkbox -->
                     <input type="checkbox" class="w-5 h-5 border-gray-300 rounded">
 
+                    
+
                     <!-- ปุ่มลบ -->
-                    <form action="#" method="POST">
+                    <form action="{{ route('cartItem.deleteItem') }}" method="POST">
                         @csrf
                         @method('DELETE')
-                        <button class="text-red-500 hover:text-red-700 text-xl">
+                        <input type="hidden" name="cart_id" value="{{ $cartItem->cart_item_id }}">
+                        <button type="submit" class="text-red-500 hover:text-red-700 text-xl">
                             ❌
                         </button>
                     </form>
+
+
+
                 </div>
             @endforeach
         </div>

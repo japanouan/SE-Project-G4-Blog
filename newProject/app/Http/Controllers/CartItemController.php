@@ -75,10 +75,22 @@ class CartItemController extends Controller
         return redirect()->back()->with('success', 'เพิ่มสินค้าลงตะกร้าเรียบร้อย');
     }
 
-    public function deleteItem($cart_id){
-        CartItem::findOrFail($cart_id)->delete();
-        return redirect()->back()->with('success', "ลบ Item ออกจากร้านค้าสำเร็จ");
+    public function deleteItem(Request $request)
+    {
+       
+
+        $cart_id = $request->input('cart_id'); // รับค่า cart_id จากฟอร์ม
+        $cartItem = CartItem::find($cart_id);
+
+        if (!$cartItem) {
+            return redirect()->back()->with('error', 'ไม่พบสินค้าที่ต้องการลบ');
+        }
+
+        $cartItem->delete();
+
+        return redirect()->back()->with('success', 'ลบสินค้าออกจากตะกร้าสำเร็จ');
     }
+
 
     public function updateItem(Request $request)
 {
