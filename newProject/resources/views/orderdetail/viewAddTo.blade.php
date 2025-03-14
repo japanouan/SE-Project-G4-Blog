@@ -6,16 +6,22 @@
 
     <div class="card">
         <div class="card-body">
-            <h4>ชุด: {{ $cartItem->outfit->name }}</h4>
-            <p>สี: {{ $cartItem->outfit->sizeAndColors->where('color_id', $cartItem->color_id)->first()->color->color_name ?? 'ไม่ระบุ' }}</p>
-            <p>ขนาด: {{ $cartItem->outfit->sizeAndColors->where('size_id', $cartItem->size_id)->first()->size->size_name ?? 'ไม่ระบุ' }}</p>
-            <p>จำนวน: {{ $cartItem->quantity }}</p>
-            <p>ราคาต่อหน่วย: {{ number_format($cartItem->outfit->price, 2) }} บาท</p>
-            <p>รวมทั้งหมด: {{ number_format($cartItem->quantity * $cartItem->outfit->price, 2) }} บาท</p>
+            @foreach ($cartItems as $cartItem)
+                <div class="order-item">
+                    <h4>ชุด: {{ $cartItem->outfit->name }}</h4>
+                    <p>สี: {{ $cartItem->outfit->sizeAndColors->where('color_id', $cartItem->color_id)->first()->color->color_name ?? 'ไม่ระบุ' }}</p>
+                    <p>ขนาด: {{ $cartItem->outfit->sizeAndColors->where('size_id', $cartItem->size_id)->first()->size->size_name ?? 'ไม่ระบุ' }}</p>
+                    <p>จำนวน: {{ $cartItem->quantity }}</p>
+                    <p>ราคาต่อหน่วย: {{ number_format($cartItem->outfit->price, 2) }} บาท</p>
+                    <p>รวมทั้งหมด: {{ number_format($cartItem->quantity * $cartItem->outfit->price, 2) }} บาท</p>
+                </div>
+            @endforeach
 
             <form action="{{ route('orderdetail.addTo') }}" method="POST">
                 @csrf
-                <input type="hidden" name="cart_item_id" value="{{ $cartItem->id }}">
+                @foreach ($cartItems as $cartItem)
+                    <input type="hidden" name="cart_item_ids[]" value="{{ $cartItem->id }}">
+                @endforeach
 
                 <label for="booking_cycle">รอบการจอง:</label>
                 <select name="booking_cycle" required>
