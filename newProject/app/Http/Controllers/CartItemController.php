@@ -100,34 +100,21 @@ class CartItemController extends Controller
 
     public function updateItem(Request $request)
 {
-    $user = Auth::user();
-    $outfit_id = $request->input('outfit_id');
-    $quantity = $request->input('quantity', 1);
+    $cartItem = CartItem::find($request->cart_id);
 
-    // ตรวจสอบว่ามี outfit_id หรือไม่
-    if (!$outfit_id) {
-        return response()->json(['message' => 'กรุณาระบุชุดที่ต้องการอัปเดต'], 400);
+    if (!$cartItem) {
+        return response()->json(['success' => false, 'message' => 'ไม่พบสินค้าที่ต้องการอัปเดต'], 404);
     }
 
-    // ค้นหาไอเท็มในตะกร้าของผู้ใช้
-    $item = CartItem::where('outfit_id', $outfit_id)
-        ->where('userId', $user->user_id)
-        ->first();
-
-    if (!$item) {
-        return response()->json(['message' => 'ไม่พบสินค้าในตะกร้า'], 404);
+    if ($request->quantity < 1) {
+        return response()->json(['success' => false, 'message' => 'จำนวนสินค้าต้องไม่น้อยกว่า 1'], 400);
     }
 
-    // ตรวจสอบว่าจำนวนต้องเป็นค่าบวก
-    if ($quantity < 1) {
-        return response()->json(['message' => 'จำนวนต้องมากกว่าหรือเท่ากับ 1'], 400);
-    }
+    $cartItem->quantity = $request->quantity;
+    $cartItem->save();
 
-    // อัปเดตจำนวนสินค้า
-    $item->quantity = $quantity;
-    $item->save();
-
-    return redirect()->back()->with('success', "update Item ร้านค้าสำเร็จ");
+    return response()->json(['success' => true, 'message' => 'อัปเดตจำนวนสินค้าเรียบร้อย']);
 }
+
 
 }
