@@ -144,13 +144,8 @@ Route::middleware(['auth', 'is_customer'])->group(function () {
 
 Route::prefix('orderdetail')->name('orderdetail.')->group(function(){
     Route::get('/outfit/{idOutfit}', [OrderDetailController::class, 'index'])->name('index');
-<<<<<<< HEAD
     Route::post('/viewAddTo', [OrderDetailController::class, 'viewAddTo'])->name('viewAddTo');
     Route::post('/orderdetail/addTo', [OrderDetailController::class, 'addTo'])->name('addTo');
-=======
-    Route::get('/viewAddTo/{cartItemId}', [OrderDetailController::class, 'viewAddTo'])->name('viewAddTo');
-    Route::post('/addTo', [OrderDetailController::class, 'addTo'])->name('addTo');
->>>>>>> ce68cfc352f849263151637096cb9d1f34e1f532
 
 });
 
