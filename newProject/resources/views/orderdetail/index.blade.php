@@ -53,8 +53,7 @@
                 <button type="button" class="px-3 py-2 border rounded-md bg-gray-200 text-gray-700" onclick="increaseQty()">+</button>
             </div>
 
-            <!-- <input type="hidden" name="size_id" id="selectedSize" value="{{ $item->size_id }}">
-            <input type="hidden" name="color_id" id="selectedColor" value="{{ $item->color_id }}"> -->
+            
 
 
             <!-- ปุ่มเช่า, ซื้อ, เพิ่มลงตะกร้า -->

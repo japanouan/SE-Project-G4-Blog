@@ -25,6 +25,12 @@ class CartItemController extends Controller
                             ->where('userId', $user->user_id)
                             ->orderBy('outfit_id')
                             ->get();
+        
+    $sizeAndColor = ThaiOutfitSizeAndColor::where('outfit_id', $cartItems->outfit_id)
+    ->where('size_id', $cartItems->size_id)
+    ->where('color_id', $cartItems->color_id)
+    ->orderBy('outfit_id')
+    ->first();
 
         // ส่งข้อมูลไปที่หน้า View
         return view('cartItem.index', compact('cartItems'));
