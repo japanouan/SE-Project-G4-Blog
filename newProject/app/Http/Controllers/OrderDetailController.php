@@ -21,7 +21,6 @@ class OrderDetailController extends Controller
         return view('orderdetail.index', compact('outfit'));
     }
 
-<<<<<<< HEAD
     public function viewAddTo(Request $request)
     {
         // รับค่าจากฟอร์ม และตรวจสอบว่าเป็น Array จริงๆ
@@ -40,46 +39,36 @@ class OrderDetailController extends Controller
     }
     
 
-=======
-    public function viewAddTo($cartItemId)
-    {
-        // ดึงข้อมูลสินค้าจากตะกร้า
-        $cartItem = CartItem::with('outfit')->findOrFail($cartItemId);
-    
-        return view('orderdetail.viewAddTo', compact('cartItem'));
-    }
->>>>>>> ce68cfc352f849263151637096cb9d1f34e1f532
     
 
     public function addTo(Request $request)
 {
     $request->validate([
-        'cart_item_id' => 'required|array', // ต้องเป็น array ของ cart_item_id
+        'cart_item_id' => 'required|exists:cart_items,id', // ตรวจสอบว่าสินค้าอยู่ในตะกร้าหรือไม่
         'booking_cycle' => 'required|in:1,2', // ตรวจสอบค่าที่รับได้ (1 หรือ 2)
         'deliveryOptions' => 'required|in:self pick-up,delivery', // ตรวจสอบรูปแบบการจัดส่ง
     ]);
 
-    // สร้างคำสั่งซื้อสำหรับแต่ละสินค้าในตะกร้า
-    foreach ($request->cart_item_id as $cartId) {
-        $cartItem = CartItem::findOrFail($cartId);
-        $total = $cartItem->outfit->price * $cartItem->quantity;
+    // ดึงข้อมูลสินค้าจากตะกร้า
+    $cartItem = CartItem::findOrFail($request->cart_item_id);
+    
+    // คำนวณ total (ราคา x จำนวน)
+    $total = $cartItem->outfit->price * $cartItem->quantity;
 
-        // สร้าง `OrderDetail`
-        OrderDetail::create([
-            'cart_item_id' => $cartItem->id,
-            'quantity' => $cartItem->quantity,
-            'total' => $total,
-            'booking_cycle' => $request->booking_cycle,
-            'booking_id' => null, // กรณีที่ยังไม่มี `booking_id` ให้เป็น `null`
-            'deliveryOptions' => $request->deliveryOptions,
-            'created_at' => now(),
-        ]);
-    }
+    // สร้าง `OrderDetail`
+    $orderDetail = OrderDetail::create([
+        'cart_item_id' => $cartItem->id,
+        'quantity' => $cartItem->quantity,
+        'total' => $total,
+        'booking_cycle' => $request->booking_cycle,
+        'booking_id' => null, // กรณีที่ยังไม่มี `booking_id` ให้เป็น `null`
+        'deliveryOptions' => $request->deliveryOptions,
+        'created_at' => now(),
+    ]);
 
-    return response()->json(['success' => true, 'message' => 'สินค้าถูกเพิ่มเข้าสู่คำสั่งซื้อเรียบร้อย']);
+    return redirect()->route('orderdetail.index', ['idOutfit' => $cartItem->outfit_id])
+                     ->with('success', 'เพิ่มสินค้าเข้าสู่คำสั่งซื้อเรียบร้อย');
 }
-
-
 
 
 
