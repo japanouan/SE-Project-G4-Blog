@@ -22,21 +22,22 @@ class OrderDetailController extends Controller
     }
 
     public function viewAddTo(Request $request)
-{
-    // รับ cartItemIds จาก request (เช่น มาจาก checkbox หรือ hidden input)
-    $cartItemIds = $request->input('cart_item_ids');
-
-    if (empty($cartItemIds)) {
-        return redirect()->route('cartItem.allItem')->with('error', 'กรุณาเลือกสินค้าที่ต้องการสั่งซื้อ');
-    }
-
-    // ดึงข้อมูลสินค้าทั้งหมดจาก cartItem ที่เลือก
-    $cartItems = CartItem::with(['outfit', 'outfit.sizeAndColors.size', 'outfit.sizeAndColors.color'])
-                         ->whereIn('id', $cartItemIds)
+    {
+        // รับค่าจากฟอร์ม และตรวจสอบว่าเป็น Array จริงๆ
+        $cartItemIds = json_decode($request->input('cart_item_ids'), true);
+    
+        if (!is_array($cartItemIds) || empty($cartItemIds)) {
+            return redirect()->route('cartItem.allItem')->with('error', 'กรุณาเลือกสินค้าที่ต้องการสั่งซื้อ');
+        }
+    
+        // ดึงข้อมูลสินค้าจากตะกร้าที่ถูกเลือก
+        $cartItems = CartItem::with(['outfit', 'outfit.sizeAndColors.size', 'outfit.sizeAndColors.color'])
+                         ->whereIn('cart_item_id', $cartItemIds)
                          ->get();
-
-    return view('orderdetail.viewAddTo', compact('cartItems'));
-}
+    
+        return view('orderdetail.viewAddTo', compact('cartItems'));
+    }
+    
 
     
 

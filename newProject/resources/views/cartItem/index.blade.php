@@ -9,88 +9,81 @@
     @if($cartItems->isEmpty())
         <p class="text-gray-600">ไม่มีสินค้าในตะกร้า</p>
     @else
-        <div class="space-y-4">
-            @foreach($cartItems as $cartItem)
-                <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow-md">
+    <div class="space-y-4">
+    @foreach($cartItems as $cartItem)
+        <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow-md">
+            
+            <!-- Checkbox สำหรับเลือกสินค้า -->
+            <input type="checkbox" name="cart_item_ids[]" value="{{ $cartItem->cart_item_id }}" class="w-5 h-5 border-gray-300 rounded mr-4">
 
-                
+            <!-- รูปสินค้า -->
+            <div class="flex items-center">
+                <img src="{{ $cartItem->outfit->image ? asset($cartItem->outfit->image) : asset('images/default-placeholder.png') }}" 
+                class="w-24 h-24 rounded-lg object-cover">
 
-                    <!-- รูปสินค้า -->
-                    <div class="flex items-center">
-                        <img src="{{ $cartItem->outfit->image ? asset($cartItem->outfit->image) : asset('images/default-placeholder.png') }}" 
-                        class="w-24 h-24 rounded-lg object-cover">
-
-                        <div class="ml-4">
-                            <h3 class="text-lg font-semibold">{{ $cartItem->outfit->name }}</h3>
-                            <p class="text-green-600 font-bold">{{ number_format($cartItem->outfit->price, 0) }}฿ /1 days</p>
-                        </div>
-                    </div>
-
-                    <!-- สีของชุด -->
-                    <div class="ml-4">
-                        <p class="text-md font-semibold">สี: 
-                            <span class="text-gray-700">
-                                {{ $cartItem->color->color ?? 'ไม่ระบุสี' }}
-                            </span>
-                        </p>
-                    </div>
-
-
-                    <!-- ขนาดของชุด -->
-                    <div class="ml-4">
-                        <p class="text-md font-semibold">ขนาด: 
-                            <span class="text-gray-700">
-                                {{ $cartItem->size->size ?? 'ไม่ระบุขนาด' }}
-                            </span>
-                        </p>
-                    </div>
-
-                    <p class="text-sm text-gray-500">คงเหลือ: {{ $cartItem->sizeAndColor->amount ?? 'ไม่ระบุ' }}</p>
-
-               
-
-
-                   <!-- จำนวนสินค้า -->
-                    <div class="flex items-center">
-                        <button class="px-2 py-1 border rounded-md bg-gray-200" 
-                            onclick="updateQty('{{ $cartItem->cart_item_id }}', -1, '{{ $cartItem->sizeAndColor->amount ?? 0 }}')">-</button>
-
-                        <input type="text" id="qty-{{ $cartItem->cart_item_id }}" 
-                            value="{{ $cartItem->quantity }}" 
-                            class="w-12 text-center border rounded-md" readonly>
-
-                        <button class="px-2 py-1 border rounded-md bg-gray-200" 
-                            onclick="updateQty('{{ $cartItem->cart_item_id }}', 1, '{{ $cartItem->sizeAndColor->amount ?? 0 }}')">+</button>
-                    </div>
-
-
-                    <!-- Checkbox -->
-                    <input type="checkbox" class="w-5 h-5 border-gray-300 rounded">
-
-                    
-
-                    <!-- ปุ่มลบ -->
-                    <form action="{{ route('cartItem.deleteItem') }}" method="POST">
-                        @csrf
-                        @method('DELETE')
-                        <input type="hidden" name="cart_id" value="{{ $cartItem->cart_item_id }}">
-                        <button type="submit" class="text-red-500 hover:text-red-700 text-xl">
-                            ❌
-                        </button>
-                    </form>
-
-
-
+                <div class="ml-4">
+                    <h3 class="text-lg font-semibold">{{ $cartItem->outfit->name }}</h3>
+                    <p class="text-green-600 font-bold">{{ number_format($cartItem->outfit->price, 0) }}฿ /1 days</p>
                 </div>
-            @endforeach
-        </div>
+            </div>
 
-        <!-- ปุ่มสั่งจอง -->
-        <div class="mt-6 text-right">
-            <a href="#" class="px-6 py-2 border border-green-500 text-green-500 rounded-md hover:bg-green-500 hover:text-white transition">
-                สั่งจอง
-            </a>
+            <!-- สีของชุด -->
+            <div class="ml-4">
+                <p class="text-md font-semibold">สี: 
+                    <span class="text-gray-700">
+                        {{ $cartItem->color->color ?? 'ไม่ระบุสี' }}
+                    </span>
+                </p>
+            </div>
+
+            <!-- ขนาดของชุด -->
+            <div class="ml-4">
+                <p class="text-md font-semibold">ขนาด: 
+                    <span class="text-gray-700">
+                        {{ $cartItem->size->size ?? 'ไม่ระบุขนาด' }}
+                    </span>
+                </p>
+            </div>
+
+            <p class="text-sm text-gray-500">คงเหลือ: {{ $cartItem->sizeAndColor->amount ?? 'ไม่ระบุ' }}</p>
+
+            <!-- จำนวนสินค้า -->
+            <div class="flex items-center">
+                <button class="px-2 py-1 border rounded-md bg-gray-200" 
+                    onclick="updateQty('{{ $cartItem->cart_item_id }}', -1, '{{ $cartItem->sizeAndColor->amount ?? 0 }}')">-</button>
+
+                <input type="text" id="qty-{{ $cartItem->cart_item_id }}" 
+                    value="{{ $cartItem->quantity }}" 
+                    class="w-12 text-center border rounded-md" readonly>
+
+                <button class="px-2 py-1 border rounded-md bg-gray-200" 
+                    onclick="updateQty('{{ $cartItem->cart_item_id }}', 1, '{{ $cartItem->sizeAndColor->amount ?? 0 }}')">+</button>
+            </div>
+
+            <!-- ปุ่มลบ -->
+            <form action="{{ route('cartItem.deleteItem') }}" method="POST">
+                @csrf
+                @method('DELETE')
+                <input type="hidden" name="cart_id" value="{{ $cartItem->cart_item_id }}">
+                <button type="submit" class="text-red-500 hover:text-red-700 text-xl">
+                    ❌
+                </button>
+            </form>
+
         </div>
+    @endforeach
+</div>
+
+<!-- ปุ่มสั่งจอง -->
+<form id="checkout-form" action="{{ route('orderdetail.viewAddTo') }}" method="POST">
+    @csrf
+    <input type="hidden" name="cart_item_ids" id="selected-cart-items">
+    <button type="button" onclick="submitSelectedItems()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded">
+        ดำเนินการสั่งซื้อ
+    </button>
+</form>
+
+
     @endif
 </div>
 
@@ -136,6 +129,25 @@
         console.error("Error:", error);
     });
 }
+
+
+
+function submitSelectedItems() {
+        let selectedItems = [];
+        document.querySelectorAll('input[name="cart_item_ids[]"]:checked').forEach((checkbox) => {
+            selectedItems.push(checkbox.value);
+        });
+
+        if (selectedItems.length === 0) {
+            alert("กรุณาเลือกสินค้าอย่างน้อย 1 รายการ");
+            return;
+        }
+
+        document.getElementById('selected-cart-items').value = JSON.stringify(selectedItems);
+        document.getElementById('checkout-form').submit();
+    }
+
+
 
 </script>
 
