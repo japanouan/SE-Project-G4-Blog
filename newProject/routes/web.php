@@ -10,6 +10,7 @@ use App\Http\Controllers\ShopController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SelectServiceController;
 use App\Http\Controllers\SelectStaffDetailController;
+use App\Http\Controllers\PromotionController;
 use App\Models\CartItem;
 use App\Models\SelectService;
 use Illuminate\Http\Request;
@@ -94,7 +95,6 @@ Route::prefix('admin')->name('admin.')->middleware('auth', 'is_admin')->group(fu
 
 
 
-
 // shop owner
 Route::prefix('shopowner')->name('shopowner.')->middleware('auth', 'is_shopowner')->group(function () {
     Route::get('/dashboard', function () {return view('dashboard');})->name('dashboard');
@@ -121,7 +121,17 @@ Route::prefix('shopowner')->name('shopowner.')->middleware('auth', 'is_shopowner
 
     // Category management routes
     Route::resource('categories', CategoryController::class);
+
+    // Add this directly in the shopowner group (not in a nested group)
+    Route::resource('promotions', PromotionController::class);
+    
+    // API route for checking promo codes
+    Route::post('/check-promotion-code', [PromotionController::class, 'checkPromoCode'])->name('promotions.check-code');
 });
+
+// Move this outside the shopowner group if you want it accessible to all users
+Route::post('/api/check-promotion', [PromotionController::class, 'checkPromoCode']);
+
 //auth
 Route::middleware('auth')->group(function () {
 

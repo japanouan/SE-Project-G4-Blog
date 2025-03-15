@@ -9,5 +9,38 @@ class Booking extends Model
     protected $table = 'Bookings';
     protected $primaryKey = 'booking_id';
     protected $guarded = ['booking_id'];
-    protected $fillable = ['purchase_date', 'total_price', 'status', 'hasOverrented', 'created_at', 'shop_id', 'promotion_id'];
+    protected $fillable = [
+        'purchase_date', 
+        'total_price', 
+        'status', 
+        'hasOverrented', 
+        'created_at', 
+        'shop_id', 
+        'promotion_id',
+        'user_id'
+    ];
+
+    // ความสัมพันธ์กับร้านค้า
+    public function shop()
+    {
+        return $this->belongsTo(Shop::class, 'shop_id', 'shop_id');
+    }
+
+    // ความสัมพันธ์กับโปรโมชั่น
+    public function promotion()
+    {
+        return $this->belongsTo(Promotion::class, 'promotion_id', 'promotion_id');
+    }
+
+    // ความสัมพันธ์กับผู้ใช้
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
+    }
+
+    // ความสัมพันธ์กับรายละเอียดออเดอร์
+    public function orderDetails()
+    {
+        return $this->hasMany(OrderDetail::class, 'booking_id', 'booking_id');
+    }
 }

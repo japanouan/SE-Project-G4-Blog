@@ -44,12 +44,18 @@
                       <a href="{{ route('shopowner.categories.index') }}" class="block px-4 py-2 text-gray-300 hover:bg-gray-700">
                           <i class="fa fa-tags"></i> จัดการหมวดหมู่
                       </a>
+                      <a href="{{ route('shopowner.promotions.index') }}" class="block px-4 py-2 text-gray-300 hover:bg-gray-700">
+                          <i class="fa fa-percent"></i> จัดการโปรโมชั่น
+                      </a>
                   @else
                       <span class="block px-4 py-2 text-gray-500">
                           <i class="fa fa-tshirt"></i> จัดการชุด (ต้องมีร้านค้าก่อน)
                       </span>
                       <span class="block px-4 py-2 text-gray-500">
                           <i class="fa fa-tags"></i> จัดการหมวดหมู่ (ต้องมีร้านค้าก่อน)
+                      </span>
+                      <span class="block px-4 py-2 text-gray-500">
+                          <i class="fa fa-percent"></i> จัดการโปรโมชั่น (ต้องมีร้านค้าก่อน)
                       </span>
                   @endif
                 

@@ -9,5 +9,31 @@ class Shop extends Model
     protected $table = 'Shops';
     protected $primaryKey = 'shop_id';
     protected $guarded = ['shop_id'];
-    protected $fillable = ['shop_name', 'shop_description', 'shop_location', 'rental_terms', 'depositfee', 'penaltyfee','status', 'created_at','is_newShop','shop_owner_id'];
+    protected $fillable = [
+        'shop_name',
+        'description',
+        'address',
+        'phone',
+        'email',
+        'shop_owner_id', // Changed from user_id to shop_owner_id
+        'created_at'
+    ];
+
+    // ความสัมพันธ์กับ User - Fix the foreign key reference
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'shop_owner_id', 'user_id');
+    }
+
+    // ความสัมพันธ์กับ Promotions
+    public function promotions()
+    {
+        return $this->hasMany(Promotion::class, 'shop_id', 'shop_id');
+    }
+
+    // ความสัมพันธ์กับ Bookings
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class, 'shop_id', 'shop_id');
+    }
 }

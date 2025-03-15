@@ -58,12 +58,18 @@
                      <a href="{{ route('shopowner.categories.index') }}" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">
                           <i class="fa fa-tags mr-1"></i> จัดการหมวดหมู่
                      </a>
+                     <a href="{{ route('shopowner.promotions.index') }}" class="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600">
+                          <i class="fa fa-percent mr-1"></i> จัดการโปรโมชั่น
+                     </a>
                  @elseif($shop)
                      <button disabled class="px-4 py-2 bg-gray-400 text-white rounded-md cursor-not-allowed">
                           <i class="fa fa-tshirt mr-1"></i> จัดการชุด (รอการอนุมัติร้านค้า)
                      </button>
                      <button disabled class="px-4 py-2 bg-gray-400 text-white rounded-md cursor-not-allowed">
                           <i class="fa fa-tags mr-1"></i> จัดการหมวดหมู่ (รอการอนุมัติร้านค้า)
+                     </button>
+                     <button disabled class="px-4 py-2 bg-gray-400 text-white rounded-md cursor-not-allowed">
+                          <i class="fa fa-percent mr-1"></i> จัดการโปรโมชั่น (รอการอนุมัติร้านค้า)
                      </button>
                  @endif
                 </div>
