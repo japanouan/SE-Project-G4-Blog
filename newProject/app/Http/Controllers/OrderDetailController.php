@@ -33,10 +33,20 @@ class OrderDetailController extends Controller
         // ดึงข้อมูลสินค้าจากตะกร้าที่ถูกเลือก
         $cartItems = CartItem::with(['outfit', 'outfit.sizeAndColors.size', 'outfit.sizeAndColors.color'])
                          ->whereIn('cart_item_id', $cartItemIds)
+                         ->orderBy('outfit_id')
                          ->get();
     
-        return view('orderdetail.viewAddTo', compact('cartItems'));
+        // ดึง outfit_id ทั้งหมดจาก cartItems
+        $outfitIds = $cartItems->pluck('outfit_id')->unique();
+    
+        // ดึงข้อมูลชุดที่เกี่ยวข้อง
+        $outfits = ThaiOutfit::with(['categories', 'sizeAndColors.size', 'sizeAndColors.color'])
+                         ->whereIn('outfit_id', $outfitIds)
+                         ->get();
+    
+        return view('orderdetail.viewAddTo', compact('cartItems', 'outfits'));
     }
+    
     
 
     
