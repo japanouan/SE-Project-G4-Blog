@@ -250,111 +250,116 @@
     </div>
     
     <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-        <div class="py-6">
-            @php
-                // Check if shop owner has registered any shop (regardless of status)
-                $hasRegisteredShop = \App\Models\Shop::where('shop_owner_id', Auth::id())->exists();
-                // Check for active shop (for other menu items)
-                $userShop = \App\Models\Shop::where('shop_owner_id', Auth::id())->where('status', 'active')->first();
-            @endphp
+    <!-- In the sidebar section of shopowner-layout.blade.php -->
+<div class="sidebar" id="sidebar">
+    <div class="py-6">
+        @php
+            // Check if shop owner has registered any shop (regardless of status)
+            $hasRegisteredShop = \App\Models\Shop::where('shop_owner_id', Auth::id())->exists();
+            // Check for active shop (for other menu items)
+            $userShop = \App\Models\Shop::where('shop_owner_id', Auth::id())->where('status', 'active')->first();
             
-            <div class="menu-item" id="dashboardMenuItem">
-                <a href="{{ route('dashboard') }}">
-                    <i class="fas fa-home mr-3"></i>
-                    <span>หน้าหลัก</span>
+            // Get current route name
+            $currentRouteName = Route::currentRouteName();
+        @endphp
+        
+        <div class="menu-item {{ $currentRouteName == 'dashboard' ? 'active' : '' }}" id="dashboardMenuItem">
+            <a href="{{ route('dashboard') }}">
+                <i class="fas fa-home mr-3"></i>
+                <span>หน้าหลัก</span>
+            </a>
+        </div>
+        
+        <div class="menu-item {{ $currentRouteName == 'shopowner.shops.my-shop' ? 'active' : '' }}">
+            <a href="{{ route('shopowner.shops.my-shop') }}">
+                <i class="fas fa-store mr-3"></i>
+                <span>ร้านค้าของฉัน</span>
+            </a>
+        </div>
+        
+        @if(!$hasRegisteredShop)
+            <div class="menu-item {{ $currentRouteName == 'shopowner.shops.create' ? 'active' : '' }}">
+                <a href="{{ route('shopowner.shops.create') }}">
+                    <i class="fas fa-plus-circle mr-3"></i>
+                    <span>ลงทะเบียนร้านค้า</span>
+                </a>
+            </div>
+        @endif
+        
+        @if($userShop)
+            <div class="menu-item {{ $currentRouteName == 'shopowner.outfits.index' ? 'active' : '' }}">
+                <a href="{{ route('shopowner.outfits.index') }}">
+                    <i class="fas fa-tshirt mr-3"></i>
+                    <span>จัดการชุด</span>
                 </a>
             </div>
             
-            <div class="menu-item">
-                <a href="{{ route('shopowner.shops.my-shop') }}">
-                    <i class="fas fa-store mr-3"></i>
-                    <span>ร้านค้าของฉัน</span>
+            <div class="menu-item {{ $currentRouteName == 'shopowner.categories.index' ? 'active' : '' }}">
+                <a href="{{ route('shopowner.categories.index') }}">
+                    <i class="fas fa-tags mr-3"></i>
+                    <span>จัดการหมวดหมู่</span>
                 </a>
             </div>
             
-            @if(!$hasRegisteredShop)
-                <div class="menu-item">
-                    <a href="{{ route('shopowner.shops.create') }}">
-                        <i class="fas fa-plus-circle mr-3"></i>
-                        <span>ลงทะเบียนร้านค้า</span>
-                    </a>
-                </div>
-            @endif
-            
-            @if($userShop)
-                <div class="menu-item">
-                    <a href="{{ route('shopowner.outfits.index') }}">
-                        <i class="fas fa-tshirt mr-3"></i>
-                        <span>จัดการชุด</span>
-                    </a>
-                </div>
-                
-                <div class="menu-item">
-                    <a href="{{ route('shopowner.categories.index') }}">
-                        <i class="fas fa-tags mr-3"></i>
-                        <span>จัดการหมวดหมู่</span>
-                    </a>
-                </div>
-                
-                <div class="menu-item">
-                    <a href="{{ route('shopowner.promotions.index') }}">
-                        <i class="fas fa-percent mr-3"></i>
-                        <span>จัดการโปรโมชั่น</span>
-                    </a>
-                </div>
-            @else
-                <div class="menu-item" style="opacity: 0.5; cursor: not-allowed;">
-                    <a href="#" onclick="return false;">
-                        <i class="fas fa-tshirt mr-3"></i>
-                        <span>จัดการชุด (ต้องมีร้านค้าก่อน)</span>
-                    </a>
-                </div>
-                
-                <div class="menu-item" style="opacity: 0.5; cursor: not-allowed;">
-                    <a href="#" onclick="return false;">
-                        <i class="fas fa-tags mr-3"></i>
-                        <span>จัดการหมวดหมู่ (ต้องมีร้านค้าก่อน)</span>
-                    </a>
-                </div>
-                
-                <div class="menu-item" style="opacity: 0.5; cursor: not-allowed;">
-                    <a href="#" onclick="return false;">
-                        <i class="fas fa-percent mr-3"></i>
-                        <span>จัดการโปรโมชั่น (ต้องมีร้านค้าก่อน)</span>
-                    </a>
-                </div>
-            @endif
-            
-            <div class="menu-item">
-                <a href="#">
-                    <i class="fas fa-calendar mr-3"></i>
-                    <span>การจอง</span>
+            <div class="menu-item {{ $currentRouteName == 'shopowner.promotions.index' ? 'active' : '' }}">
+                <a href="{{ route('shopowner.promotions.index') }}">
+                    <i class="fas fa-percent mr-3"></i>
+                    <span>จัดการโปรโมชั่น</span>
+                </a>
+            </div>
+        @else
+            <div class="menu-item" style="opacity: 0.5; cursor: not-allowed;">
+                <a href="#" onclick="return false;">
+                    <i class="fas fa-tshirt mr-3"></i>
+                    <span>จัดการชุด (ต้องมีร้านค้าก่อน)</span>
                 </a>
             </div>
             
-            <div class="menu-item">
-                <a href="#">
-                    <i class="fas fa-comment mr-3"></i>
-                    <span>รีวิว</span>
+            <div class="menu-item" style="opacity: 0.5; cursor: not-allowed;">
+                <a href="#" onclick="return false;">
+                    <i class="fas fa-tags mr-3"></i>
+                    <span>จัดการหมวดหมู่ (ต้องมีร้านค้าก่อน)</span>
                 </a>
             </div>
             
-            <div class="menu-item">
-                <a href="#">
-                    <i class="fas fa-chart-bar mr-3"></i>
-                    <span>สถิติ</span>
+            <div class="menu-item" style="opacity: 0.5; cursor: not-allowed;">
+                <a href="#" onclick="return false;">
+                    <i class="fas fa-percent mr-3"></i>
+                    <span>จัดการโปรโมชั่น (ต้องมีร้านค้าก่อน)</span>
                 </a>
             </div>
-            
-            <div class="menu-item">
-                <a href="#">
-                    <i class="fas fa-cog mr-3"></i>
-                    <span>ตั้งค่า</span>
-                </a>
-            </div>
+        @endif
+        
+        <div class="menu-item {{ Str::startsWith($currentRouteName, 'shopowner.bookings') ? 'active' : '' }}">
+            <a href="#">
+                <i class="fas fa-calendar mr-3"></i>
+                <span>การจอง</span>
+            </a>
+        </div>
+        
+        <div class="menu-item {{ Str::startsWith($currentRouteName, 'shopowner.reviews') ? 'active' : '' }}">
+            <a href="#">
+                <i class="fas fa-comment mr-3"></i>
+                <span>รีวิว</span>
+            </a>
+        </div>
+        
+        <div class="menu-item {{ Str::startsWith($currentRouteName, 'shopowner.stats') ? 'active' : '' }}">
+            <a href="#">
+                <i class="fas fa-chart-bar mr-3"></i>
+                <span>สถิติ</span>
+            </a>
+        </div>
+        
+        <div class="menu-item {{ Str::startsWith($currentRouteName, 'shopowner.settings') ? 'active' : '' }}">
+            <a href="#">
+                <i class="fas fa-cog mr-3"></i>
+                <span>ตั้งค่า</span>
+            </a>
         </div>
     </div>
+</div>
+
     
     <!-- Content -->
     <div class="content" id="mainContent">
@@ -370,69 +375,58 @@
         </div>
     </div>
 
-    <script>
-        $(document).ready(function() {
-            // Toggle sidebar visibility with animation
-            $('#menuToggle').click(function() {
-                $('#sidebar').toggleClass('sidebar-collapsed');
-                $('#mainContent').toggleClass('content-expanded');
-                
-                // Change menu icon based on sidebar state
-                if ($('#sidebar').hasClass('sidebar-collapsed')) {
-                    $('#menuToggle i').removeClass('fa-bars').addClass('fa-bars-staggered');
-                } else {
-                    $('#menuToggle i').removeClass('fa-bars-staggered').addClass('fa-bars');
-                }
-            });
+   <!-- In the JavaScript section at the bottom of shopowner-layout.blade.php -->
+   <script>
+    $(document).ready(function() {
+        // Toggle sidebar visibility with animation
+        $('#menuToggle').click(function() {
+            $('#sidebar').toggleClass('sidebar-collapsed');
+            $('#mainContent').toggleClass('content-expanded');
             
-            // Toggle user dropdown
-            $('#userProfile').click(function(e) {
-                e.stopPropagation();
-                $('#userDropdown').toggle();
-            });
-            
-            // Close dropdown when clicking elsewhere
-            $(document).click(function() {
-                $('#userDropdown').hide();
-            });
-            
-            // Prevent dropdown from closing when clicking inside it
-            $('#userDropdown').click(function(e) {
-                e.stopPropagation();
-            });
-            
-            // Set active menu item based on current URL
-            const currentPath = window.location.pathname;
-            $('.menu-item a').each(function() {
-                const href = $(this).attr('href');
-                if (href && currentPath.includes(href.split('?')[0])) {
-                    $(this).closest('.menu-item').addClass('active');
-                }
-            });
-            
-            // If no menu item is active, set dashboard as active by default
-            if ($('.menu-item.active').length === 0) {
-                $('#dashboardMenuItem').addClass('active');
+            // Change menu icon based on sidebar state
+            if ($('#sidebar').hasClass('sidebar-collapsed')) {
+                $('#menuToggle i').removeClass('fa-bars').addClass('fa-bars-staggered');
+            } else {
+                $('#menuToggle i').removeClass('fa-bars-staggered').addClass('fa-bars');
             }
-            
-            // Show loading indicator when navigating
-            $('a:not([href^="#"]):not([target="_blank"]):not([onclick])').click(function() {
-                if ($(this).attr('href')) {
-                    $('#loadingIndicator').show();
-                }
-            });
-            
-            // Show loading indicator when submitting forms
-            $('form:not(#logoutForm)').submit(function() {
-                $('#loadingIndicator').show();
-            });
-            
-            // Hide loading indicator when page is fully loaded
-            $(window).on('load', function() {
-                $('#loadingIndicator').hide();
-            });
         });
-    </script>
+        
+        // Toggle user dropdown
+        $('#userProfile').click(function(e) {
+            e.stopPropagation();
+            $('#userDropdown').toggle();
+        });
+        
+        // Close dropdown when clicking elsewhere
+        $(document).click(function() {
+            $('#userDropdown').hide();
+        });
+        
+        // Prevent dropdown from closing when clicking inside it
+        $('#userDropdown').click(function(e) {
+            e.stopPropagation();
+        });
+        
+        // Show loading indicator when navigating
+        $('a:not([href^="#"]):not([target="_blank"]):not([onclick])').click(function() {
+            if ($(this).attr('href') && !$(this).closest('.menu-item').is('[style*="opacity: 0.5"]')) {
+                $('#loadingIndicator').show();
+            }
+        });
+        
+        // Show loading indicator when submitting forms
+        $('form:not(#logoutForm)').submit(function() {
+            $('#loadingIndicator').show();
+        });
+        
+        // Hide loading indicator when page is fully loaded
+        $(window).on('load', function() {
+            $('#loadingIndicator').hide();
+        });
+    });
+</script>
+
+
 </body>
 </html>
 
