@@ -22,8 +22,13 @@ Route::prefix('outfits')->name('outfits.')->group(function(){
     Route::get('/search/{searchkey}',[OutfitController::class, 'searchOutfits'])->name('search');
 });
 
-
 Route::get('/dashboard', function () {
+    // ตรวจสอบประเภทผู้ใช้และเปลี่ยนเส้นทางตามความเหมาะสม
+    if (auth()->check()) {
+        if (auth()->user()->userType == 'shop owner') {
+            return redirect()->route('shopowner.shops.my-shop');
+        }
+    }
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -97,7 +102,10 @@ Route::prefix('admin')->name('admin.')->middleware('auth', 'is_admin')->group(fu
 
 // shop owner
 Route::prefix('shopowner')->name('shopowner.')->middleware('auth', 'is_shopowner')->group(function () {
-    Route::get('/dashboard', function () {return view('dashboard');})->name('dashboard');
+    // เปลี่ยนจาก dashboard เป็น redirect ไปที่ my-shop
+    Route::get('/dashboard', function () {
+        return redirect()->route('shopowner.shops.my-shop');
+    })->name('dashboard');
     
     // จัดการร้านค้า
     Route::get('/shops/create', [ShopController::class, 'create'])->name('shops.create');
