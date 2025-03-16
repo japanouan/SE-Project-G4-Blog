@@ -14,34 +14,44 @@ class UserController extends Controller
     // ฟังก์ชันแสดงรายการผู้ใช้
     public function index(Request $request)
     {
-        // Get and sanitize sort parameters
-        $orderBy = in_array($request->input('orderBy'), ['user_id', 'name', 'email', 'phone', 'username', 'userType', 'status']) 
-            ? $request->input('orderBy') 
+        $search = $request->input('search'); // ค่าที่ผู้ใช้พิมพ์ค้นหา
+        $userTypes = $request->input('userType', []); // ตัวกรอง userType
+        $orderBy = in_array($request->input('orderBy'), ['user_id', 'name', 'email', 'phone', 'username', 'userType', 'status'])
+            ? $request->input('orderBy')
             : 'user_id';
-            
-        $direction = in_array(strtolower($request->input('direction')), ['asc', 'desc']) 
-            ? strtolower($request->input('direction')) 
+
+        $direction = in_array(strtolower($request->input('direction')), ['asc', 'desc'])
+            ? strtolower($request->input('direction'))
             : 'asc';
-            
-        $userTypes = $request->input('userType', []);
-        
-        // Start query
+
+        // Query
         $query = User::query();
-        
-        // Apply filters
+
+        // 🔍 ค้นหาจาก name, email, username, phone
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                    ->orWhere('user_id', 'LIKE', "%{$search}%")
+                    ->orWhere('username', 'LIKE', "%{$search}%")
+                    ->orWhere('phone', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // 🎯 กรองตาม userType
         if (!empty($userTypes) && is_array($userTypes)) {
             $query->whereIn('userType', $userTypes);
         }
-        
-        // Apply sort
+
+        // 🔄 จัดเรียงข้อมูล
         $query->orderBy($orderBy, $direction);
-        
-        // Execute query
-        $users = $query->get();
-        
-        // Pass all required variables to view for sorting and filtering to work
-        return view('admin.users.index', compact('users', 'orderBy', 'direction', 'userTypes'));
+
+        // 🟢 ดึงข้อมูลจาก Database
+        $users = $query->paginate(10); // ใช้ pagination เพื่อความเร็ว
+
+        // ✅ ส่งค่ากลับไปที่ View
+        return view('admin.users.index', compact('users', 'search', 'orderBy', 'direction', 'userTypes'));
     }
+
 
 
     // ฟังก์ชันแสดงฟอร์มแก้ไขผู้ใช้
@@ -82,14 +92,14 @@ class UserController extends Controller
         try {
             $user = User::findOrFail($id);
             $newStatus = $request->input('status');
-            
+
             if (!in_array($newStatus, ['active', 'inactive'])) {
                 throw new \Exception('Invalid status value');
             }
-            
+
             $user->status = $newStatus;
             $user->save();
-            
+
             // If it's an AJAX request, return JSON response
             if ($request->ajax()) {
                 return response()->json([
@@ -101,7 +111,7 @@ class UserController extends Controller
                     ]
                 ]);
             }
-            
+
             // For non-AJAX requests, redirect back with parameters
             return redirect()->route('admin.users.index', [
                 'orderBy' => $request->input('orderBy'),
@@ -115,7 +125,7 @@ class UserController extends Controller
                     'message' => 'Failed to update user status: ' . $e->getMessage()
                 ], 422);
             }
-            
+
             return back()->withErrors(['error' => 'Failed to update user status: ' . $e->getMessage()]);
         }
     }

@@ -309,48 +309,75 @@
         .user-avatar {
             width: 2.5rem;
 
-        .table-container {
-            width: 100%;
-            max-width: 100%;
-            margin: 0 auto;
-            overflow-x: visible;
-        }
-
-        table {
-            width: 100%;
-            table-layout: auto;
-            border-collapse: separate;
-            border-spacing: 0;
-            min-width: auto;
-        }
-
-        thead th:nth-child(1) { width: 5%; }
-        thead th:nth-child(2) { width: 15%; }
-        thead th:nth-child(3) { width: 15%; }
-        thead th:nth-child(4) { width: 10%; }
-        thead th:nth-child(5) { width: 10%; }
-        thead th:nth-child(6) { width: 10%; }
-        thead th:nth-child(7) { width: 10%; }
-        thead th:nth-child(8) { width: 15%; }
-
-        tbody td {
-            padding: 0.75rem 0.5rem;
-        }
-
-        .page-container {
-            padding: 1.5rem;
-
-        /* Add this to your style section */
-        @media (max-width: 1200px) {
             .table-container {
-                overflow-x: auto; /* Re-enable scrolling for smaller screens */
+                width: 100%;
+                max-width: 100%;
+                margin: 0 auto;
+                overflow-x: visible;
             }
-            
+
             table {
-                min-width: 1000px; /* Set minimum width for small screens */
+                width: 100%;
+                table-layout: auto;
+                border-collapse: separate;
+                border-spacing: 0;
+                min-width: auto;
             }
-        }
-        }            height: 2.5rem;
+
+            thead th:nth-child(1) {
+                width: 5%;
+            }
+
+            thead th:nth-child(2) {
+                width: 15%;
+            }
+
+            thead th:nth-child(3) {
+                width: 15%;
+            }
+
+            thead th:nth-child(4) {
+                width: 10%;
+            }
+
+            thead th:nth-child(5) {
+                width: 10%;
+            }
+
+            thead th:nth-child(6) {
+                width: 10%;
+            }
+
+            thead th:nth-child(7) {
+                width: 10%;
+            }
+
+            thead th:nth-child(8) {
+                width: 15%;
+            }
+
+            tbody td {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .page-container {
+                padding: 1.5rem;
+
+                /* Add this to your style section */
+                @media (max-width: 1200px) {
+                    .table-container {
+                        overflow-x: auto;
+                        /* Re-enable scrolling for smaller screens */
+                    }
+
+                    table {
+                        min-width: 1000px;
+                        /* Set minimum width for small screens */
+                    }
+                }
+            }
+
+            height: 2.5rem;
             border-radius: 9999px;
             background-color: #e5e7eb;
             display: flex;
@@ -363,6 +390,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="page-container">
         <div class="page-header">
@@ -384,9 +412,9 @@
                 <input type="hidden" name="orderBy" value="user_id">
                 <input type="hidden" name="direction" value="{{ request('orderBy') == 'user_id' && request('direction') == 'asc' ? 'desc' : 'asc' }}">
                 @if(request()->has('userType'))
-                    @foreach(request('userType') as $type)
-                        <input type="hidden" name="userType[]" value="{{ $type }}">
-                    @endforeach
+                @foreach(request('userType') as $type)
+                <input type="hidden" name="userType[]" value="{{ $type }}">
+                @endforeach
                 @endif
                 <button type="submit" class="sort-btn">
                     ID
@@ -436,10 +464,18 @@
                         <i class="fas fa-filter"></i> Apply Filter
                     </button>
                 </form>
+
+                <!-- Search Bar -->
+                <form method="GET" action="{{ route('admin.users.index') }}" class="mb-4 flex p-4">
+                    <input type="text" name="search" placeholder="ค้นหา User ID, Name, Username, Phone"
+                        class="border p-2 w-full rounded-l-md"
+                        value="{{ request('search') }}">
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-r-md">ค้นหา</button>
+                </form>
             </div>
         </div>
 
-        
+
 
         <div class="card">
             <div class="card-header">
@@ -474,7 +510,7 @@
                                     @if(request()->has('userType'))
                                     @foreach(request('userType') as $type)
                                     <input type="hidden" name="userType[]" value="{{ $type }}">
-                                 @endforeach
+                                    @endforeach
                                     @endif
                                     <button type="submit" class="sort-btn">
                                         Name
@@ -568,9 +604,9 @@
                                 <div class="user-info">
                                     <div class="user-avatar">
                                         @if($user->profilePicture)
-                                            <img src="{{ asset($user->profilePicture) }}" alt="Profile Picture" class="profile-picture rounded-full h-10 w-auto object-cover">
+                                        <img src="{{ asset($user->profilePicture) }}" alt="Profile Picture" class="profile-picture rounded-full h-10 w-auto object-cover">
                                         @else
-                                            {{ strtoupper(substr($user->name, 0, 1)) }}
+                                        {{ strtoupper(substr($user->name, 0, 1)) }}
                                         @endif
                                     </div>
                                     <div>
