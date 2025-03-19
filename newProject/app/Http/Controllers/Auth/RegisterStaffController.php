@@ -48,6 +48,6 @@ class RegisterStaffController extends Controller
         Auth::login($user);
 
         // รีไดเร็กไปที่หน้า dashboard หรือหน้าที่ต้องการ
-        return redirect()->route('dashboard');
+        return redirect()->route('outfits.index');
     }
 }

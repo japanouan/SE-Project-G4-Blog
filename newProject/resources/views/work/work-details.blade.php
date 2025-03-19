@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Work Details</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <body class="bg-gray-100">
@@ -55,12 +56,18 @@
         document.addEventListener("DOMContentLoaded", function() {
             let currentTime = new Date();
             let appointmentTime = new Date("{{ \Carbon\Carbon::parse($work->selectService->reservation_date)->toIso8601String() }}");
+            let serviceInfo = "{{ e($work->service_info) }}";
+            let textarea = document.getElementById('service_info');
 
             let finishJobBtn = document.getElementById('finish-job-btn');
 
-            if (currentTime >= appointmentTime) {
+            if (currentTime >= appointmentTime && serviceInfo == null) {
                 finishJobBtn.classList.remove('hidden');
                 finishJobBtn.classList.add('bg-green-500', 'hover:bg-green-700');
+            }
+            textarea.value = serviceInfo;
+            if (serviceInfo != null && serviceInfo.trim() != '') {
+                textarea.setAttribute('readonly', true); // ทำให้ไม่สามารถแก้ไขค่าใน textarea ได้
             }
 
             finishJobBtn.addEventListener('click', function() {

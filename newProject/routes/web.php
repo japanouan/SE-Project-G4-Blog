@@ -8,8 +8,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\SelectServiceController;
-use App\Http\Controllers\SelectStaffDetailController;
+use App\Http\Controllers\StaffController;
 use App\Http\Controllers\PromotionController;
 use App\Models\CartItem;
 use App\Models\SelectService;
@@ -37,23 +36,25 @@ Route::middleware(['is_active'])->group(function () {
 
 // make-up
 Route::prefix('make-upartist')->name('make-upartist.')->middleware('auth', 'is_makeup')->group(function () {
-    Route::get('/', [SelectStaffDetailController::class, 'index'])->name('dashboard');
-    Route::get('/work/details/{id}', [SelectStaffDetailController::class, 'show'])->name('work.details');
-    Route::post('/work/finish/{id}', [SelectStaffDetailController::class, 'finishWork'])->name('work.finish');
-    Route::get('/work-list', [SelectServiceController::class, 'getAvailableJobs'])->name('work-list');
+    Route::get('/', [StaffController::class, 'schedule'])->name('dashboard');
+    Route::get('/work/details/{id}', [StaffController::class, 'workDetails'])->name('work.details');
+    Route::post('/work/finish/{id}', [StaffController::class, 'finishJob'])->name('work.finish');
+    Route::get('/work-list', [StaffController::class, 'getAvailableJobs'])->name('work-list');
+    Route::get('/earning', [StaffController::class, 'earning'])->name('work.earning');
 
 
-    Route::post('/accept-job', [SelectServiceController::class, 'acceptJob'])->name('accept-job');
+    Route::post('/accept-job', [StaffController::class, 'acceptJob'])->name('accept-job');
 });
 
 // photographer
 Route::prefix('photographer')->name('photographer.')->middleware('auth', 'is_photographer')->group(function () {
-    Route::get('/', [SelectStaffDetailController::class, 'index'])->name('dashboard');
-    Route::get('/work/details/{id}', [SelectStaffDetailController::class, 'show'])->name('work.details');
-    Route::post('/work/finish/{id}', [SelectStaffDetailController::class, 'finishWork'])->name('work.finish');
-    Route::get('/work-list', [SelectServiceController::class, 'getAvailableJobs'])->name('work-list');
+    Route::get('/', [StaffController::class, 'schedule'])->name('dashboard');
+    Route::get('/work/details/{id}', [StaffController::class, 'workDetails'])->name('work.details');
+    Route::post('/work/finish/{id}', [StaffController::class, 'finishJob'])->name('work.finish');
+    Route::get('/work-list', [StaffController::class, 'getAvailableJobs'])->name('work-list');
+    Route::get('/earning', [StaffController::class, 'earning'])->name('work.earning');
 
-    Route::post('/accept-job', [SelectServiceController::class, 'acceptJob'])->name('accept-job');
+    Route::post('/accept-job', [StaffController::class, 'acceptJob'])->name('accept-job');
 });
 
 
