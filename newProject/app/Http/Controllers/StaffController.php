@@ -69,7 +69,7 @@ class StaffController extends Controller
             ->get();
 
 
-        dd($services);
+        // dd($services);
 
         // คำนวณการแบ่งลูกค้าให้พนักงาน
         foreach ($services as $service) {
