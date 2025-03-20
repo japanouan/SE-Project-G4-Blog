@@ -39,7 +39,6 @@ class StaffController extends Controller
             'message' => 'งานถูกทำเสร็จเรียบร้อย!',
             'staff_detail' => $staff_detail // ส่งข้อมูล staff_detail กลับ
         ]);
-
     }
 
 
@@ -63,10 +62,14 @@ class StaffController extends Controller
                 DB::raw('CEIL(SelectServices.customer_count / 3) as required_staff')
             )
             ->where('SelectServices.service_type', $userType)
+            ->where('SelectServices.reservation_date', '<', now())
             ->groupBy('SelectServices.select_service_id', 'SelectServices.customer_count')
             ->havingRaw('staff_count < required_staff')
             ->whereNull('ss.select_staff_detail_id') // กรองงานที่ยังไม่มีช่างรับ
             ->get();
+
+
+        dd($services);
 
         // คำนวณการแบ่งลูกค้าให้พนักงาน
         foreach ($services as $service) {
@@ -154,7 +157,7 @@ class StaffController extends Controller
         $user_id = Auth::id();
 
         // กำหนดช่วงเวลาเริ่มต้นและสิ้นสุดสำหรับแต่ละช่วงเวลา
-        $date = Carbon::now();
+        $date = Carbon::now('Asia/Bangkok');
 
         if ($period == 'daily') {
             // Earning ของแต่ละชั่วโมงในวันนั้นๆ
@@ -164,17 +167,36 @@ class StaffController extends Controller
                 ->where('staff_id', $user_id)
                 ->groupBy(DB::raw('HOUR(finished_time)'))
                 ->get();
+
+            for ($hour = 0; $hour <= 23; $hour++) {
+                $earningsForHour = $earningsPerDay->where('hour', $hour)->first();
+                if ($earningsForHour) {
+                    $earningsPerPeriod[$hour] = $earningsForHour->earnings;
+                } else {
+                    $earningsPerPeriod[$hour] = 0; // หากไม่มีการทำงานในชั่วโมงนั้นๆ
+                }
+            }
         } elseif ($period == 'weekly') {
+            $startOfWeek = (clone $date)->startOfWeek()->startOfDay(); // clone ก่อนแก้ไข
+            $endOfWeek = (clone $date)->endOfWeek()->endOfDay();
             // Earning ของแต่ละวันในสัปดาห์นั้นๆ
             $earningsPerDay = DB::table('SelectStaffDetails')
                 ->select(DB::raw('DAYOFWEEK(finished_time) as day'), DB::raw('SUM(earning) as earnings'))
-                ->whereBetween('finished_time', [
-                    $date->startOfWeek(),
-                    $date->endOfWeek()
-                ])
+                ->whereBetween('finished_time', [$startOfWeek, $endOfWeek])
                 ->where('staff_id', $user_id)
                 ->groupBy(DB::raw('DAYOFWEEK(finished_time)'))
                 ->get();
+                
+
+            // เตรียมข้อมูลในแต่ละวันของสัปดาห์
+            for ($day = 1; $day <= 7; $day++) {
+                $earningsForDay = $earningsPerDay->where('day', $day)->first();
+                if ($earningsForDay) {
+                    $earningsPerPeriod[$day] = $earningsForDay->earnings;
+                } else {
+                    $earningsPerPeriod[$day] = 0; // หากไม่มีการทำงานในวันนั้นๆ
+                }
+            }
         } elseif ($period == 'monthly') {
             // Earning ของแต่ละวันในเดือนนั้นๆ
             $earningsPerDay = DB::table('SelectStaffDetails')
@@ -184,12 +206,29 @@ class StaffController extends Controller
                 ->whereYear('finished_time', $date->year)
                 ->groupBy(DB::raw('DAY(finished_time)'))
                 ->get();
+
+            // สร้างอาร์เรย์ที่มีวันที่ทุกวันในเดือน
+            $daysInMonth = range(1, $date->daysInMonth);
+
+            // เตรียมข้อมูลที่ไม่มีการทำงาน
+            foreach ($daysInMonth as $day) {
+                // ค้นหาว่ามีข้อมูลรายได้สำหรับวันนั้นหรือไม่
+                $earningsForDay = $earningsPerDay->where('day', $day)->first();
+                if ($earningsForDay) {
+                    $earningsPerPeriod[$day] = $earningsForDay->earnings;
+                } else {
+                    $earningsPerPeriod[$day] = 0; // หากไม่มีการทำงานให้เป็น 0
+                }
+            }
         }
+        // dd($earningsPerPeriod);
+        // dd($earningsPerDay);
+        // dd($earningsPerDay->toSql());
 
 
 
         return view('work.earning', [
-            'earningsPerHour' => $earningsPerDay,
+            'earningsPerHour' => $earningsPerPeriod,
             'period' => $period,
             'totalEarnings' => $earningsPerDay->sum('earnings'),
             'tasks' => $earningsPerDay->count(),
