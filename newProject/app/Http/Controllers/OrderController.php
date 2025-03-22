@@ -66,82 +66,91 @@ class OrderController extends Controller
 
 
     public function store(Request $request)
-    {
-        $user = Auth::user();
-        DB::beginTransaction();
-    
-        try {
-            Log::debug('เริ่ม store()');
-    
-            $firstCartItem = CartItem::with('outfit')->find($request->cart_item_ids[0]);
-            $shop_id = $firstCartItem?->outfit?->shop_id ?? 1;
-            Log::debug('Shop ID:', ['shop_id' => $shop_id]);
-    
-            $promotions = $request->input('promotions', []);
-            $promotionId = is_array($promotions) ? reset($promotions) : null;
-            
-            Log::debug('Promotion ID:', ['promotion_id' => $promotionId]);
-    
-            $booking = new Booking();
-            $booking->purchase_date = now();
-            $booking->total_price = $request->total_price ?? 0;
-            $booking->amount_staff = $request->amount_staff ?? 0;
-            $booking->status = 'pending';
-            $booking->shop_id = $shop_id;
-            $booking->user_id = $user->user_id;
-            $booking->promotion_id = $promotionId;
-            $booking->AddressID = $request->address_id ?? null;
-            $booking->save();
-    
-            Log::debug('บันทึก Booking แล้ว:', $booking->toArray());
-    
-            foreach ($request->cart_item_ids as $cartItemId) {
-                $cartItem = CartItem::with('outfit')->find($cartItemId);
-                if (!$cartItem) {
-                    Log::warning("CartItem ไม่พบ", ['id' => $cartItemId]);
+{
+    $user = Auth::user();
+    DB::beginTransaction();
+
+    try {
+        Log::debug('เริ่ม store()');
+
+        // ดึง shop_id จาก cart item แรก
+        $firstCartItem = CartItem::with('outfit')->find($request->cart_item_ids[0]);
+        $shop_id = $firstCartItem?->outfit?->shop_id ?? 1;
+        Log::debug('Shop ID:', ['shop_id' => $shop_id]);
+
+        // ตรวจสอบ promotion
+        $promotions = $request->input('promotions', []);
+        $promotionId = is_array($promotions) ? reset($promotions) : null;
+        Log::debug('Promotion ID:', ['promotion_id' => $promotionId]);
+
+        // สร้าง Booking
+        $booking = new Booking();
+        $booking->purchase_date = now();
+        $booking->total_price = $request->total_price ?? 0;
+        $booking->amount_staff = $request->amount_staff ?? 0;
+        $booking->status = 'pending';
+        $booking->shop_id = $shop_id;
+        $booking->user_id = $user->user_id;
+        $booking->promotion_id = $promotionId;
+        $booking->AddressID = $request->address_id ?? null;
+        $booking->save();
+
+        Log::debug('บันทึก Booking แล้ว:', $booking->toArray());
+
+        // บันทึก OrderDetail และลบ CartItem
+        foreach ($request->cart_item_ids as $cartItemId) {
+            $cartItem = CartItem::with('outfit')->find($cartItemId);
+            if (!$cartItem) {
+                Log::warning("CartItem ไม่พบ", ['id' => $cartItemId]);
+                continue;
+            }
+
+            $orderDetail = new OrderDetail();
+            $orderDetail->quantity = $cartItem->quantity;
+            $orderDetail->total = $cartItem->quantity * $cartItem->outfit->price;
+            $orderDetail->booking_cycle = 1;
+            $orderDetail->booking_id = $booking->booking_id;
+            $orderDetail->cart_item_id = $cartItem->cart_item_id;
+            $orderDetail->deliveryOptions = 'default';
+            $orderDetail->save();
+
+            Log::debug('บันทึก OrderDetail แล้ว:', $orderDetail->toArray());
+
+            // ลบ cart item หลังบันทึกเสร็จ
+            $cartItem->delete();
+            Log::debug('ลบ CartItem แล้ว:', ['cart_item_id' => $cartItemId]);
+        }
+
+        // บันทึก SelectService
+        if ($request->has('selected_services') && is_array($request->selected_services)) {
+            foreach ($request->selected_services as $service) {
+                if (!isset($service['type']) || !isset($service['count'])) {
+                    Log::warning('selected_service ข้อมูลไม่ครบ', ['service' => $service]);
                     continue;
                 }
-    
-                $orderDetail = new OrderDetail();
-                $orderDetail->quantity = $cartItem->quantity;
-                $orderDetail->total = $cartItem->quantity * $cartItem->outfit->price;
-                $orderDetail->booking_cycle = 1;
-                $orderDetail->booking_id = $booking->booking_id;
-                $orderDetail->cart_item_id = $cartItem->cart_item_id;
-                $orderDetail->deliveryOptions = 'default';
-                $orderDetail->save();
-    
-                Log::debug('บันทึก OrderDetail แล้ว:', $orderDetail->toArray());
+
+                $selectService = new SelectService();
+                $selectService->service_type = $service['type'];
+                $selectService->customer_count = $service['count'];
+                $selectService->reservation_date = now();
+                $selectService->booking_id = $booking->booking_id;
+                $selectService->AddressID = $request->address_id ?? null;
+                $selectService->save();
+
+                Log::debug('บันทึก SelectService แล้ว:', $selectService->toArray());
             }
-    
-            if ($request->has('selected_services') && is_array($request->selected_services)) {
-                foreach ($request->selected_services as $service) {
-                    if (!isset($service['type']) || !isset($service['count'])) {
-                        Log::warning('selected_service ข้อมูลไม่ครบ', ['service' => $service]);
-                        continue;
-                    }
-    
-                    $selectService = new SelectService();
-                    $selectService->service_type = $service['type'];
-                    $selectService->customer_count = $service['count'];
-                    $selectService->reservation_date = now();
-                    $selectService->booking_id = $booking->booking_id;
-                    $selectService->AddressID = $request->address_id ?? null;
-                    $selectService->save();
-    
-                    Log::debug('บันทึก SelectService แล้ว:', $selectService->toArray());
-                }
-            }
-    
-            DB::commit();
-            Log::debug('จองสำเร็จ');
-            return redirect()->back()->with('success', 'ลบสินค้าออกจากตะกร้าสำเร็จ');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('เกิดข้อผิดพลาด:', ['message' => $e->getMessage(), 'line' => $e->getLine()]);
-            return back()->withErrors(['error' => $e->getMessage()]);
         }
+
+        DB::commit();
+        Log::debug('จองสำเร็จ');
+        return redirect()->back()->with('success', 'ทำรายการสำเร็จและลบสินค้าจากตะกร้าแล้ว');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('เกิดข้อผิดพลาด:', ['message' => $e->getMessage(), 'line' => $e->getLine()]);
+        return back()->withErrors(['error' => $e->getMessage()]);
     }
+}
+
     
 
 
