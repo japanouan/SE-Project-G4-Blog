@@ -81,7 +81,7 @@ class BookingController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:pending,confirmed,completed,cancelled',
+            'status' => 'required|in:pending,confirmed,partial paid,cancelled',
         ]);
         
         $booking = Booking::findOrFail($id);
