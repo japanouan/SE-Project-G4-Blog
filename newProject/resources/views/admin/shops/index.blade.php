@@ -186,23 +186,22 @@
     }
 
     .status-badge {
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-
-    .status-active {
-        background-color: #DEF7EC;
-        color: #03543E;
-    }
-
-    .status-inactive {
-        background-color: #FDE8E8;
-        color: #9B1C1C;
-    }
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.status-active {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+.status-inactive {
+    background-color: #fee2e2;
+    color: #b91c1c;
+}
 
     .btn {
         padding: 0.5rem 1rem;
