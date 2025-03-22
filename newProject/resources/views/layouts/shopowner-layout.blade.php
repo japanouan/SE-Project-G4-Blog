@@ -331,32 +331,19 @@
         @endif
         
         <div class="menu-item {{ Str::startsWith($currentRouteName, 'shopowner.bookings') ? 'active' : '' }}">
-            <a href="#">
+            <a href="{{ route('shopowner.bookings.index') }}">
                 <i class="fas fa-calendar mr-3"></i>
                 <span>การจอง</span>
             </a>
         </div>
-        
-        <div class="menu-item {{ Str::startsWith($currentRouteName, 'shopowner.reviews') ? 'active' : '' }}">
-            <a href="#">
-                <i class="fas fa-comment mr-3"></i>
-                <span>รีวิว</span>
-            </a>
-        </div>
-        
+
         <div class="menu-item {{ Str::startsWith($currentRouteName, 'shopowner.stats') ? 'active' : '' }}">
-            <a href="#">
+            <a href="{{ route('shopowner.stats.index') }}">
                 <i class="fas fa-chart-bar mr-3"></i>
                 <span>สถิติ</span>
             </a>
         </div>
-        
-        <div class="menu-item {{ Str::startsWith($currentRouteName, 'shopowner.settings') ? 'active' : '' }}">
-            <a href="#">
-                <i class="fas fa-cog mr-3"></i>
-                <span>ตั้งค่า</span>
-            </a>
-        </div>
+
     </div>
 </div>
 
