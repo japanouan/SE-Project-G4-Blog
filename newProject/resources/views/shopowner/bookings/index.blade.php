@@ -30,7 +30,7 @@
                             <option value="">ทั้งหมด</option>
                             <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>รอการยืนยัน</option>
                             <option value="confirmed" {{ request('status') == 'confirmed' ? 'selected' : '' }}>ยืนยันแล้ว</option>
-                            <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>เสร็จสิ้นแล้ว</option>
+                            <option value="partial paid" {{ request('status') == 'partial paid' ? 'selected' : '' }}>ชำระบางส่วน</option>
                             <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>ยกเลิก</option>
                         </select>
                     </div>
@@ -88,9 +88,9 @@
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                                         ยืนยันแล้ว
                                     </span>
-                                @elseif($booking->status == 'completed')
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        เสร็จสิ้นแล้ว
+                                @elseif($booking->status == 'partial paid')
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+                                        ชำระบางส่วน
                                     </span>
                                 @elseif($booking->status == 'cancelled')
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">

@@ -64,9 +64,9 @@
                                 <span class="px-2 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold">
                                     ยืนยันแล้ว
                                 </span>
-                            @elseif($booking->status == 'completed')
-                                <span class="px-2 py-1 rounded-full bg-green-100 text-green-800 text-xs font-semibold">
-                                    เสร็จสิ้นแล้ว
+                            @elseif($booking->status == 'partial paid')
+                                <span class="px-2 py-1 rounded-full bg-purple-100 text-purple-800 text-xs font-semibold">
+                                    ชำระบางส่วน
                                 </span>
                             @elseif($booking->status == 'cancelled')
                                 <span class="px-2 py-1 rounded-full bg-red-100 text-red-800 text-xs font-semibold">
