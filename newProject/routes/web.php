@@ -10,6 +10,7 @@ use App\Http\Controllers\ShopController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\PromotionController;
+use App\Http\Controllers\IssueController;
 use App\Models\CartItem;
 use App\Models\SelectService;
 use Illuminate\Http\Request;
@@ -31,7 +32,14 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+// check if account active
 Route::middleware(['is_active'])->group(function () {
+
+// report system
+Route::get('/report-issue', [IssueController::class, 'create'])->name('report.create');
+Route::post('/report-issue', [IssueController::class, 'report'])->name('report.issue');
+Route::get('/issue-show', [IssueController::class, 'showReportStatus'])->name('issue.show');
+Route::get('/issue-reported/{id}', [IssueController::class, 'issueReported'])->name('issue.reported');
 
 
 // make-up
@@ -96,6 +104,13 @@ Route::prefix('admin')->name('admin.')->middleware('auth', 'is_admin')->group(fu
     Route::get('/outfits/{id}/edit', [OutfitController::class, 'AdminEdit'])->name('outfits.edit');
     Route::PUT('/outfits/{id}', [OutfitController::class, 'update'])->name('outfits.update');
     Route::delete('/outfits/{id}', [OutfitController::class, 'destroy'])->name('outfits.destroy');
+    
+    //report issue
+    
+    Route::get('/issues', [IssueController::class, 'showNotifications'])->name('issue.show');
+    Route::get('/issues/{id}/reply', [IssueController::class, 'replyPage'])->name('issue.replyPage');
+    Route::post('/issues/{id}/reply', [IssueController::class, 'reply'])->name('issue.reply');
+    Route::post('/issues/{id}/updateStatus', [IssueController::class, 'updateStatus'])->name('issue.updateStatus');
 
 });
 

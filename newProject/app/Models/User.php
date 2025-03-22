@@ -36,4 +36,12 @@ class User extends Authenticatable
             'status' => 'string',
         ];
     }
+    public function notifications()
+    {
+        return $this->hasMany(Notifications::class, 'user_id', 'user_id');
+    }
+    public function issue()
+    {
+        return $this->hasMany(Issue::class, 'user_id', 'user_id');
+    }
 }

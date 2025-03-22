@@ -20,6 +20,11 @@
                class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition m-2">
                 earning
             </a>
+
+            <a href="{{ route('issue.show') }}" 
+               class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition m-2">
+                Report Issue
+            </a>
         </div>
         @if ($works->isEmpty())
         <div class="text-center bg-yellow-100 text-yellow-800 p-4 rounded-lg">
