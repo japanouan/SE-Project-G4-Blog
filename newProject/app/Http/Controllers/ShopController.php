@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Shop;
+use App\Models\Address;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 
@@ -126,25 +127,67 @@ public function create()
 // เมธอดสำหรับบันทึกร้านค้าใหม่
 public function store(Request $request)
 {
+    // Dump the request data to see what's coming in (remove in production)
+    \Log::info('Shop creation request data:', $request->all());
+    
     $request->validate([
         'shop_name' => 'required|string|max:255',
         'shop_description' => 'required|string',
-        'shop_location' => 'required|string',
         'rental_terms' => 'required|string',
+        'houseNumber' => 'required|string',
+        'province' => 'required|string',
+        'district' => 'required|string',
+        'subdistrict' => 'required|string',
+        'postalCode' => 'required|string',
     ]);
 
-    $shop = new Shop();
-    $shop->shop_name = $request->shop_name;
-    $shop->shop_description = $request->shop_description;
-    $shop->shop_location = $request->shop_location;
-    $shop->rental_terms = $request->rental_terms;
-    $shop->status = 'inactive'; // รอการอนุมัติจาก admin
-    $shop->is_newShop = true;
-    $shop->shop_owner_id = auth()->id();
-    $shop->save();
+    // Begin transaction
+    DB::beginTransaction();
 
-    return redirect()->route('shopowner.shops.my-shop')
-        ->with('success', 'ร้านค้าของคุณถูกส่งไปรอการอนุมัติแล้ว');
+    try {
+        // Create address first with explicit logging
+        \Log::info('Creating address with:', [
+            'HouseNumber' => $request->houseNumber,
+            'Street' => $request->street,
+            'Subdistrict' => $request->subdistrict,
+            'District' => $request->district,
+            'Province' => $request->province,
+            'PostalCode' => $request->postalCode,
+        ]);
+        
+        $address = new Address();
+        $address->HouseNumber = $request->houseNumber;
+        $address->Street = $request->street ?? '';
+        $address->Subdistrict = $request->subdistrict;
+        $address->District = $request->district;
+        $address->Province = $request->province;
+        $address->PostalCode = $request->postalCode;
+        $address->save();
+        
+        \Log::info('Address created with ID:', ['AddressID' => $address->AddressID]);
+
+        // Create shop with address ID
+        $shop = new Shop();
+        $shop->shop_name = $request->shop_name;
+        $shop->shop_description = $request->shop_description;
+        $shop->rental_terms = $request->rental_terms;
+        $shop->status = 'inactive'; // waiting for admin approval
+        $shop->is_newShop = true;
+        $shop->shop_owner_id = auth()->id();
+        $shop->AddressID = $address->AddressID;
+        $shop->save();
+        
+        \Log::info('Shop created with ID:', ['shop_id' => $shop->shop_id]);
+
+        DB::commit();
+
+        return redirect()->route('shopowner.shops.my-shop')
+            ->with('success', 'ร้านค้าของคุณถูกส่งไปรอการอนุมัติแล้ว');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        \Log::error('Error creating shop:', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+        return back()->with('error', 'เกิดข้อผิดพลาด: ' . $e->getMessage())->withInput();
+    }
 }
 
 // เมธอดสำหรับดูร้านค้าของตัวเอง
@@ -158,7 +201,7 @@ public function myShop()
 // เมธอดสำหรับแก้ไขร้านค้าของตัวเอง
 public function editMyShop($shop_id)
 {
-    $shop = Shop::where('shop_id', $shop_id)
+    $shop = Shop::with('address')->where('shop_id', $shop_id)
         ->where('shop_owner_id', auth()->id())
         ->firstOrFail();
         
@@ -168,30 +211,70 @@ public function editMyShop($shop_id)
 // เมธอดสำหรับอัปเดตร้านค้าของตัวเอง
 public function updateMyShop(Request $request, $shop_id)
 {
-    $shop = Shop::where('shop_id', $shop_id)
+    \Log::info('Shop update request data:', $request->all());
+    
+    $shop = Shop::with('address')->where('shop_id', $shop_id)
         ->where('shop_owner_id', auth()->id())
         ->firstOrFail();
         
     $request->validate([
         'shop_name' => 'required|string|max:255',
         'shop_description' => 'required|string',
-        'shop_location' => 'required|string',
         'rental_terms' => 'required|string',
-        'depositfee' => 'required|numeric|min:0',
-        'penaltyfee' => 'required|numeric|min:0',
+        'houseNumber' => 'required|string',
+        'province' => 'required|string',
+        'district' => 'required|string',
+        'subdistrict' => 'required|string',
+        'postalCode' => 'required|string',
     ]);
-    
-    $shop->update($request->only([
-        'shop_name', 
-        'shop_description', 
-        'shop_location', 
-        'rental_terms', 
-        'depositfee', 
-        'penaltyfee'
-    ]));
-    
-    return redirect()->route('shopowner.shops.my-shop')
-        ->with('success', 'ข้อมูลร้านค้าอัปเดตเรียบร้อยแล้ว');
+
+    DB::beginTransaction();
+
+    try {
+        // Update shop details
+        $shop->shop_name = $request->shop_name;
+        $shop->shop_description = $request->shop_description;
+        $shop->rental_terms = $request->rental_terms;
+        
+        // If address exists, update it
+        if ($shop->address) {
+            \Log::info('Updating existing address:', ['AddressID' => $shop->address->AddressID]);
+            $address = $shop->address;
+            $address->HouseNumber = $request->houseNumber;
+            $address->Street = $request->street ?? '';
+            $address->Subdistrict = $request->subdistrict;
+            $address->District = $request->district;
+            $address->Province = $request->province;
+            $address->PostalCode = $request->postalCode;
+            $address->save();
+        } else {
+            // Create new address
+            \Log::info('Creating new address for shop update');
+            $address = new Address();
+            $address->HouseNumber = $request->houseNumber;
+            $address->Street = $request->street ?? '';
+            $address->Subdistrict = $request->subdistrict;
+            $address->District = $request->district;
+            $address->Province = $request->province;
+            $address->PostalCode = $request->postalCode;
+            $address->save();
+            
+            $shop->AddressID = $address->AddressID;
+        }
+        
+        $shop->save();
+        
+        DB::commit();
+        \Log::info('Shop and address updated successfully');
+        
+        return redirect()->route('shopowner.shops.my-shop')
+            ->with('success', 'ข้อมูลร้านค้าอัปเดตเรียบร้อยแล้ว');
+            
+    } catch (\Exception $e) {
+        DB::rollBack();
+        \Log::error('Error updating shop:', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+        return back()->with('error', 'เกิดข้อผิดพลาด: ' . $e->getMessage())->withInput();
+    }
     }
 // แสดงรายการชุดทั้งหมดของร้าน
 public function listCostumes()

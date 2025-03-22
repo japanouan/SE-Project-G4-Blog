@@ -11,18 +11,25 @@ class Shop extends Model
     protected $guarded = ['shop_id'];
     protected $fillable = [
         'shop_name',
-        'description',
-        'address',
-        'phone',
-        'email',
-        'shop_owner_id', // Changed from user_id to shop_owner_id
-        'created_at'
+        'shop_description',
+        'rental_terms',
+        'shop_owner_id',
+        'created_at',
+        'status',
+        'is_newShop',
+        'AddressID'
     ];
 
     // ความสัมพันธ์กับ User - Fix the foreign key reference
     public function user()
     {
         return $this->belongsTo(User::class, 'shop_owner_id', 'user_id');
+    }
+
+    // ความสัมพันธ์กับ Address
+    public function address()
+    {
+        return $this->belongsTo(Address::class, 'AddressID', 'AddressID');
     }
 
     // ความสัมพันธ์กับ Promotions

@@ -8,14 +8,24 @@ class Address extends Model
 {
     protected $table = 'Address';
     protected $primaryKey = 'AddressID';
-    protected $guarded = ['AddressID'];
-    protected $fillable = ['Province', 'District', 'Subdistrict', 'PostalCode', 'HouseNumber', 'Street', 'CreatedAt'];
+    public $timestamps = false; // Change this to false
+    
+    // If you still want to use CreatedAt, you can customize the field name
+    const CREATED_AT = 'CreatedAt';
+    const UPDATED_AT = null; // This tells Laravel you don't have an updated_at column
+    
+    protected $fillable = [
+        'HouseNumber',
+        'Street',
+        'Subdistrict',
+        'District',
+        'Province',
+        'PostalCode'
+    ];
 
-
-
-    public function user()
+    // Relationship with Shop
+    public function shops()
     {
-        return $this->belongsTo(User::class, 'customer_id', 'user_id');
+        return $this->hasMany(Shop::class, 'AddressID', 'AddressID');
     }
-
 }

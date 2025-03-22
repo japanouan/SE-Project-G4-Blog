@@ -33,7 +33,17 @@
                             @endif
                         </p>
                         <p class="mb-2"><i class="fa fa-store mr-2 text-blue-500"></i><strong>ชื่อร้าน:</strong> {{ $shop->shop_name }}</p>
-                        <p class="mb-2"><i class="fa fa-map-marker-alt mr-2 text-blue-500"></i><strong>ที่ตั้ง:</strong> {{ $shop->shop_location }}</p>
+                        
+                        @if($shop->address)
+                            <p class="mb-2"><i class="fa fa-map-marker-alt mr-2 text-blue-500"></i><strong>ที่ตั้ง:</strong> 
+                                {{ $shop->address->HouseNumber }} 
+                                {{ $shop->address->Street ? $shop->address->Street : '' }}
+                                ต.{{ $shop->address->Subdistrict }} 
+                                อ.{{ $shop->address->District }} 
+                                จ.{{ $shop->address->Province }} 
+                                {{ $shop->address->PostalCode }}
+                            </p>
+                        @endif
                     </div>
                 </div>
                 
