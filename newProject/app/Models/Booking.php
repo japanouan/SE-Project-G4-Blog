@@ -9,6 +9,9 @@ class Booking extends Model
     protected $table = 'Bookings';
     protected $primaryKey = 'booking_id';
     protected $guarded = ['booking_id'];
+
+    public $timestamps = false;
+
     protected $fillable = [
         'purchase_date', 
         'total_price',
@@ -18,7 +21,8 @@ class Booking extends Model
         'created_at', 
         'shop_id', 
         'promotion_id',
-        'user_id'
+        'user_id',
+        'pickup_date'
     ];
 
     // ความสัมพันธ์กับร้านค้า
