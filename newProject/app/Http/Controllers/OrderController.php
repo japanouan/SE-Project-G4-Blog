@@ -88,6 +88,7 @@ class OrderController extends Controller
         $booking->purchase_date = now();
         $booking->total_price = $request->total_price ?? 0;
         $booking->amount_staff = $request->amount_staff ?? 0;
+        $booking->pickup_date = $request->pickup_date ?? now(); 
         $booking->status = 'pending';
         $booking->shop_id = $shop_id;
         $booking->user_id = $user->user_id;

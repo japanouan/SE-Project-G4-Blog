@@ -21,7 +21,8 @@ class Booking extends Model
         'created_at', 
         'shop_id', 
         'promotion_id',
-        'user_id'
+        'user_id',
+        'pickup_date'
     ];
 
     // ความสัมพันธ์กับร้านค้า
