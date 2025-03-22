@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Log; // เพิ่มบนหัวไฟล์
 use Illuminate\Http\Request;
 use App\Models\OrderDetail;
 use App\Models\CartItem;
