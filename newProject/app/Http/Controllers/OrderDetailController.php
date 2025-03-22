@@ -26,51 +26,44 @@ class OrderDetailController extends Controller
     }
 
     public function viewAddTo(Request $request)
-    {
-        // รับค่าจากฟอร์ม และตรวจสอบว่าเป็น Array จริงๆ
-        $cartItemIds = json_decode($request->input('cart_item_ids'), true);
-    
-        if (!is_array($cartItemIds) || empty($cartItemIds)) {
-            return redirect()->route('cartItem.allItem')->with('error', 'กรุณาเลือกสินค้าที่ต้องการสั่งซื้อ');
-        }
-    
-        // ดึงข้อมูลสินค้าจากตะกร้าที่ถูกเลือก
-        $cartItems = CartItem::with(['outfit', 'outfit.sizeAndColors.size', 'outfit.sizeAndColors.color'])
-                         ->whereIn('cart_item_id', $cartItemIds)
-                         ->orderBy('outfit_id')
-                         ->get();
-    
-        // ดึง outfit_id ทั้งหมดจาก cartItems
-        $outfitIds = $cartItems->pluck('outfit_id')->unique();
-    
-        // ดึงข้อมูลชุดที่เกี่ยวข้อง
-        $outfits = ThaiOutfit::with(['categories', 'sizeAndColors.size', 'sizeAndColors.color'])
-                         ->whereIn('outfit_id', $outfitIds)
-                         ->get();
-        
-        // ดึงโปรโมชั่นที่กำลังใช้งานได้
-        $shop = null;
-        $activePromotion = null;
-        
-        // หากสินค้าทั้งหมดมาจากร้านค้าเดียวกัน
-        if ($outfits->isNotEmpty()) {
-            $shop_id = $outfits->first()->shop_id ?? null;
-            
-            if ($shop_id) {
-                $shop = Shop::find($shop_id);
-                
-                if ($shop) {
-                    $activePromotion = Promotion::where('shop_id', $shop_id)
-                                               ->where('is_active', true)
-                                               ->where('start_date', '<=', now())
-                                               ->where('end_date', '>=', now())
-                                               ->first();
-                }
-            }
-        }
-    
-        return view('orderdetail.viewAddTo', compact('cartItems', 'outfits', 'activePromotion', 'shop'));
+{
+    $cartItemIds = json_decode($request->input('cart_item_ids'), true);
+
+    if (!is_array($cartItemIds) || empty($cartItemIds)) {
+        return redirect()->route('cartItem.allItem')->with('error', 'กรุณาเลือกสินค้าที่ต้องการสั่งซื้อ');
     }
+
+    $cartItems = CartItem::with(['outfit', 'outfit.sizeAndColors.size', 'outfit.sizeAndColors.color'])
+                    ->whereIn('cart_item_id', $cartItemIds)
+                    ->orderBy('outfit_id')
+                    ->get();
+
+    $outfitIds = $cartItems->pluck('outfit_id')->unique();
+
+    $outfits = ThaiOutfit::with(['categories', 'sizeAndColors.size', 'sizeAndColors.color'])
+                    ->whereIn('outfit_id', $outfitIds)
+                    ->get();
+
+    // ✅ เก็บ promotion แยกร้าน (key => shop_id)
+    $activePromotions = [];
+
+    $shopIds = $outfits->pluck('shop_id')->unique();
+
+    foreach ($shopIds as $shop_id) {
+        $promotion = Promotion::where('shop_id', $shop_id)
+            ->where('is_active', true)
+            ->whereDate('start_date', '<=', now())
+            ->whereDate('end_date', '>=', now())
+            ->first();
+
+        if ($promotion) {
+            $activePromotions[$shop_id] = $promotion;
+        }
+    }
+
+    return view('orderdetail.viewAddTo', compact('cartItems', 'outfits', 'activePromotions'));
+}
+
     
     public function addTo(Request $request)
     {
