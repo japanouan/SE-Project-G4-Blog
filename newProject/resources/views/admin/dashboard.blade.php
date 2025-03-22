@@ -275,7 +275,7 @@
     
     <!-- Content -->
     <div class="content" id="mainContent">
-        <div class="max-w-7xl mx-auto">
+        <div class="max-w-full mx-auto">
             <!-- Dashboard Home Content -->
             <div id="dashboard-home" class="content-section dashboard-home">
                 <div class="bg-white overflow-hidden shadow-sm rounded-lg">
