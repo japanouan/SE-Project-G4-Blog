@@ -330,7 +330,10 @@ class OutfitController extends Controller
         }
 
         // ดึงข้อมูลชุดทั้งหมด + ร้านค้า
-        $outfits = $query->with('shop')->paginate(10);
+        $outfits = $query->join('Shops', 'ThaiOutfits.shop_id', '=', 'Shops.shop_id')
+                 ->paginate(10);
+
+        // dd($outfits);
 
         return view('admin.outfits.outfits', compact('outfits'));
     }

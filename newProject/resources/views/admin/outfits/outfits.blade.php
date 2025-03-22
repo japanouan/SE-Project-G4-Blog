@@ -52,7 +52,7 @@
                             {{ $outfit->status == 'active' ? 'พร้อมใช้งาน' : 'ไม่พร้อมใช้งาน' }}
                         </span>
                     </td>
-                    <td class="p-3">{{ $outfit->shop_id }}</td>
+                    <td class="p-3">{{ $outfit->shop_name }}</td>
                     <td class="p-3 flex space-x-2">
                         <a href="{{ route('admin.outfits.edit', $outfit->outfit_id) }}" class="text-blue-500 hover:underline">แก้ไข</a>
                         <form action="{{ route('admin.outfits.destroy', $outfit->outfit_id) }}" method="POST" onsubmit="return confirm('คุณแน่ใจหรือไม่ว่าต้องการลบชุดนี้?');">
