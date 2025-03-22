@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Issue;
 use App\Models\Notifications;
+use Illuminate\Support\Str;
 
 
 class IssueController extends Controller
@@ -47,7 +48,17 @@ class IssueController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:256',
             'description' => 'required|string|max:1000',
+            'file' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
         ]);
+
+
+        if ($request->hasFile('file')) {
+            $filename = Str::random(40) . '.' . $request->file('file')->getClientOriginalExtension();
+            $request->file('file')->move(public_path('images/issue'), $filename);
+            $filePath = 'images/issue/' . $filename;
+        } else {
+            $filePath = null;
+        }
     
         // บันทึกปัญหาลงในฐานข้อมูล
         $issue = Issue::create([
@@ -55,6 +66,7 @@ class IssueController extends Controller
             'title' => $validated['title'],
             'description' => $validated['description'],
             'status' => 'reported',
+            'file_path' => $filePath,
         ]);
     
         // ส่งการแจ้งเตือนให้ Admin

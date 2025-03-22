@@ -21,6 +21,7 @@
                 {{ $issue->status }}
             </span>
         </p>
+        <img src="{{ asset($issue->file_path) }}" alt="Issue Pic" class="max-w-sm w-full h-auto object-contain border border-dashed border-gray-300 rounded-lg p-2 cursor-pointer hover:opacity-90 transition">
     </div>
 
     <!-- ฟอร์มตอบกลับ -->
