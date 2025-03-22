@@ -44,4 +44,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Issue::class, 'user_id', 'user_id');
     }
+
+    public function address()
+    {
+        return $this->hasOne(CustomerAddress::class, 'customer_id', 'user_id');
+    }
+
 }

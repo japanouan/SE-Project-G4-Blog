@@ -13,6 +13,7 @@ use App\Models\Shop;
 use App\Models\SelectService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Models\CustomerAddress; 
 
 class OrderController extends Controller
 {
@@ -69,7 +70,7 @@ class OrderController extends Controller
 {
     $user = Auth::user();
     DB::beginTransaction();
-
+    $addressIdFromUser = optional($user->address)->AddressID;
     try {
         Log::debug('เริ่ม store()');
 
@@ -93,7 +94,7 @@ class OrderController extends Controller
         $booking->shop_id = $shop_id;
         $booking->user_id = $user->user_id;
         $booking->promotion_id = $promotionId;
-        $booking->AddressID = $request->address_id ?? null;
+        $booking->AddressID = $addressIdFromUser;
         $booking->save();
 
         Log::debug('บันทึก Booking แล้ว:', $booking->toArray());
