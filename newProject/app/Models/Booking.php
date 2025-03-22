@@ -11,7 +11,8 @@ class Booking extends Model
     protected $guarded = ['booking_id'];
     protected $fillable = [
         'purchase_date', 
-        'total_price', 
+        'total_price',
+        'amount_staff', 
         'status', 
         'hasOverrented', 
         'created_at', 
