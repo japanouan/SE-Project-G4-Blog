@@ -65,10 +65,6 @@ class OrderController extends Controller
 
 
 
-
-
-    use Illuminate\Support\Facades\Log; // เพิ่มบนหัวไฟล์
-
     public function store(Request $request)
     {
         $user = Auth::user();
@@ -81,7 +77,9 @@ class OrderController extends Controller
             $shop_id = $firstCartItem?->outfit?->shop_id ?? 1;
             Log::debug('Shop ID:', ['shop_id' => $shop_id]);
     
-            $promotionId = is_array($request->promotions) ? reset($request->promotions) : null;
+            $promotions = $request->input('promotions', []);
+            $promotionId = is_array($promotions) ? reset($promotions) : null;
+            
             Log::debug('Promotion ID:', ['promotion_id' => $promotionId]);
     
             $booking = new Booking();
@@ -137,7 +135,7 @@ class OrderController extends Controller
     
             DB::commit();
             Log::debug('จองสำเร็จ');
-            return redirect()->route('booking.success')->with('success', 'จองสำเร็จ');
+            return redirect()->back()->with('success', 'ลบสินค้าออกจากตะกร้าสำเร็จ');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('เกิดข้อผิดพลาด:', ['message' => $e->getMessage(), 'line' => $e->getLine()]);

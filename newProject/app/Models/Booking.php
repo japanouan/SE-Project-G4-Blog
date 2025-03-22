@@ -9,6 +9,9 @@ class Booking extends Model
     protected $table = 'Bookings';
     protected $primaryKey = 'booking_id';
     protected $guarded = ['booking_id'];
+
+    public $timestamps = false;
+
     protected $fillable = [
         'purchase_date', 
         'total_price',
