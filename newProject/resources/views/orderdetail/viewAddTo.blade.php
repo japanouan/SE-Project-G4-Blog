@@ -49,6 +49,13 @@
                         <input type="hidden" name="cart_item_ids[]" value="{{ $item->cart_item_id }}">
                     @endforeach
 
+                    <!-- วันที่รับชุด -->
+                    <div class="mb-5">
+                        <label for="pickup_date" class="block text-gray-700 font-medium mb-2">วันที่ต้องการรับชุด:</label>
+                        <input type="date" id="pickup_date" name="pickup_date" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                    </div>
+
+
                     <!-- บริการเสริม -->
                     <div class="bg-gray-50 p-4 rounded-lg mb-5">
                         <h4 class="font-medium text-gray-800 mb-3">บริการเสริม</h4>
