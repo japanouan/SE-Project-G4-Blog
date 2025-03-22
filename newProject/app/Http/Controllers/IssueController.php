@@ -115,5 +115,43 @@ class IssueController extends Controller
         return redirect()->route('issues.show', $notification->issue_id);
     }
 
- 
+    public function shopownerIndex()
+    {
+        $issues = Issue::where('user_id', Auth::id())->orderBy('created_at', 'desc')->get();
+        return view('shopowner.issue.index', compact('issues'));
+    }
+
+    public function shopownerCreate()
+    {
+        return view('shopowner.issue.report');
+    }
+
+    public function shopownerStore(Request $request)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:256',
+            'description' => 'required|string|max:1000',
+        ]);
+    
+        $issue = Issue::create([
+            'user_id' => Auth::id(),
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'status' => 'reported',
+        ]);
+    
+        // Send notification to admin
+        $this->sendNotificationToAdmin($issue);
+    
+        return redirect()->route('shopowner.issue.index')->with('success', 'ระบบได้รับการแจ้งปัญหาของคุณเรียบร้อยแล้ว');
+    }
+
+    public function shopownerShow($id)
+    {
+        $issue = Issue::where('id', $id)
+                    ->where('user_id', Auth::id())
+                    ->firstOrFail();
+    
+        return view('shopowner.issue.show', compact('issue'));
+    }
 }

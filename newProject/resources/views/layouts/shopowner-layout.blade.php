@@ -343,7 +343,12 @@
                 <span>สถิติ</span>
             </a>
         </div>
-
+        <div class="menu-item {{ Str::startsWith($currentRouteName, 'shopowner.issue') ? 'active' : '' }}">
+            <a href="{{ route('shopowner.issue.index') }}">
+                <i class="fas fa-flag mr-3"></i>
+                <span>แจ้งปัญหา</span>
+            </a>
+        </div>
     </div>
 </div>
 

@@ -168,6 +168,14 @@ Route::prefix('shopowner')->name('shopowner.')->middleware('auth', 'is_shopowner
         })->name('index');
     });
 
+    // Inside the shopowner prefix group
+    Route::prefix('issue')->name('issue.')->group(function () {
+        Route::get('/', [IssueController::class, 'shopownerIndex'])->name('index');
+        Route::get('/create', [IssueController::class, 'shopownerCreate'])->name('create');
+        Route::post('/store', [IssueController::class, 'shopownerStore'])->name('store');
+        Route::get('/{id}', [IssueController::class, 'shopownerShow'])->name('show');
+    });
+
 });
 
 // Move this outside the shopowner group if you want it accessible to all users
