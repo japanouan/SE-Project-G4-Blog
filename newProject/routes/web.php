@@ -10,6 +10,7 @@ use App\Http\Controllers\ShopController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\PromotionController;
+use App\Http\Controllers\OrderController;
 use App\Models\CartItem;
 use App\Models\SelectService;
 use Illuminate\Http\Request;
@@ -159,6 +160,12 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'is_customer'])->group(function () {
     Route::get('/outfit/all', [OutfitController::class, 'index'])->name('outfit.all');
+});
+
+Route::prefix('order')->name('order.')->group(function(){
+    Route::post('/viewAddTo', [OrderController::class, 'viewAddTo'])->name('viewAddTo');
+    Route::post('/store', [OrderController::class, 'store'])->name('store');
+
 });
 
 Route::prefix('orderdetail')->name('orderdetail.')->group(function(){
