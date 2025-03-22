@@ -119,7 +119,8 @@ class OrderController extends Controller
             Log::debug('บันทึก OrderDetail แล้ว:', $orderDetail->toArray());
 
             // ลบ cart item หลังบันทึกเสร็จ
-            $cartItem->delete();
+            $cartItem->status = 'REMOVED';
+            $cartItem->save();
             Log::debug('ลบ CartItem แล้ว:', ['cart_item_id' => $cartItemId]);
         }
 

@@ -23,6 +23,7 @@ class CartItemController extends Controller
     // ดึงข้อมูลสินค้าทั้งหมดในตะกร้าของ User นั้นๆ
     $cartItems = CartItem::with(['outfit', 'size', 'color'])
                         ->where('userId', $user->user_id)
+                        ->where('status', 'INUSE')
                         ->orderBy('outfit_id')
                         ->get();
 
@@ -69,6 +70,7 @@ class CartItemController extends Controller
                         ->where('size_id', $size_id)
                         ->where('color_id', $color_id)
                         ->where('userId', $user->user_id)
+                        ->where('status', 'INUSE')
                         ->first();
     
         if ($item) {
@@ -90,20 +92,21 @@ class CartItemController extends Controller
     }
 
     public function deleteItem(Request $request)
-    {
-       
+{
+    $cart_id = $request->input('cart_id'); // รับค่า cart_id จากฟอร์ม
+    $cartItem = CartItem::find($cart_id);
 
-        $cart_id = $request->input('cart_id'); // รับค่า cart_id จากฟอร์ม
-        $cartItem = CartItem::find($cart_id);
-
-        if (!$cartItem) {
-            return redirect()->back()->with('error', 'ไม่พบสินค้าที่ต้องการลบ');
-        }
-
-        $cartItem->delete();
-
-        return redirect()->back()->with('success', 'ลบสินค้าออกจากตะกร้าสำเร็จ');
+    if (!$cartItem) {
+        return redirect()->back()->with('error', 'ไม่พบสินค้าที่ต้องการลบ');
     }
+
+    // เปลี่ยนสถานะเป็น 'REMOVED' แทนการลบ
+    $cartItem->status = 'REMOVED';
+    $cartItem->save();
+
+    return redirect()->back()->with('success', 'นำสินค้าออกจากตะกร้าเรียบร้อยแล้ว');
+}
+
 
 
     public function updateItem(Request $request)
@@ -118,6 +121,7 @@ class CartItemController extends Controller
         $sizeAndColor = ThaiOutfitSizeAndColor::where('outfit_id', $cartItem->outfit_id)
             ->where('size_id', $cartItem->size_id)
             ->where('color_id', $cartItem->color_id)
+            ->where('status', 'INUSE')
             ->first();
 
         if (!$sizeAndColor || $sizeAndColor->amount === null) {
