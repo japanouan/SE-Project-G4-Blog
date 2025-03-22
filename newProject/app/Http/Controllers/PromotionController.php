@@ -212,4 +212,36 @@ class PromotionController extends Controller
             ]);
         }
     }
+
+    public function checkPromotion(Request $request)
+    {
+        $request->validate([
+            'code' => 'required|string',
+            'shop_id' => 'required|integer',
+        ]);
+    
+        $promotion = Promotion::where('promotion_code', $request->code)
+            ->where('shop_id', $request->shop_id)
+            ->where('is_active', true)
+            ->where('start_date', '<=', now())
+            ->where('end_date', '>=', now())
+            ->first();
+    
+        if ($promotion) {
+            return response()->json([
+                'valid' => true,
+                'discount' => $promotion->discount_amount,
+                'promotion_id' => $promotion->promotion_id,
+                'message' => 'โค้ดใช้งานได้'
+            ]);
+        }
+    
+        return response()->json([
+            'valid' => false,
+            'discount' => 0,
+            'message' => 'ไม่พบโค้ดหรือหมดอายุแล้ว'
+        ]);
+    }
+    
+
 }
