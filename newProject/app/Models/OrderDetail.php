@@ -9,5 +9,25 @@ class OrderDetail extends Model
     protected $table = 'OrderDetails';
     protected $primaryKey = 'orderDetail_id';
     protected $guarded = ['orderDetail_id'];
-    protected $fillable = ['quantity', 'total', 'booking_cycle', 'created_at', 'booking_id', 'cart_item_id'];
+    protected $fillable = [
+        'quantity', 
+        'total', 
+        'booking_cycle', 
+        'created_at', 
+        'booking_id', 
+        'cart_item_id',
+        'deliveryOptions'
+    ];
+
+    // Relationship with Booking
+    public function booking()
+    {
+        return $this->belongsTo(Booking::class, 'booking_id', 'booking_id');
+    }
+
+    // Relationship with CartItem
+    public function cartItem()
+    {
+        return $this->belongsTo(CartItem::class, 'cart_item_id', 'cart_item_id');
+    }
 }

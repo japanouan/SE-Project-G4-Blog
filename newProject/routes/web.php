@@ -11,6 +11,8 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\IssueController;
+use App\Http\Controllers\BookingController;
+use App\Http\Controllers\OrderController;
 use App\Models\CartItem;
 use App\Models\SelectService;
 use Illuminate\Http\Request;
@@ -151,6 +153,21 @@ Route::prefix('shopowner')->name('shopowner.')->middleware('auth', 'is_shopowner
     
     // API route for checking promo codes
     Route::post('/check-promotion-code', [PromotionController::class, 'checkPromoCode'])->name('promotions.check-code');
+   
+    // Bookings routes
+    Route::prefix('bookings')->name('bookings.')->group(function () {
+        Route::get('/', [BookingController::class, 'index'])->name('index');
+        Route::get('/{id}', [BookingController::class, 'show'])->name('show');
+        Route::post('/{id}/update-status', [BookingController::class, 'updateStatus'])->name('updateStatus');
+    });
+
+    // Stats routes
+    Route::prefix('stats')->name('stats.')->group(function () {
+        Route::get('/', function () {
+            return view('shopowner.stats.index');
+        })->name('index');
+    });
+
 });
 
 // Move this outside the shopowner group if you want it accessible to all users
@@ -174,6 +191,12 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'is_customer'])->group(function () {
     Route::get('/outfit/all', [OutfitController::class, 'index'])->name('outfit.all');
+});
+
+Route::prefix('order')->name('order.')->group(function(){
+    Route::post('/viewAddTo', [OrderController::class, 'viewAddTo'])->name('viewAddTo');
+    Route::post('/store', [OrderController::class, 'store'])->name('store');
+
 });
 
 Route::prefix('orderdetail')->name('orderdetail.')->group(function(){
