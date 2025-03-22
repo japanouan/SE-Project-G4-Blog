@@ -201,7 +201,7 @@ Route::prefix('order')->name('order.')->group(function(){
 
 Route::prefix('orderdetail')->name('orderdetail.')->group(function(){
     Route::get('/outfit/{idOutfit}', [OrderDetailController::class, 'index'])->name('index');
-    Route::post('/viewAddTo', [OrderDetailController::class, 'viewAddTo'])->name('viewAddTo');
+    Route::match(['get', 'post'], '/viewAddTo', [OrderDetailController::class, 'viewAddTo'])->name('viewAddTo');
     Route::post('/orderdetail/addTo', [OrderDetailController::class, 'addTo'])->name('addTo');
 
 });
@@ -222,6 +222,7 @@ Route::prefix('cartItem')->name('cartItem.')->group(function(){
 
 });
 
+Route::post('/api/check-promotion', [PromotionController::class, 'checkPromotion']);
 
 
 

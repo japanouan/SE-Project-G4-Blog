@@ -45,4 +45,6 @@ class Promotion extends Model
                $today >= $this->start_date && 
                $today <= $this->end_date;
     }
+
+    
 }
