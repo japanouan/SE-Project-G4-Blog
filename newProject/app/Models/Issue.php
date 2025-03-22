@@ -14,6 +14,7 @@ class Issue extends Model
         'user_id', 
         'title', 
         'description', 
+        'file_path', 
         'reply', 
         'status', 
         'created_at', 

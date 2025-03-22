@@ -39,7 +39,7 @@ Route::middleware(['is_active'])->group(function () {
 
 // report system
 Route::get('/report-issue', [IssueController::class, 'create'])->name('report.create');
-Route::post('/report-issue', [IssueController::class, 'report'])->name('report.issue');
+Route::post('/report-issue', [IssueController::class, 'reportPage'])->name('report.issue');
 Route::get('/issue-show', [IssueController::class, 'showReportStatus'])->name('issue.show');
 Route::get('/issue-reported/{id}', [IssueController::class, 'issueReported'])->name('issue.reported');
 
