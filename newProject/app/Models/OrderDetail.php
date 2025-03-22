@@ -8,7 +8,7 @@ class OrderDetail extends Model
 {
     protected $table = 'OrderDetails';
     protected $primaryKey = 'orderDetail_id';
-    protected $guarded = ['orderDetail_id'];
+
     protected $fillable = [
         'quantity', 
         'total', 
