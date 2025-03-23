@@ -36,11 +36,30 @@
                 <p class="mt-1">{{ $issue->created_at->format('d/m/Y H:i') }}</p>
             </div>
 
+            @if($issue->file_path)
+            <div>
+                <h3 class="text-lg font-semibold text-gray-700">รูปภาพประกอบ:</h3>
+                <div class="mt-2">
+                    <img src="{{ asset($issue->file_path) }}" alt="รูปประกอบปัญหา" 
+                         class="max-w-full h-auto rounded-lg shadow-sm border border-gray-200" style="max-height: 400px;">
+                </div>
+                <p class="text-sm text-blue-600 mt-1">
+                    <a href="{{ asset($issue->file_path) }}" target="_blank" class="hover:underline">
+                        <i class="fas fa-external-link-alt mr-1"></i> ดูรูปภาพขนาดเต็ม
+                    </a>
+                </p>
+            </div>
+            @endif
+
             @if($issue->reply)
             <div class="mt-6 p-4 bg-gray-50 rounded-lg">
-                <h3 class="text-lg font-semibold text-gray-700">การตอบกลับจากผู้ดูแลระบบ:</h3>
+                <h3 class="text-lg font-semibold text-gray-700 mb-2">การตอบกลับจากผู้ดูแลระบบ:</h3>
                 <p class="mt-2 whitespace-pre-line">{{ $issue->reply }}</p>
                 <p class="text-sm text-gray-500 mt-2">ตอบกลับเมื่อ: {{ $issue->updated_at->format('d/m/Y H:i') }}</p>
+            </div>
+            @else
+            <div class="mt-6 p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                <p class="text-center text-gray-500">ยังไม่มีการตอบกลับจากผู้ดูแลระบบ กรุณารอการตอบกลับ</p>
             </div>
             @endif
         </div>

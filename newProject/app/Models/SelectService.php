@@ -19,4 +19,8 @@ class SelectService extends Model
     {
         return $this->belongsTo(SelectStaffDetail::class, 'select_service_id', 'select_service_id');
     }
+    public function booking()
+    {
+        return $this->belongsTo(Booking::class, 'booking_id', 'booking_id');
+    }
 }

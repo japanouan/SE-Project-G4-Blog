@@ -11,21 +11,42 @@
     @else
 
     @php
-        // เรียงรายการใน Blade ให้ overent = 0 ขึ้นก่อน
+        // เรียงลำดับ overent = 0 ก่อน
         $sortedItems = $cartItems->sortBy('overent');
+
+        // เตรียม list ของ outfit+size+color ที่มี overent = 0 เพื่อใช้เช็ค
+        $inStockMap = $cartItems->where('overent', 0)->map(function ($item) {
+            return $item->outfit_id . '-' . $item->size_id . '-' . $item->color_id;
+        })->values()->all();
     @endphp
 
     <div class="space-y-4">
     @foreach($sortedItems as $cartItem)
+        @php
+            $key = $cartItem->outfit_id . '-' . $cartItem->size_id . '-' . $cartItem->color_id;
+            $isSelectable = $cartItem->overent == 0 || in_array($key, $inStockMap);
+        @endphp
+
         <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow-md">
             
-            <!-- Checkbox สำหรับเลือกสินค้า -->
-            <input type="checkbox" name="cart_item_ids[]" value="{{ $cartItem->cart_item_id }}" class="w-5 h-5 border-gray-300 rounded mr-4">
+            <!-- ✅ Checkbox -->
+            @if($isSelectable)
+                <input type="checkbox"
+                    name="cart_item_ids[]"
+                    value="{{ $cartItem->cart_item_id }}"
+                    class="w-5 h-5 border-gray-300 rounded mr-4">
+            @else
+                <input type="checkbox"
+                    class="w-5 h-5 border-gray-300 rounded mr-4"
+                    disabled
+                    title="ต้องเลือกสินค้าที่มีในร้านก่อน">
+            @endif
+
 
             <!-- รูปสินค้า -->
             <div class="flex items-center">
                 <img src="{{ $cartItem->outfit->image ? asset($cartItem->outfit->image) : asset('images/default-placeholder.png') }}" 
-                class="w-24 h-24 rounded-lg object-cover">
+                    class="w-24 h-24 rounded-lg object-cover">
 
                 <div class="ml-4">
                     <h3 class="text-lg font-semibold flex items-center gap-2">
@@ -38,7 +59,7 @@
                 </div>
             </div>
 
-            <!-- สีของชุด -->
+            <!-- สี -->
             <div class="ml-4">
                 <p class="text-md font-semibold">สี: 
                     <span class="text-gray-700">
@@ -47,7 +68,7 @@
                 </p>
             </div>
 
-            <!-- ขนาดของชุด -->
+            <!-- ขนาด -->
             <div class="ml-4">
                 <p class="text-md font-semibold">ขนาด: 
                     <span class="text-gray-700">
@@ -56,20 +77,21 @@
                 </p>
             </div>
 
-            <!-- สต็อก -->
+            <!-- คงเหลือ -->
             <p class="text-sm text-gray-500">
                 คงเหลือ: 
                 {{ $cartItem->overent == 1 ? '-' : ($cartItem->sizeAndColor->amount ?? 'ไม่ระบุ') }}
             </p>
 
-            <!-- จำนวนสินค้า -->
+            <!-- จำนวน -->
             <div class="flex items-center">
                 <button class="px-2 py-1 border rounded-md bg-gray-200" 
                     onclick="updateQty('{{ $cartItem->cart_item_id }}', -1, '{{ $cartItem->overent == 1 ? 'null' : ($cartItem->sizeAndColor->amount ?? 0) }}')">-</button>
 
-                <input type="text" id="qty-{{ $cartItem->cart_item_id }}" 
-                    value="{{ $cartItem->quantity }}" 
-                    class="w-12 text-center border rounded-md" readonly>
+                    <input type="text" id="qty-{{ $cartItem->cart_item_id }}" 
+                        value="{{ $cartItem->quantity }}" 
+                        class="w-12 text-center border rounded-md">
+
 
                 <button class="px-2 py-1 border rounded-md bg-gray-200" 
                     onclick="updateQty('{{ $cartItem->cart_item_id }}', 1, '{{ $cartItem->overent == 1 ? 'null' : ($cartItem->sizeAndColor->amount ?? 0) }}')">+</button>
@@ -84,19 +106,18 @@
                     ❌
                 </button>
             </form>
-
         </div>
     @endforeach
-</div>
+    </div>
 
-<!-- ปุ่มสั่งจอง -->
-<form id="checkout-form" action="{{ route('orderdetail.viewAddTo') }}" method="POST">
-    @csrf
-    <input type="hidden" name="cart_item_ids" id="selected-cart-items">
-    <button type="button" onclick="submitSelectedItems()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded">
-        ดำเนินการสั่งซื้อ
-    </button>
-</form>
+    <!-- ปุ่มสั่งจอง -->
+    <form id="checkout-form" action="{{ route('orderdetail.viewAddTo') }}" method="POST">
+        @csrf
+        <input type="hidden" name="cart_item_ids" id="selected-cart-items">
+        <button type="button" onclick="submitSelectedItems()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded">
+            ดำเนินการสั่งซื้อ
+        </button>
+    </form>
 
     @endif
 </div>
@@ -128,6 +149,7 @@
                 quantity: newQty
             })
         })
+
         .then(response => response.json())
         .then(data => {
             if (data.success) {

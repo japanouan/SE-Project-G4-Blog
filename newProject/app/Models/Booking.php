@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Booking extends Model
 {
@@ -24,6 +25,30 @@ class Booking extends Model
         'user_id',
         'pickup_date'
     ];
+
+    // Define which attributes should be treated as dates
+    protected $dates = [
+        'purchase_date',
+        'created_at',
+        'pickup_date'
+    ];
+
+    // Handle date formatting when setting purchase_date
+    public function setPurchaseDateAttribute($value)
+    {
+        if ($value) {
+            $this->attributes['purchase_date'] = Carbon::parse($value)->format('Y-m-d');
+        }
+    }
+
+    // Handle date formatting when getting purchase_date
+    public function getPurchaseDateAttribute($value)
+    {
+        if ($value) {
+            return Carbon::parse($value)->format('Y-m-d');
+        }
+        return null;
+    }
 
     // ความสัมพันธ์กับร้านค้า
     public function shop()
@@ -53,5 +78,11 @@ class Booking extends Model
     public function selectService()
     {
         return $this->hasMany(SelectService::class, 'booking_id', 'booking_id');
+    }
+
+    // Add this relationship to the Booking model
+    public function address()
+    {
+        return $this->belongsTo(Address::class, 'AddressID', 'AddressID');
     }
 }

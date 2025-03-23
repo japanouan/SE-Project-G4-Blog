@@ -11,32 +11,6 @@
             </a>
             <h2 class="text-2xl font-bold mt-2">รายละเอียดการจอง #{{ $booking->booking_id }}</h2>
         </div>
-        <div>
-            @if($booking->status == 'pending')
-                <form action="{{ route('shopowner.bookings.updateStatus', $booking->booking_id) }}" method="POST" class="inline">
-                    @csrf
-                    <input type="hidden" name="status" value="confirmed">
-                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 mr-2">
-                        <i class="fa fa-check mr-2"></i>ยืนยันการจอง
-                    </button>
-                </form>
-                <form action="{{ route('shopowner.bookings.updateStatus', $booking->booking_id) }}" method="POST" class="inline">
-                    @csrf
-                    <input type="hidden" name="status" value="cancelled">
-                    <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700" onclick="return confirm('คุณแน่ใจหรือไม่ที่ต้องการยกเลิกการจองนี้?')">
-                        <i class="fa fa-times mr-2"></i>ยกเลิกการจอง
-                    </button>
-                </form>
-            @elseif($booking->status == 'confirmed')
-                <form action="{{ route('shopowner.bookings.updateStatus', $booking->booking_id) }}" method="POST" class="inline">
-                    @csrf
-                    <input type="hidden" name="status" value="completed">
-                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 mr-2">
-                        <i class="fa fa-check-double mr-2"></i>เสร็จสิ้นการจอง
-                    </button>
-                </form>
-            @endif
-        </div>
     </div>
 
     @if(session('success'))
@@ -77,7 +51,7 @@
                     </div>
                     <div class="flex justify-between items-center mb-2">
                         <span class="text-gray-600">วันที่สั่งซื้อ:</span>
-                        <span class="font-medium">{{ \Carbon\Carbon::parse($booking->purchase_date)->format('d/m/Y H:i') }}</span>
+                        <span class="font-medium">{{ \Carbon\Carbon::parse($booking->purchase_date)->format('d/m/Y') }}</span>
                     </div>
                     <div class="flex justify-between items-center mb-2">
                         <span class="text-gray-600">จำนวนรายการ:</span>
@@ -122,7 +96,7 @@
                 </div>
                 <div class="mb-4">
                     <p class="text-gray-600 mb-1">เบอร์โทรศัพท์:</p>
-                    <p class="font-medium">{{ $booking->user->tel ?? 'ไม่ระบุ' }}</p>
+                    <p class="font-medium">{{ $booking->user->phone ?? 'ไม่ระบุ' }}</p>
                 </div>
             </div>
         </div>
@@ -133,18 +107,21 @@
                 <h3 class="text-lg font-semibold">ข้อมูลการจัดส่ง</h3>
             </div>
             <div class="p-4">
-                @if($booking->orderDetails->first() && $booking->orderDetails->first()->deliveryOptions == 'delivery')
+                @if($booking->address)
                     <div class="mb-4">
-                        <p class="text-gray-600 mb-1">วิธีจัดส่ง:</p>
-                        <p class="font-medium">จัดส่งถึงบ้าน</p>
-                    </div>
-                    <div class="mb-4">
-                        <p class="text-gray-600 mb-1">ที่อยู่:</p>
-                        <p class="font-medium">{{ $booking->user->address ?? 'ไม่ระบุ' }}</p>
+                        <p class="text-gray-600 mb-1">จัดส่งที่:</p>
+                        <p class="font-medium">
+                            บ้านเลขที่ {{ $booking->address->HouseNumber }}
+                            @if($booking->address->Street) ถนน{{ $booking->address->Street }} @endif
+                            @if($booking->address->Subdistrict) ตำบล/แขวง{{ $booking->address->Subdistrict }} @endif
+                            @if($booking->address->District) อำเภอ/เขต{{ $booking->address->District }} @endif
+                            @if($booking->address->Province) จังหวัด{{ $booking->address->Province }} @endif
+                            @if($booking->address->PostalCode) {{ $booking->address->PostalCode }} @endif
+                        </p>
                     </div>
                 @else
                     <div class="mb-4">
-                        <p class="text-gray-600 mb-1">วิธีจัดส่ง:</p>
+                        <p class="text-gray-600 mb-1">จัดส่งที่:</p>
                         <p class="font-medium">รับที่ร้าน</p>
                     </div>
                     <div class="mb-4">

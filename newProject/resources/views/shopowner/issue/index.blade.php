@@ -20,6 +20,8 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">หัวข้อ</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">วันที่แจ้ง</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">สถานะ</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">รูปภาพ</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">การตอบกลับ</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">การดำเนินการ</th>
                     </tr>
                 </thead>
@@ -36,6 +38,20 @@
                                     @endif">
                                     {{ $issue->status }}
                                 </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @if($issue->file_path)
+                                    <span class="text-green-600"><i class="fas fa-check-circle"></i> มี</span>
+                                @else
+                                    <span class="text-gray-400">ไม่มี</span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @if($issue->reply)
+                                    <span class="text-green-600"><i class="fas fa-comment-alt"></i> มี</span>
+                                @else
+                                    <span class="text-gray-400">ยังไม่มี</span>
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <a href="{{ route('shopowner.issue.show', $issue->id) }}" 
