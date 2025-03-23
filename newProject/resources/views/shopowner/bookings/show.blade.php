@@ -122,7 +122,7 @@
                 </div>
                 <div class="mb-4">
                     <p class="text-gray-600 mb-1">เบอร์โทรศัพท์:</p>
-                    <p class="font-medium">{{ $booking->user->tel ?? 'ไม่ระบุ' }}</p>
+                    <p class="font-medium">{{ $booking->user->phone ?? 'ไม่ระบุ' }}</p>
                 </div>
             </div>
         </div>

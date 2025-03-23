@@ -161,7 +161,6 @@
                             <div class="text-sm text-gray-900">{{ number_format($outfit->depositfee, 2) }} บาท</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                        <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm text-gray-900">{{ number_format($outfit->penaltyfee, 2) }} บาท</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
