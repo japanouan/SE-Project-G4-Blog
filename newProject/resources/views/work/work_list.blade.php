@@ -42,6 +42,21 @@
                 <p class="job-detail"><strong>ช่างที่รับแล้ว:</strong> {{ $service->staff_count }} / {{ $staff_count }}</p>
                 <p class="job-detail"><strong>ค่าตอบแทน:</strong> <span class="job-earning">{{ $earning }} ฿</span></p>
 
+                @if ($service->booking->user)
+                <p class="job-detail"><strong>Customer Name:</strong>
+                    {{ e($service->booking->user->name) }}
+                </p>
+                <p class="job-detail"><strong>Phone :</strong>
+                    {{ e($service->booking->user->phone) }}
+                </p>
+                @else
+                <p class="job-detail"><strong>Customer Name:</strong>
+                    ไม่ระบุ
+                </p>
+                <p class="job-detail"><strong>Phone :</strong>
+                    ไม่ระบุ
+                </p>
+                @endif
                 @if ($service->address)
                 <p class="job-detail"><strong>ที่อยู่:</strong> {{ e($service->address->Street) }}, {{ e($service->address->District) }}, {{ e($service->address->Province) }}</p>
                 @else

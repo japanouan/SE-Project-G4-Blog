@@ -65,6 +65,14 @@
             <p class="mb-2"><strong>Appointment Time:</strong>
                 {{ \Carbon\Carbon::parse($work->selectService->reservation_date)->format('H:i') }}
             </p>
+            if($work->selectService->booking->user)
+            <p class="mb-2"><strong>Customer Name:</strong>
+                {{ e($work->selectService->booking->user->name) }}
+            </p>
+            <p class="mb-2"><strong>Phone :</strong>
+                {{ e($work->selectService->booking->user->phone) }}
+            </p>
+            @endif
             <p class="mb-2"><strong>จำนวนคนที่ต้องให้บริการ:</strong>
                 {{ e($work->customer_count) }} คน
             </p>
