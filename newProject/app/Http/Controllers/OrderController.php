@@ -15,8 +15,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Models\CustomerAddress; 
 
-
-
 class OrderController extends Controller
 {
     public function viewAddTo(Request $request)
@@ -69,85 +67,93 @@ class OrderController extends Controller
 
 
     public function store(Request $request)
-    {
-        $user = Auth::user();
-        DB::beginTransaction();
-        $addressIdFromUser = optional($user->address)->AddressID;
+{
+    $user = Auth::user();
+    DB::beginTransaction();
+    $addressIdFromUser = optional($user->address)->AddressID;
+    try {
+        Log::debug('เริ่ม store()');
 
-        try {
-            $cartItemIds = $request->input('cart_item_ids', []);
-            $cartItems = CartItem::with('outfit')->whereIn('cart_item_id', $cartItemIds)->get();
+        // ดึง shop_id จาก cart item แรก
+        $firstCartItem = CartItem::with('outfit')->find($request->cart_item_ids[0]);
+        $shop_id = $firstCartItem?->outfit?->shop_id ?? 1;
+        Log::debug('Shop ID:', ['shop_id' => $shop_id]);
 
-            // แยกสินค้าตาม overent
-            $itemsReady = $cartItems->where('overent', 0);
-            $itemsOver = $cartItems->where('overent', 1);
+        // ตรวจสอบ promotion
+        $promotions = $request->input('promotions', []);
+        $promotionId = is_array($promotions) ? reset($promotions) : null;
+        Log::debug('Promotion ID:', ['promotion_id' => $promotionId]);
 
-            $createdBookings = [];
+        // สร้าง Booking
+        $booking = new Booking();
+        $booking->purchase_date = now();
+        $booking->total_price = $request->total_price ?? 0;
+        //$booking->amount_staff = $request->amount_staff ?? 0;
+        $booking->pickup_date = $request->pickup_date ?? now(); 
+        $booking->status = 'pending';
+        $booking->shop_id = $shop_id;
+        $booking->user_id = $user->user_id;
+        $booking->promotion_id = $promotionId;
+        $booking->AddressID = $addressIdFromUser;
+        $booking->save();
 
-            foreach ([
-                ['items' => $itemsReady, 'status' => 'confirmed', 'cycle' => 1],
-                ['items' => $itemsOver, 'status' => 'pending', 'cycle' => 2],
-            ] as $group) {
+        Log::debug('บันทึก Booking แล้ว:', $booking->toArray());
 
-                if ($group['items']->isEmpty()) continue;
-
-                $firstItem = $group['items']->first();
-                $shop_id = $firstItem->outfit->shop_id ?? 1;
-
-                $booking = new Booking();
-                $booking->purchase_date = now();
-                $booking->total_price = $group['items']->sum(fn($i) => $i->quantity * $i->outfit->price);
-                $booking->pickup_date = $request->pickup_date ?? now();
-                $booking->status = $group['status'];
-                $booking->shop_id = $shop_id;
-                $booking->user_id = $user->user_id;
-                $booking->promotion_id = $request->input('promotions')[$shop_id] ?? null;
-                $booking->AddressID = $addressIdFromUser;
-                $booking->save();
-
-                // เก็บ OrderDetail
-                foreach ($group['items'] as $item) {
-                    $orderDetail = new OrderDetail();
-                    $orderDetail->quantity = $item->quantity;
-                    $orderDetail->total = $item->quantity * $item->outfit->price;
-                    $orderDetail->booking_cycle = $group['cycle'];
-                    $orderDetail->booking_id = $booking->booking_id;
-                    $orderDetail->cart_item_id = $item->cart_item_id;
-                    $orderDetail->deliveryOptions = 'default';
-                    $orderDetail->save();
-
-                    // เปลี่ยนสถานะ CartItem
-                    $item->status = 'REMOVED';
-                    $item->save();
-                }
-
-                // บันทึกบริการเสริม (แค่ให้ Booking แรกก็พอ)
-                if (empty($createdBookings)) {
-                    if ($request->has('selected_services')) {
-                        foreach ($request->selected_services as $service) {
-                            if (!isset($service['type']) || !isset($service['count'])) continue;
-                            SelectService::create([
-                                'service_type' => $service['type'],
-                                'customer_count' => $service['count'],
-                                'reservation_date' => now(),
-                                'booking_id' => $booking->booking_id,
-                                'AddressID' => $request->address_id ?? null
-                            ]);
-                        }
-                    }
-                    $createdBookings[] = $booking->booking_id;
-                }
+        // บันทึก OrderDetail และลบ CartItem
+        foreach ($request->cart_item_ids as $cartItemId) {
+            $cartItem = CartItem::with('outfit')->find($cartItemId);
+            if (!$cartItem) {
+                Log::warning("CartItem ไม่พบ", ['id' => $cartItemId]);
+                continue;
             }
 
-            DB::commit();
-            return redirect()->route('orderdetail.viewAddTo')->with('success', 'สั่งซื้อสำเร็จ');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            \Log::error('OrderStore Error:', ['msg' => $e->getMessage(), 'line' => $e->getLine()]);
-            return back()->withErrors(['error' => 'เกิดข้อผิดพลาด: ' . $e->getMessage()]);
-        }
-    }
+            $orderDetail = new OrderDetail();
+            $orderDetail->quantity = $cartItem->quantity;
+            $orderDetail->total = $cartItem->quantity * $cartItem->outfit->price;
+            $orderDetail->booking_cycle = 1;
+            $orderDetail->booking_id = $booking->booking_id;
+            $orderDetail->cart_item_id = $cartItem->cart_item_id;
+            $orderDetail->deliveryOptions = 'default';
+            $orderDetail->save();
 
+            Log::debug('บันทึก OrderDetail แล้ว:', $orderDetail->toArray());
+
+            // ลบ cart item หลังบันทึกเสร็จ
+            $cartItem->status = 'REMOVED';
+            $cartItem->purchased_at = now();
+            $cartItem->save();
+            Log::debug('ลบ CartItem แล้ว:', ['cart_item_id' => $cartItemId]);
+        }
+
+        // บันทึก SelectService
+        if ($request->has('selected_services') && is_array($request->selected_services)) {
+            foreach ($request->selected_services as $service) {
+                if (!isset($service['type']) || !isset($service['count'])) {
+                    Log::warning('selected_service ข้อมูลไม่ครบ', ['service' => $service]);
+                    continue;
+                }
+
+                $selectService = new SelectService();
+                $selectService->service_type = $service['type'];
+                $selectService->customer_count = $service['count'];
+                $selectService->reservation_date = now();
+                $selectService->booking_id = $booking->booking_id;
+                $selectService->AddressID = $request->address_id ?? null;
+                $selectService->save();
+
+                Log::debug('บันทึก SelectService แล้ว:', $selectService->toArray());
+            }
+        }
+
+        DB::commit();
+        Log::debug('จองสำเร็จ');
+        return redirect()->back()->with('success', 'ทำรายการสำเร็จและลบสินค้าจากตะกร้าแล้ว');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('เกิดข้อผิดพลาด:', ['message' => $e->getMessage(), 'line' => $e->getLine()]);
+        return back()->withErrors(['error' => $e->getMessage()]);
+    }
+}
 
     
 
