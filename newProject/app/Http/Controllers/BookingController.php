@@ -36,7 +36,7 @@ class BookingController extends Controller
             $bookings->where('status', $status);
         }
         
-        // Apply date range filter - Fixed to work with date-only format
+        // Apply date range filter with better error handling
         if ($dateRange) {
             $dates = explode(' - ', $dateRange);
             if (count($dates) == 2) {
