@@ -48,4 +48,10 @@ class Booking extends Model
     {
         return $this->hasMany(OrderDetail::class, 'booking_id', 'booking_id');
     }
+
+    // ความสัมพันธ์กับ selectservices
+    public function selectService()
+    {
+        return $this->hasMany(SelectService::class, 'booking_id', 'booking_id');
+    }
 }

@@ -90,7 +90,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth', 'is_admin')->group(fu
     Route::get('/users/{user_id}/edit', [UserController::class, 'edit'])->name('users.edit');
     Route::put('/users/{user_id}', [UserController::class, 'update'])->name('users.update');
 
-
+    // shop
     Route::get('/shops', [ShopController::class, 'index'])->name('shops.index');
     Route::post('/shops/{user_id}/toggleStatus', [ShopController::class, 'toggleStatus'])->name('shops.toggleStatus');
 
@@ -108,11 +108,14 @@ Route::prefix('admin')->name('admin.')->middleware('auth', 'is_admin')->group(fu
     Route::delete('/outfits/{id}', [OutfitController::class, 'destroy'])->name('outfits.destroy');
     
     //report issue
-    
     Route::get('/issues', [IssueController::class, 'showNotifications'])->name('issue.show');
     Route::get('/issues/{id}/reply', [IssueController::class, 'replyPage'])->name('issue.replyPage');
     Route::post('/issues/{id}/reply', [IssueController::class, 'reply'])->name('issue.reply');
     Route::post('/issues/{id}/updateStatus', [IssueController::class, 'updateStatus'])->name('issue.updateStatus');
+
+    //booking
+    Route::get('/booking', [BookingController::class, 'adminBooking'])->name('booking.index');
+    Route::get('/order/{id}', [BookingController::class, 'adminOrderDetails'])->name('booking.detail');
 
 });
 

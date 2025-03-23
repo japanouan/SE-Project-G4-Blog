@@ -28,5 +28,11 @@ class CartItem extends Model
         return $this->belongsTo(ThaiOutfitColor::class, 'color_id', 'color_id');
     }
 
+    // Relations with User
+    public function user()
+    {
+        return $this->belongsTo(User::class,'userId', 'user_id'); // หรือ field ที่ใช้เชื่อม
+    }
+
     
 }

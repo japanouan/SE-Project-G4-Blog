@@ -132,4 +132,35 @@ class BookingController extends Controller
             echo "Booking table does not exist!";
         }
     }
+
+
+    // show booking for admin
+    public function adminBooking(){
+        $bookings = Booking::with('selectService')->get();
+        // dd($bookings[23]);
+        return view('admin.booking.booking', [
+            'bookings' => $bookings,
+        ]);
+    }
+
+    // admin show orderdetails
+    public function adminOrderDetails($id){
+        $booking = Booking::with([
+            'shop',
+            'promotion',
+            'orderDetails.cartItem.user',  // preload แบบซ้อน
+        ])->findOrFail($id);
+        
+
+        // dd($booking->shop,$booking->promotion);
+        // dd($booking,$booking->orderDetails);
+
+        return view('admin.booking.detail', [
+            'booking' => $booking,
+            'orderdetails' => $booking->orderDetails,
+            'shop' => $booking->shop,
+            'promotion' => $booking->promotion,
+            'user' => $booking->orderDetails[0]->cartItem->user,
+        ]);
+    }
 }
