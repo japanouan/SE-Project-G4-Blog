@@ -120,6 +120,7 @@ class OrderController extends Controller
 
             // ลบ cart item หลังบันทึกเสร็จ
             $cartItem->status = 'REMOVED';
+            $cartItem->purchased_at = now();
             $cartItem->save();
             Log::debug('ลบ CartItem แล้ว:', ['cart_item_id' => $cartItemId]);
         }
