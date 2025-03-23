@@ -53,17 +53,13 @@
                 <button type="button" class="px-3 py-2 border rounded-md bg-gray-200 text-gray-700" onclick="increaseQty()">+</button>
             </div>
 
-            
-
-
-            <!-- ปุ่มเช่า, ซื้อ, เพิ่มลงตะกร้า -->
-            <!-- ฟอร์มเพิ่มสินค้าลงตะกร้า -->
-            <form action="{{ url('cartItem/addToCart') }}" method="POST" onsubmit="return validateForm()">
+            <!-- ฟอร์มกรณีร้านมีพอ -->
+            <form id="normalForm" action="{{ url('cartItem/addToCart') }}" method="POST" onsubmit="return validateForm()">
                 @csrf
                 <input type="hidden" name="outfit_id" value="{{ $outfit->outfit_id }}">
                 <input type="hidden" name="size_id" id="selectedSize" value="">
                 <input type="hidden" name="color_id" id="selectedColor" value="">
-
+                <input type="hidden" name="overent" value="0">
                 <input type="hidden" id="quantityInput" name="quantity" value="1">
 
                 <div class="mt-6 flex gap-4">
@@ -81,8 +77,19 @@
                         class="hidden px-6 py-2 border border-yellow-500 text-yellow-500 rounded-md hover:bg-yellow-500 hover:text-white transition">
                         สั่งซื้อเพิ่มเติม
                     </button>
-
                 </div>
+            </form>
+
+            <!-- ฟอร์มกรณีต้องการเพิ่มจำนวนเกินร้าน (overent = 1) -->
+            <form id="overForm" action="{{ url('cartItem/addToCart') }}" method="POST" class="hidden mt-4">
+                @csrf
+                <input type="hidden" name="outfit_id" value="{{ $outfit->outfit_id }}">
+                <input type="hidden" name="size_id" id="selectedSizeExtra" value="">
+                <input type="hidden" name="color_id" id="selectedColorExtra" value="">
+                <input type="hidden" name="overent" value="1">
+                <label for="extraQuantity" class="block text-gray-700">กรอกจำนวนเพิ่มเติมที่ต้องการ:</label>
+                <input type="number" id="extraQuantity" name="quantity" min="1" class="mt-1 border rounded-md px-3 py-2 w-32" value="1">
+                <button type="button" id="submitBothForms" class="ml-2 px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 mt-2">ยืนยันสั่งเพิ่ม</button>
             </form>
 
         </div>
@@ -91,99 +98,81 @@
 
 <!-- JavaScript -->
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-    let stockData = @json($outfit->sizeAndColors);
-    let selectedColor = null;
-    let selectedSize = null;
+    document.addEventListener("DOMContentLoaded", function () {
+        let stockData = @json($outfit->sizeAndColors);
+        let selectedColor = null;
+        let selectedSize = null;
 
-    console.log("Stock Data Loaded:", stockData); // ✅ Debugging: ตรวจสอบข้อมูลสต็อก
+        function updateStockDisplay() {
+            if (selectedColor && selectedSize) {
+                let stockItem = stockData.find(item =>
+                    item.color_id == selectedColor && item.size_id == selectedSize
+                );
+                let stockAmount = stockItem ? stockItem.amount : 0;
+                document.getElementById("stockAmount").innerText = stockAmount;
+            } else {
+                document.getElementById("stockAmount").innerText = "0";
+            }
+        }
 
-    function updateStockDisplay() {
-        console.log("Updating stock display..."); // ✅ Debugging
+        document.querySelectorAll(".color-option").forEach(button => {
+            button.addEventListener("click", function () {
+                selectedColor = this.getAttribute("data-color-id");
+                document.getElementById("selectedColor").value = selectedColor;
+                document.getElementById("selectedColorExtra").value = selectedColor;
+                document.querySelectorAll(".color-option").forEach(btn => btn.classList.remove("bg-blue-500", "text-white"));
+                this.classList.add("bg-blue-500", "text-white");
+                updateStockDisplay();
+            });
+        });
 
-        if (selectedColor && selectedSize) {
-            let stockItem = stockData.find(item => 
-                item.color_id == selectedColor && item.size_id == selectedSize
-            );
+        document.querySelectorAll(".size-option").forEach(button => {
+            button.addEventListener("click", function () {
+                selectedSize = this.getAttribute("data-size-id");
+                document.getElementById("selectedSize").value = selectedSize;
+                document.getElementById("selectedSizeExtra").value = selectedSize;
+                document.querySelectorAll(".size-option").forEach(btn => btn.classList.remove("bg-blue-500", "text-white"));
+                this.classList.add("bg-blue-500", "text-white");
+                updateStockDisplay();
+            });
+        });
+    });
 
-            let stockAmount = stockItem ? stockItem.amount : 0;
-            console.log("Stock for selected size and color:", stockAmount); // ✅ Debugging
+    function increaseQty() {
+        let qty = document.getElementById('quantity');
+        let stock = parseInt(document.getElementById('stockAmount').innerText) || 0;
+        let customOrderBtn = document.getElementById('customOrderBtn');
 
-            document.getElementById("stockAmount").innerText = stockAmount;
+        if (stock > 0 && parseInt(qty.value) < stock) {
+            qty.value = parseInt(qty.value) + 1;
+            document.getElementById('quantityInput').value = qty.value;
+            customOrderBtn.classList.add("hidden");
+            document.getElementById('overForm').classList.add("hidden");
         } else {
-            document.getElementById("stockAmount").innerText = "0";
+            alert("จำนวนที่คุณต้องการมากกว่าจำนวนที่มีในร้าน กรุณาระบุจำนวนเพิ่มด้านล่าง");
+            customOrderBtn.classList.remove("hidden");
+            document.getElementById('overForm').classList.remove("hidden");
         }
     }
 
-    // เมื่อกดปุ่มเลือกสี
-    document.querySelectorAll(".color-option").forEach(button => {
-        button.addEventListener("click", function() {
-            selectedColor = this.getAttribute("data-color-id");
-            document.getElementById("selectedColor").value = selectedColor; // ✅ อัปเดตค่า
-            console.log("Selected Color ID:", selectedColor); // ✅ Debugging
+    function decreaseQty() {
+        let qty = document.getElementById('quantity');
+        let customOrderBtn = document.getElementById('customOrderBtn');
+        let stock = parseInt(document.getElementById('stockAmount').innerText) || 0;
 
-            document.querySelectorAll(".color-option").forEach(btn => btn.classList.remove("bg-blue-500", "text-white"));
-            this.classList.add("bg-blue-500", "text-white");
+        if (parseInt(qty.value) > 1) {
+            qty.value = parseInt(qty.value) - 1;
+            document.getElementById('quantityInput').value = qty.value;
+        }
 
-            updateStockDisplay();
-        });
-    });
-
-    // เมื่อกดปุ่มเลือกขนาด
-    document.querySelectorAll(".size-option").forEach(button => {
-        button.addEventListener("click", function() {
-            selectedSize = this.getAttribute("data-size-id");
-            document.getElementById("selectedSize").value = selectedSize; // ✅ อัปเดตค่า
-            console.log("Selected Size ID:", selectedSize); // ✅ Debugging
-
-            document.querySelectorAll(".size-option").forEach(btn => btn.classList.remove("bg-blue-500", "text-white"));
-            this.classList.add("bg-blue-500", "text-white");
-
-            updateStockDisplay();
-        });
-    });
-
-
-});
-
-    
-
-
-function increaseQty() {
-    let qty = document.getElementById('quantity');
-    let stock = parseInt(document.getElementById('stockAmount').innerText) || 0;
-    let customOrderBtn = document.getElementById('customOrderBtn');
-
-    if (stock > 0 && parseInt(qty.value) < stock) {
-        qty.value = parseInt(qty.value) + 1;
-        document.getElementById('quantityInput').value = qty.value;
-        customOrderBtn.classList.add("hidden"); // ซ่อนปุ่มถ้ายังไม่เกิน
-    } else {
-        alert("จำนวนที่คุณต้องการมากกว่าจำนวนที่มีในร้าน หากต้องการสั่งเพิ่ม กรุณากดปุ่ม 'สั่งซื้อเพิ่มเติม'");
-        customOrderBtn.classList.remove("hidden"); // แสดงปุ่มถ้าเกิน
+        if (parseInt(qty.value) <= stock) {
+            customOrderBtn.classList.add("hidden");
+            document.getElementById('overForm').classList.add("hidden");
+        }
     }
-}
-
-
-
-function decreaseQty() {
-    let qty = document.getElementById('quantity');
-    let customOrderBtn = document.getElementById('customOrderBtn');
-    let stock = parseInt(document.getElementById('stockAmount').innerText) || 0;
-
-    if (parseInt(qty.value) > 1) {
-        qty.value = parseInt(qty.value) - 1;
-        document.getElementById('quantityInput').value = qty.value;
-    }
-
-    if (parseInt(qty.value) <= stock) {
-        customOrderBtn.classList.add("hidden");
-    }
-}
-
 
     function validateForm() {
-        if (!selectedColor || !selectedSize) {
+        if (!document.getElementById('selectedColor').value || !document.getElementById('selectedSize').value) {
             alert("กรุณาเลือกสีและขนาดก่อนเพิ่มลงตะกร้า!");
             return false;
         }
@@ -194,27 +183,21 @@ function decreaseQty() {
         return true;
     }
 
-    document.querySelectorAll(".color-option").forEach(button => {
-    button.addEventListener("click", function() {
-        selectedColor = this.getAttribute("data-color-id");
-        document.getElementById("selectedColor").value = selectedColor;
-    });
-    });
+    // ✅ ส่งทั้งสองฟอร์มพร้อมกัน
+    document.getElementById('submitBothForms').addEventListener('click', function () {
+        const qtyExtra = parseInt(document.getElementById('extraQuantity').value);
+        if (isNaN(qtyExtra) || qtyExtra < 1) {
+            alert("กรุณากรอกจำนวนเพิ่มเติมให้ถูกต้อง");
+            return;
+        }
 
-    document.querySelectorAll(".size-option").forEach(button => {
-        button.addEventListener("click", function() {
-            selectedSize = this.getAttribute("data-size-id");
-            document.getElementById("selectedSize").value = selectedSize;
-        });
+        // ส่งฟอร์มแรก
+        document.getElementById('normalForm').submit();
+
+        // รอเล็กน้อยก่อนส่งฟอร์มที่สอง
+        setTimeout(() => {
+            document.getElementById('overForm').submit();
+        }, 500);
     });
-
-    document.getElementById('customOrderBtn').addEventListener('click', function () {
-    // สมมุติว่าคุณต้องการส่ง outfit_id ไปด้วย
-        let outfitId = "{{ $outfit->outfit_id }}";
-        window.location.href = "/custom-order/" + outfitId;
-    });
-
-
 </script>
-
 @endsection

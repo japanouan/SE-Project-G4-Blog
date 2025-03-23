@@ -22,10 +22,12 @@ class CartItemController extends Controller
 
     // ดึงข้อมูลสินค้าทั้งหมดในตะกร้าของ User นั้นๆ
     $cartItems = CartItem::with(['outfit', 'size', 'color'])
-                        ->where('userId', $user->user_id)
-                        ->where('status', 'INUSE')
-                        ->orderBy('outfit_id')
-                        ->get();
+            ->where('userId', $user->user_id)
+            ->where('status', 'INUSE')
+            ->orderBy('overent', 'asc') // ✅ เพิ่มตรงนี้: ให้ overent = 0 มาก่อน
+            ->orderBy('outfit_id')
+            ->get();
+
 
     // ดึงข้อมูล stock_quantity ของแต่ละชุดที่เลือกในตะกร้า
     foreach ($cartItems as $cartItem) {
@@ -51,45 +53,44 @@ class CartItemController extends Controller
     
 
 
-    public function addToCart(Request $request)
-    {
-        if (!Auth::check()) {
-            return redirect()->route('login')->with('error', 'กรุณาเข้าสู่ระบบก่อนเพิ่มลงตะกร้า');
-        }
-
-        
-    
-        $user = Auth::user();
-        $outfit_id = $request->input('outfit_id');
-        $size_id = $request->input('size_id'); // รับค่าขนาดจากฟอร์ม
-        $color_id = $request->input('color_id'); // รับค่าสีจากฟอร์ม
-        $quantity = (int) $request->input('quantity', 1);
-    
-        // ตรวจสอบว่ามีสินค้านี้ (outfit_id, size_id, color_id) อยู่ในตะกร้าแล้วหรือไม่
-        $item = CartItem::where('outfit_id', $outfit_id)
-                        ->where('size_id', $size_id)
-                        ->where('color_id', $color_id)
-                        ->where('userId', $user->user_id)
-                        ->where('status', 'INUSE')
-                        ->first();
-    
-        if ($item) {
-            // อัปเดตจำนวนสินค้าถ้ามีอยู่แล้ว
-            $item->quantity += $quantity;
-            $item->save();
-        } else {
-            // เพิ่มสินค้าใหม่ถ้ายังไม่มีรายการที่ตรงกัน
-            CartItem::create([
-                'userId' => $user->user_id,
-                'outfit_id' => $outfit_id,
-                'size_id' => $size_id,
-                'color_id' => $color_id,
-                'quantity' => $quantity,
-            ]);
-        }
-    
-        return redirect()->back()->with('success', 'เพิ่มสินค้าลงตะกร้าเรียบร้อย');
+public function addToCart(Request $request)
+{
+    if (!Auth::check()) {
+        return redirect()->route('login')->with('error', 'กรุณาเข้าสู่ระบบก่อนเพิ่มลงตะกร้า');
     }
+
+    $user = Auth::user();
+    $outfit_id = $request->input('outfit_id');
+    $size_id = $request->input('size_id');
+    $color_id = $request->input('color_id');
+    $quantity = (int) $request->input('quantity', 1);
+    $overent = $request->input('overent');
+
+    $item = CartItem::where('outfit_id', $outfit_id)
+        ->where('size_id', $size_id)
+        ->where('color_id', $color_id)
+        ->where('userId', $user->user_id)
+        ->where('overent', $overent) // ✅ เพิ่มเงื่อนไขนี้
+        ->where('status', 'INUSE')
+        ->first();
+
+    if ($item) {
+        $item->quantity += $quantity;
+        $item->save();
+    } else {
+        CartItem::create([
+            'userId' => $user->user_id,
+            'outfit_id' => $outfit_id,
+            'size_id' => $size_id,
+            'color_id' => $color_id,
+            'quantity' => $quantity,
+            'overent' => $overent,
+        ]);
+    }
+
+    return redirect()->back()->with('success', 'เพิ่มสินค้าลงตะกร้าเรียบร้อย');
+}
+
 
     public function deleteItem(Request $request)
 {
