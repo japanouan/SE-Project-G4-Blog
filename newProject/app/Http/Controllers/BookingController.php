@@ -135,13 +135,40 @@ class BookingController extends Controller
 
 
     // show booking for admin
-    public function adminBooking(){
-        $bookings = Booking::with('selectService')->get();
-        // dd($bookings[23]);
+    public function adminBooking(Request $request)
+    {
+        $query = Booking::with([
+            'shop',
+            'selectService',
+            'orderDetails.cartItem.user'
+        ]);
+    
+        if ($request->filled('search')) {
+            $search = $request->search;
+    
+            $query->where(function ($q) use ($search) {
+                // Search จาก booking fields
+                $q->where('booking_id', 'like', "%{$search}%");
+    
+                // Search จากชื่อร้านค้า
+                $q->orWhereHas('shop', function ($q2) use ($search) {
+                    $q2->where('shop_name', 'like', "%{$search}%");
+                });
+    
+                // Search จากชื่อผู้ใช้ (user → ผ่าน cartItem)
+                $q->orWhereHas('orderDetails.cartItem.user', function ($q3) use ($search) {
+                    $q3->where('name', 'like', "%{$search}%");
+                });
+            });
+        }
+    
+        $bookings = $query->orderBy('booking_id', 'desc')->get();
+    
         return view('admin.booking.booking', [
             'bookings' => $bookings,
         ]);
     }
+    
 
     // admin show orderdetails
     public function adminOrderDetails($id){
