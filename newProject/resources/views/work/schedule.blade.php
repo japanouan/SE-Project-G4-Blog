@@ -1,61 +1,88 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📅 ตารางงานของคุณ</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100">
-    <div class="container mx-auto p-6">
-        <h2 class="text-center text-2xl font-bold mb-6">📅 ตารางงานของคุณ</h2>
+@extends('layouts.staff-dashboard')
 
-        <div class="text-center mb-4">
-            <a href="{{ route(str_replace(' ', '', Auth::user()->userType) . '.work-list') }}" 
-               class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition m-2">
-                🔍 ไปหน้ารับงาน
-            </a>
-
-            <a href="{{ route(str_replace(' ', '', Auth::user()->userType) . '.work.earning') }}" 
-               class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition m-2">
-                Earning
-            </a>
-
-            <a href="{{ route('issue.show') }}" 
-               class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition m-2">
-                Report Issue
+@section('content')
+<div class="card">
+    <div class="card-header">
+        <div class="flex items-center">
+            <i class="fas fa-calendar-alt card-header-icon"></i>
+            <h2 class="card-title">ตารางงานของคุณ</h2>
+        </div>
+        <div>
+            @php
+                $routePrefix = str_replace(' ', '', Auth::user()->userType);
+            @endphp
+            <a href="{{ route($routePrefix.'.work-list') }}" 
+               class="btn btn-primary">
+                <i class="fas fa-clipboard-list"></i> ไปหน้ารับงาน
             </a>
         </div>
+    </div>
+    <div class="card-body">
         @if ($works->isEmpty())
         <div class="text-center bg-yellow-100 text-yellow-800 p-4 rounded-lg">
             ❌ ยังไม่มีงานที่ได้รับ
         </div>
         @else
-        @foreach ($works as $work)
-        <a href="{{ route(str_replace(' ', '', $work->selectService->service_type) . '.work.details', ['id' => encrypt($work->select_staff_detail_id)]) }}" class="block">
-            <div class="bg-white p-6 rounded-lg shadow-md mb-4">
-                <h4 class="text-lg font-semibold">
-                    {{ \Carbon\Carbon::parse($work->selectService->reservation_date)->format('d M Y') }}
-                </h4>
-                <p><strong>Location:</strong>
-    @if($work->selectService->address)
-        {{ e($work->selectService->address->Street) }},
-        {{ e($work->selectService->address->District) }},
-        {{ e($work->selectService->address->Province) }}
-    @else
-        Not specified
-    @endif
-</p>
-
-                <p><strong>Appointment Time:</strong> 
-                    {{ \Carbon\Carbon::parse($work->selectService->reservation_date)->format('H:i') }}</p>
-                <p><strong>จำนวนลูกค้าที่ต้องให้บริการ:</strong> {{ e($work->customer_count) }} คน</p>
-                <p><strong>Earning:</strong> 
-                    <span class="text-green-500 font-semibold">{{ e($work->earning) }} ฿</span></p>
-            </div>
-        </a>
-        @endforeach
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            @foreach ($works as $work)
+            <a href="{{ route(str_replace(' ', '', $work->selectService->service_type) . '.work.details', ['id' => encrypt($work->select_staff_detail_id)]) }}" class="block">
+                <div class="job-card relative">
+                    <!-- Completion indicator -->
+                    @if($work->service_info)
+                    <div class="absolute top-0 right-0 mt-2 mr-2">
+                        <span class="bg-green-500 text-white rounded-full p-1 flex items-center justify-center" 
+                              title="Job completed">
+                            <i class="fas fa-check"></i>
+                        </span>
+                    </div>
+                    @endif
+                    
+                    <div class="job-date">
+                        {{ \Carbon\Carbon::parse($work->selectService->reservation_date)->format('d M Y') }}
+                    </div>
+                    <p class="job-detail"><strong>Location:</strong> 
+                        @if($work->selectService->address)
+                            {{ e($work->selectService->address->Street) }}, 
+                            {{ e($work->selectService->address->District) }}, 
+                            {{ e($work->selectService->address->Province) }}
+                        @else
+                            Not specified
+                        @endif
+                    </p>
+                    <p class="job-detail"><strong>Appointment Time:</strong> 
+                        {{ \Carbon\Carbon::parse($work->selectService->reservation_date)->format('H:i') }}</p>
+                    <p class="job-detail"><strong>จำนวนลูกค้าที่ต้องให้บริการ:</strong> {{ e($work->customer_count) }} คน</p>
+                    <p class="job-detail"><strong>Earning:</strong> 
+                        <span class="job-earning">{{ e($work->earning) }} ฿</span></p>
+                    
+                    <!-- Status indicator at the bottom -->
+                    <div class="mt-3 pt-2 border-t border-gray-200">
+                        @if($work->service_info)
+                            <span class="text-green-600 text-sm font-medium flex items-center">
+                                <i class="fas fa-check-circle mr-1"></i> Completed
+                            </span>
+                        @else
+                            @php
+                                $appointmentTime = \Carbon\Carbon::parse($work->selectService->reservation_date);
+                                $now = \Carbon\Carbon::now();
+                            @endphp
+                            
+                            @if($appointmentTime->isFuture())
+                                <span class="text-blue-600 text-sm font-medium flex items-center">
+                                    <i class="fas fa-clock mr-1"></i> Upcoming
+                                </span>
+                            @else
+                                <span class="text-orange-600 text-sm font-medium flex items-center">
+                                    <i class="fas fa-exclamation-circle mr-1"></i> Needs completion
+                                </span>
+                            @endif
+                        @endif
+                    </div>
+                </div>
+            </a>
+            @endforeach
+        </div>
         @endif
     </div>
-</body>
-</html>
+</div>
+@endsection
