@@ -10,28 +10,35 @@
             <h3 class="text-xl font-semibold text-gray-700 mb-4">รายการสินค้า</h3>
             
             @foreach ($cartItems as $cartItem)
-                <div class="bg-white shadow-md rounded-lg p-4 flex gap-6 hover:shadow-lg transition duration-300">
+                <div class="bg-white shadow-md rounded-lg p-4 flex gap-6 hover:shadow-lg transition duration-300 border-l-4 {{ $cartItem->overent == 1 ? 'border-yellow-400' : 'border-green-500' }}">
                     <img src="{{ asset($cartItem->outfit->image) }}" class="w-28 h-28 object-cover rounded-lg border">
 
                     <div class="flex-1 flex flex-col justify-between">
                         <div>
-                            <h4 class="text-lg font-semibold text-gray-800">{{ $cartItem->outfit->name }}</h4>
-                            <div class="flex flex-wrap gap-x-4 mt-1 text-gray-600">
-                                <p>สี: <span class="font-medium">{{ $cartItem->color->color_name ?? 'ไม่ระบุ' }}</span></p>
-                                <p>ขนาด: <span class="font-medium">{{ $cartItem->size->size_name ?? 'ไม่ระบุ' }}</span></p>
+                            <h4 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                                {{ $cartItem->outfit->name }}
+                                @if($cartItem->overent == 1)
+                                    <span class="text-xs bg-yellow-400 text-white px-2 py-1 rounded-full">สั่งเพิ่ม</span>
+                                @endif
+                            </h4>
+                            <div class="flex flex-wrap gap-x-4 mt-1 text-gray-600 text-sm">
+                                <p>สี: <span class="font-medium">{{ $cartItem->color->color ?? 'ไม่ระบุ' }}</span></p>
+                                <p>ขนาด: <span class="font-medium">{{ $cartItem->size->size ?? 'ไม่ระบุ' }}</span></p>
+                                <p>จำนวน: <span class="font-medium">{{ $cartItem->quantity }}</span></p>
+                                @if(isset($cartItem->sizeAndColor))
+                                    <p>คงเหลือ: <span class="font-medium">{{ $cartItem->overent == 1 ? '-' : $cartItem->sizeAndColor->amount }}</span></p>
+                                @endif
                             </div>
                         </div>
-                        
+
                         <div class="flex justify-between items-end mt-2">
-                            <div>
-                                <p class="text-green-600 font-medium">{{ number_format($cartItem->outfit->price, 2) }} ฿</p>
-                                <p class="text-sm text-gray-500">จำนวน: {{ $cartItem->quantity }}</p>
-                            </div>
+                            <p class="text-green-600 font-medium">{{ number_format($cartItem->outfit->price, 2) }} ฿</p>
                             <p class="font-bold text-lg text-gray-800">{{ number_format($cartItem->outfit->price * $cartItem->quantity, 2) }} ฿</p>
                         </div>
                     </div>
                 </div>
             @endforeach
+
 
             <div class="bg-white p-4 rounded-lg shadow-md border-l-4 border-blue-500 mt-6">
                 <p class="text-sm text-gray-600">* การให้บริการของเราอยู่ภายใต้เงื่อนไขและข้อตกลงการใช้บริการ</p>

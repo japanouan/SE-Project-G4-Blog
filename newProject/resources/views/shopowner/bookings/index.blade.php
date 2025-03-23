@@ -72,7 +72,7 @@
                                 <div class="text-sm font-medium text-gray-900">{{ $booking->booking_id }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">{{ \Carbon\Carbon::parse($booking->purchase_date)->format('d/m/Y H:i') }}</div>
+                                <div class="text-sm text-gray-900">{{ \Carbon\Carbon::parse($booking->purchase_date)->format('d/m/Y') }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900">{{ $booking->user->name ?? 'ไม่ระบุ' }}</div>
@@ -137,13 +137,21 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        flatpickr("#date_range", {
-            mode: "range",
-            dateFormat: "d/m/Y",
-            locale: "th",
-            rangeSeparator: " - ",
-            placeholder: "เลือกช่วงวันที่"
+    $(function() {
+        $('input[name="date_range"]').daterangepicker({
+            autoUpdateInput: false,
+            locale: {
+                format: 'DD/MM/YYYY',
+                cancelLabel: 'Clear'
+            }
+        });
+
+        $('input[name="date_range"]').on('apply.daterangepicker', function(ev, picker) {
+            $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+        });
+
+        $('input[name="date_range"]').on('cancel.daterangepicker', function(ev, picker) {
+            $(this).val('');
         });
     });
 </script>
