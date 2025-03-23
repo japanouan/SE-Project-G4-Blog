@@ -13,7 +13,7 @@
             </div>
         @endif
 
-        <form action="{{ route('shopowner.issue.store') }}" method="POST" class="space-y-6">
+        <form action="{{ route('shopowner.issue.store') }}" method="POST" class="space-y-6" enctype="multipart/form-data">
             @csrf
             
             <div>
@@ -30,6 +30,16 @@
                 <textarea name="description" id="description" rows="5" required
                     class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-4 py-2"></textarea>
                 @error('description')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div>
+                <label for="file" class="block text-sm font-medium text-gray-700 mb-1">แนบรูปภาพ (ถ้ามี):</label>
+                <input type="file" name="file" id="file" accept="image/jpeg,image/png,image/jpg,image/gif"
+                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-4 py-2">
+                <p class="text-xs text-gray-500 mt-1">รองรับไฟล์ .jpeg, .png, .jpg, .gif ขนาดสูงสุด 2MB</p>
+                @error('file')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                 @enderror
             </div>
