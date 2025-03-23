@@ -324,7 +324,7 @@ class OutfitController extends Controller
         // ค้นหา shop_id, outfit_id หรือชื่อชุด
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
-            $query->where('shop_id', 'like', "%{$search}%")
+            $query->where('ThaiOutfits.shop_id', 'like', "%{$search}%")
                 ->orWhere('outfit_id', 'like', "%{$search}%")
                 ->orWhere('name', 'like', "%{$search}%");
         }
