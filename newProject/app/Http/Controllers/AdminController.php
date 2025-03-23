@@ -48,6 +48,7 @@ class AdminController extends Controller
         $photographerStatsTop10 = SelectService::where('service_type', 'photographer')
             ->where('reservation_date', 'LIKE', "%$month%")
             ->join('SelectStaffDetails', 'SelectServices.select_service_id', '=', 'SelectStaffDetails.select_service_id')
+            ->where('SelectStaffDetails.finished_time', '<=', now())
             ->selectRaw('SelectStaffDetails.staff_id, SUM(SelectStaffDetails.earning) as total_payment')
             ->groupBy('SelectStaffDetails.staff_id')
             ->orderByDesc('total_payment')
@@ -58,6 +59,7 @@ class AdminController extends Controller
         $photographerStatsAll = SelectService::where('service_type', 'photographer')
             ->where('reservation_date', 'LIKE', "%$month%")
             ->join('SelectStaffDetails', 'SelectServices.select_service_id', '=', 'SelectStaffDetails.select_service_id')
+            ->where('SelectStaffDetails.finished_time', '<=', now())
             ->selectRaw('SelectStaffDetails.staff_id, SUM(SelectStaffDetails.earning) as total_payment')
             ->groupBy('SelectStaffDetails.staff_id')
             ->get();
@@ -77,6 +79,7 @@ class AdminController extends Controller
         $makeUpArtistStatsTop10 = SelectService::where('service_type', 'make-up artist')
             ->where('reservation_date', 'LIKE', "%$month%")
             ->join('SelectStaffDetails', 'SelectServices.select_service_id', '=', 'SelectStaffDetails.select_service_id')
+            ->where('SelectStaffDetails.finished_time', '<=', now())
             ->selectRaw('SelectStaffDetails.staff_id, SUM(SelectStaffDetails.earning) as total_payment')
             ->groupBy('SelectStaffDetails.staff_id')
             ->orderByDesc('total_payment')
@@ -87,6 +90,7 @@ class AdminController extends Controller
         $makeUpArtistStatsAll = SelectService::where('service_type', 'make-up artist')
             ->where('reservation_date', 'LIKE', "%$month%")
             ->join('SelectStaffDetails', 'SelectServices.select_service_id', '=', 'SelectStaffDetails.select_service_id')
+            ->where('SelectStaffDetails.finished_time', '<=', now())
             ->selectRaw('SelectStaffDetails.staff_id, SUM(SelectStaffDetails.earning) as total_payment')
             ->groupBy('SelectStaffDetails.staff_id')
             ->get();
