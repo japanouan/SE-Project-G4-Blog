@@ -30,14 +30,16 @@
         <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow-md">
             
             <!-- ✅ Checkbox -->
-            @if($cartItem->overent == 0)
+            @if($isSelectable)
                 <input type="checkbox"
                     name="cart_item_ids[]"
                     value="{{ $cartItem->cart_item_id }}"
                     class="w-5 h-5 border-gray-300 rounded mr-4">
             @else
-                <!-- ไม่แสดง checkbox -->
-                <div class="w-5 h-5 mr-4"></div>
+                <input type="checkbox"
+                    class="w-5 h-5 border-gray-300 rounded mr-4"
+                    disabled
+                    title="ต้องเลือกสินค้าที่มีในร้านก่อน">
             @endif
 
 
@@ -86,9 +88,10 @@
                 <button class="px-2 py-1 border rounded-md bg-gray-200" 
                     onclick="updateQty('{{ $cartItem->cart_item_id }}', -1, '{{ $cartItem->overent == 1 ? 'null' : ($cartItem->sizeAndColor->amount ?? 0) }}')">-</button>
 
-                <input type="text" id="qty-{{ $cartItem->cart_item_id }}" 
-                    value="{{ $cartItem->quantity }}" 
-                    class="w-12 text-center border rounded-md" readonly>
+                    <input type="text" id="qty-{{ $cartItem->cart_item_id }}" 
+                        value="{{ $cartItem->quantity }}" 
+                        class="w-12 text-center border rounded-md">
+
 
                 <button class="px-2 py-1 border rounded-md bg-gray-200" 
                     onclick="updateQty('{{ $cartItem->cart_item_id }}', 1, '{{ $cartItem->overent == 1 ? 'null' : ($cartItem->sizeAndColor->amount ?? 0) }}')">+</button>
@@ -146,6 +149,7 @@
                 quantity: newQty
             })
         })
+
         .then(response => response.json())
         .then(data => {
             if (data.success) {

@@ -43,6 +43,8 @@ class CartItemController extends Controller
         }
     }
 
+    
+
     return view('cartItem.index', compact('cartItems'));
 }
 
@@ -138,18 +140,17 @@ public function addToCart(Request $request)
             return response()->json(['success' => false, 'message' => 'ไม่พบสินค้าที่ต้องการอัปเดต'], 404);
         }
 
-        // ดึงข้อมูล stock_quantity จาก ThaiOutfitSizeAndColor
+        // ดึงข้อมูล stock
         $sizeAndColor = ThaiOutfitSizeAndColor::where('outfit_id', $cartItem->outfit_id)
             ->where('size_id', $cartItem->size_id)
             ->where('color_id', $cartItem->color_id)
-            ->where('status', 'INUSE')
+            // ->where('status', 'INUSE')
             ->first();
 
         if (!$sizeAndColor || $sizeAndColor->amount === null) {
             return response()->json(['success' => false, 'message' => 'ไม่พบข้อมูลสต็อกสินค้า'], 404);
         }
 
-        // ตรวจสอบว่าจำนวนใหม่ไม่เกิน stock_quantity
         if ($request->quantity > $sizeAndColor->amount) {
             return response()->json([
                 'success' => false,
@@ -161,12 +162,12 @@ public function addToCart(Request $request)
             return response()->json(['success' => false, 'message' => 'จำนวนสินค้าต้องไม่น้อยกว่า 1'], 400);
         }
 
-        // อัปเดตจำนวนสินค้า
         $cartItem->quantity = $request->quantity;
         $cartItem->save();
 
         return response()->json(['success' => true, 'message' => 'อัปเดตจำนวนสินค้าเรียบร้อย']);
     }
+
 
 
     
