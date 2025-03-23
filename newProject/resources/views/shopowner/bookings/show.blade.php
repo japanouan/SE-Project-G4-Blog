@@ -80,8 +80,12 @@
                         <span class="font-medium">{{ \Carbon\Carbon::parse($booking->purchase_date)->format('d/m/Y H:i') }}</span>
                     </div>
                     <div class="flex justify-between items-center mb-2">
-                        <span class="text-gray-600">จำนวนชุด:</span>
-                        <span class="font-medium">{{ $booking->orderDetails->count() }} ชุด</span>
+                        <span class="text-gray-600">จำนวนรายการ:</span>
+                        <span class="font-medium">{{ $booking->orderDetails->count() }} รายการ</span>
+                    </div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-gray-600">จำนวนชุดรวม:</span>
+                        <span class="font-medium">{{ $booking->orderDetails->sum('quantity') }} ชุด</span>
                     </div>
                     <div class="flex justify-between items-center">
                         <span class="text-gray-600">ยอดรวม:</span>
@@ -145,7 +149,18 @@
                     </div>
                     <div class="mb-4">
                         <p class="text-gray-600 mb-1">ที่ตั้งร้าน:</p>
-                        <p class="font-medium">{{ $booking->shop->shop_location ?? 'ไม่ระบุ' }}</p>
+                        @if($booking->shop && $booking->shop->address)
+                            <p class="font-medium">
+                                บ้านเลขที่ {{ $booking->shop->address->HouseNumber }}
+                                @if($booking->shop->address->Street) ถนน{{ $booking->shop->address->Street }} @endif
+                                @if($booking->shop->address->Subdistrict) ตำบล/แขวง{{ $booking->shop->address->Subdistrict }} @endif
+                                @if($booking->shop->address->District) อำเภอ/เขต{{ $booking->shop->address->District }} @endif
+                                @if($booking->shop->address->Province) จังหวัด{{ $booking->shop->address->Province }} @endif
+                                @if($booking->shop->address->PostalCode) {{ $booking->shop->address->PostalCode }} @endif
+                            </p>
+                        @else
+                            <p class="font-medium">{{ $booking->shop->shop_location ?? 'ไม่ระบุ' }}</p>
+                        @endif
                     </div>
                 @endif
             </div>
@@ -163,7 +178,8 @@
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">รูปภาพ</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่อชุด</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ขนาด/สี</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ขนาด</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">สี</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">จำนวน</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ราคาต่อชิ้น</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">รอบการเช่า</th>
@@ -186,15 +202,92 @@
                                 <div class="text-sm font-medium text-gray-900">
                                     {{ $orderDetail->cartItem->outfit->name ?? 'ไม่ระบุ' }}
                                 </div>
+                                @if($orderDetail->cartItem && $orderDetail->cartItem->outfit)
+                                    <div class="text-xs text-gray-500 mt-1">
+                                        รหัสชุด: {{ $orderDetail->cartItem->outfit->outfit_id }}
+                                    </div>
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900">
-                                    ขนาด: {{ $orderDetail->cartItem->size ?? 'ไม่ระบุ' }}<br>
-                                    สี: {{ $orderDetail->cartItem->color ?? 'ไม่ระบุ' }}
-                                    </div>
+                                    @php
+                                        $size = 'ไม่ระบุ';
+                                        
+                                        // Try multiple possible paths to get size data
+                                        if($orderDetail->cartItem) {
+                                            // Path 1: Direct access to size field
+                                            if(!empty($orderDetail->cartItem->size) && is_string($orderDetail->cartItem->size)) {
+                                                $size = $orderDetail->cartItem->size;
+                                            }
+                                            // Path 2: Access through size_id
+                                            elseif(!empty($orderDetail->cartItem->size_id)) {
+                                                $sizeObj = \App\Models\ThaiOutfitSize::find($orderDetail->cartItem->size_id);
+                                                if($sizeObj) {
+                                                    $size = $sizeObj->size;
+                                                }
+                                            }
+                                            // Path 3: Access through sizeAndColor
+                                            elseif(isset($orderDetail->cartItem->sizeAndColor_id)) {
+                                                $sizeAndColor = \App\Models\ThaiOutfitSizeAndColor::find($orderDetail->cartItem->sizeAndColor_id);
+                                                if($sizeAndColor && $sizeAndColor->size_id) {
+                                                    $sizeObj = \App\Models\ThaiOutfitSize::find($sizeAndColor->size_id);
+                                                    if($sizeObj) {
+                                                        $size = $sizeObj->size;
+                                                    }
+                                                }
+                                            }
+                                            // Path 4: Debug output - print the actual data we have
+                                            if($size === 'ไม่ระบุ') {
+                                                $cartItemData = json_encode($orderDetail->cartItem);
+                                                $size = "ไม่พบข้อมูลขนาด - Debug: " . (strlen($cartItemData) > 50 ? substr($cartItemData, 0, 50)."..." : $cartItemData);
+                                            }
+                                        }
+                                        
+                                        echo $size;
+                                    @endphp
+                                </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">{{ $orderDetail->quantity }}</div>
+                                <div class="text-sm text-gray-900">
+                                    @php
+                                        $color = 'ไม่ระบุ';
+                                        
+                                        // Try multiple possible paths to get color data
+                                        if($orderDetail->cartItem) {
+                                            // Path 1: Direct access to color field
+                                            if(!empty($orderDetail->cartItem->color) && is_string($orderDetail->cartItem->color)) {
+                                                $color = $orderDetail->cartItem->color;
+                                            }
+                                            // Path 2: Access through color_id
+                                            elseif(!empty($orderDetail->cartItem->color_id)) {
+                                                $colorObj = \App\Models\ThaiOutfitColor::find($orderDetail->cartItem->color_id);
+                                                if($colorObj) {
+                                                    $color = $colorObj->color;
+                                                }
+                                            }
+                                            // Path 3: Access through sizeAndColor
+                                            elseif(isset($orderDetail->cartItem->sizeAndColor_id)) {
+                                                $sizeAndColor = \App\Models\ThaiOutfitSizeAndColor::find($orderDetail->cartItem->sizeAndColor_id);
+                                                if($sizeAndColor && $sizeAndColor->color_id) {
+                                                    $colorObj = \App\Models\ThaiOutfitColor::find($sizeAndColor->color_id);
+                                                    if($colorObj) {
+                                                        $color = $colorObj->color;
+                                                    }
+                                                }
+                                            }
+                                            // Path 4: Debug output - print the actual data we have
+                                            if($color === 'ไม่ระบุ') {
+                                                $cartItemData = json_encode($orderDetail->cartItem);
+                                                $color = "ไม่พบข้อมูลสี - Debug: " . (strlen($cartItemData) > 50 ? substr($cartItemData, 0, 50)."..." : $cartItemData);
+                                            }
+                                        }
+                                        
+                                        echo $color;
+                                    @endphp
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900 font-medium">{{ $orderDetail->quantity }} ชุด</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900">
@@ -220,6 +313,14 @@
                         </tr>
                     @endforeach
                 </tbody>
+                <tfoot class="bg-gray-50">
+                    <tr>
+                        <td colspan="4" class="px-6 py-4 text-right font-medium">จำนวนรวม:</td>
+                        <td class="px-6 py-4 font-medium">{{ $booking->orderDetails->sum('quantity') }} ชุด</td>
+                        <td colspan="2" class="px-6 py-4 text-right font-medium">ยอดรวมทั้งสิ้น:</td>
+                        <td class="px-6 py-4 font-bold">{{ number_format($booking->total_price, 2) }} ฿</td>
+                    </tr>
+                </tfoot>
             </table>
         </div>
     </div>
