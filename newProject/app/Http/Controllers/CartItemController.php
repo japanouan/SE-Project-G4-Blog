@@ -9,6 +9,7 @@ use App\Models\CartItem;
 use App\Models\User;
 use App\Models\ThaiOutfitSizeAndColor;
 
+
 class CartItemController extends Controller
 {
     public function __construct()
@@ -66,13 +67,31 @@ public function addToCart(Request $request)
     $quantity = (int) $request->input('quantity', 1);
     $overent = $request->input('overent');
 
+    // ดึงความสัมพันธ์ sizeAndColor เพื่อเช็ค stock
+    $sizeAndColor = ThaiOutfitSizeAndColor::where('outfit_id', $outfit_id)
+        ->where('size_id', $size_id)
+        ->where('color_id', $color_id)
+        ->first();
+
+    if (!$sizeAndColor) {
+        return redirect()->back()->with('error', 'ไม่พบข้อมูลขนาดและสีของชุด');
+    }
+
+    // เช็คว่ามี item เดิมอยู่ในตะกร้าไหม
     $item = CartItem::where('outfit_id', $outfit_id)
         ->where('size_id', $size_id)
         ->where('color_id', $color_id)
         ->where('userId', $user->user_id)
-        ->where('overent', $overent) // ✅ เพิ่มเงื่อนไขนี้
+        ->where('overent', $overent)
         ->where('status', 'INUSE')
         ->first();
+
+    $existingQty = $item ? $item->quantity : 0;
+
+    // ตรวจสอบจำนวนรวมไม่เกิน amount
+    if (($existingQty + $quantity) > $sizeAndColor->amount) {
+        return redirect()->back()->with('error', 'จำนวนสินค้าที่เลือกเกินจำนวนคงเหลือในสต็อก');
+    }
 
     if ($item) {
         $item->quantity += $quantity;
@@ -90,6 +109,7 @@ public function addToCart(Request $request)
 
     return redirect()->back()->with('success', 'เพิ่มสินค้าลงตะกร้าเรียบร้อย');
 }
+
 
 
     public function deleteItem(Request $request)
