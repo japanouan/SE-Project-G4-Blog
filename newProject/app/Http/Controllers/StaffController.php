@@ -15,12 +15,13 @@ class StaffController extends Controller
     public function schedule()
     {
         $user_id = Auth::id();
-        $works = SelectStaffDetail::with('selectService.address')
+        $works = SelectStaffDetail::with(['selectService.address',])
             ->where('staff_id', $user_id)
             ->get();
 
+            // dd($works->first());
         $works = $works->sortBy('selectService.reservation_date');
-        return view('work.schedule', compact('works'));
+        return view('work.schedule', ['works' => $works,]);
     }
 
     public function finishJob(Request $request)
@@ -45,7 +46,7 @@ class StaffController extends Controller
     public function workDetails($id)
     {
         $decryptedId = decrypt($id); // ถอดรหัสค่า ID ที่เข้ารหัสมา
-        $work = SelectStaffDetail::with('selectService.address')->findOrFail($decryptedId);
+        $work = SelectStaffDetail::with(['selectService.address','selectService.booking.user'])->findOrFail($decryptedId);
         // dd($work);
         return view('work.work-details', compact('work'));
     }
@@ -54,7 +55,7 @@ class StaffController extends Controller
     {
         $userType = Auth::user()->userType;
 
-        $services = SelectService::with('address')
+        $services = SelectService::with(['address','booking.user'])
             ->leftJoin('SelectStaffDetails as ss', 'SelectServices.select_service_id', '=', 'ss.select_service_id')
             ->select(
                 'SelectServices.*',
