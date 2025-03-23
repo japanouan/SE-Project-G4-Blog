@@ -143,13 +143,22 @@ class IssueController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:256',
             'description' => 'required|string|max:1000',
+            'file' => 'nullable|file|mimes:jpg,jpeg,png,gif|max:2048',
         ]);
-    
+
+        $filePath = null;
+        if ($request->hasFile('file')) {
+            $filename = Str::random(40) . '.' . $request->file('file')->getClientOriginalExtension();
+            $request->file('file')->move(public_path('images/issue'), $filename);
+            $filePath = 'images/issue/' . $filename;
+        }
+
         $issue = Issue::create([
             'user_id' => Auth::id(),
             'title' => $validated['title'],
             'description' => $validated['description'],
             'status' => 'reported',
+            'file_path' => $filePath,
         ]);
     
         // Send notification to admin

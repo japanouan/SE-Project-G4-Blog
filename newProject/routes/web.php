@@ -166,9 +166,8 @@ Route::prefix('shopowner')->name('shopowner.')->middleware('auth', 'is_shopowner
 
     // Stats routes
     Route::prefix('stats')->name('stats.')->group(function () {
-        Route::get('/', function () {
-            return view('shopowner.stats.index');
-        })->name('index');
+        Route::get('/', [BookingController::class, 'stats'])->name('index');
+        Route::get('/income', [BookingController::class, 'stats'])->name('income');
     });
 
     // Inside the shopowner prefix group
