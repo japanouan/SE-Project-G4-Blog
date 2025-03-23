@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Models\OrderDetail;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class BookingController extends Controller
 {
@@ -35,13 +36,21 @@ class BookingController extends Controller
             $bookings->where('status', $status);
         }
         
-        // Apply date range filter
+        // Apply date range filter - Fixed to work with date-only format
         if ($dateRange) {
             $dates = explode(' - ', $dateRange);
             if (count($dates) == 2) {
-                $startDate = \Carbon\Carbon::createFromFormat('d/m/Y', $dates[0])->startOfDay();
-                $endDate = \Carbon\Carbon::createFromFormat('d/m/Y', $dates[1])->endOfDay();
-                $bookings->whereBetween('purchase_date', [$startDate, $endDate]);
+                try {
+                    // Create Carbon instances from the formatted dates
+                    $startDate = Carbon::createFromFormat('d/m/Y', trim($dates[0]))->startOfDay();
+                    $endDate = Carbon::createFromFormat('d/m/Y', trim($dates[1]))->endOfDay();
+                    
+                    // Apply the date range filter to purchase_date
+                    $bookings->whereDate('purchase_date', '>=', $startDate->toDateString())
+                             ->whereDate('purchase_date', '<=', $endDate->toDateString());
+                } catch (\Exception $e) {
+                    // Handle date parsing errors silently
+                }
             }
         }
         
@@ -81,7 +90,7 @@ class BookingController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:pending,confirmed,partial paid,cancelled',
+            'status' => 'required|in:pending,confirmed,partial paid,cancelled,completed',
         ]);
         
         $booking = Booking::findOrFail($id);
@@ -195,8 +204,8 @@ class BookingController extends Controller
     {
         // Get the current shop owner's active shop
         $shopId = \App\Models\Shop::where('shop_owner_id', Auth::id())
-                     ->where('status', 'active')
-                     ->first()->shop_id ?? null;
+                        ->where('status', 'active')
+                        ->first()->shop_id ?? null;
         
         if (!$shopId) {
             return redirect()->route('shopowner.shops.my-shop')
