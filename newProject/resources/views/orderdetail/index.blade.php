@@ -75,6 +75,13 @@
                         class="px-6 py-2 border border-blue-500 text-blue-500 rounded-md hover:bg-blue-500 hover:text-white transition">
                         เพิ่มลงตะกร้า
                     </button>
+
+                    <button type="button"
+                        id="customOrderBtn"
+                        class="hidden px-6 py-2 border border-yellow-500 text-yellow-500 rounded-md hover:bg-yellow-500 hover:text-white transition">
+                        สั่งซื้อเพิ่มเติม
+                    </button>
+
                 </div>
             </form>
 
@@ -135,26 +142,45 @@
             updateStockDisplay();
         });
     });
+
+
 });
 
+    
 
-    function increaseQty() {
-        let qty = document.getElementById('quantity');
-        let stock = parseInt(document.getElementById('stockAmount').innerText) || 0;
 
-        if (stock > 0 && parseInt(qty.value) < stock) {
-            qty.value = parseInt(qty.value) + 1;
-            document.getElementById('quantityInput').value = qty.value;
-        }
+function increaseQty() {
+    let qty = document.getElementById('quantity');
+    let stock = parseInt(document.getElementById('stockAmount').innerText) || 0;
+    let customOrderBtn = document.getElementById('customOrderBtn');
+
+    if (stock > 0 && parseInt(qty.value) < stock) {
+        qty.value = parseInt(qty.value) + 1;
+        document.getElementById('quantityInput').value = qty.value;
+        customOrderBtn.classList.add("hidden"); // ซ่อนปุ่มถ้ายังไม่เกิน
+    } else {
+        alert("จำนวนที่คุณต้องการมากกว่าจำนวนที่มีในร้าน หากต้องการสั่งเพิ่ม กรุณากดปุ่ม 'สั่งซื้อเพิ่มเติม'");
+        customOrderBtn.classList.remove("hidden"); // แสดงปุ่มถ้าเกิน
+    }
+}
+
+
+
+function decreaseQty() {
+    let qty = document.getElementById('quantity');
+    let customOrderBtn = document.getElementById('customOrderBtn');
+    let stock = parseInt(document.getElementById('stockAmount').innerText) || 0;
+
+    if (parseInt(qty.value) > 1) {
+        qty.value = parseInt(qty.value) - 1;
+        document.getElementById('quantityInput').value = qty.value;
     }
 
-    function decreaseQty() {
-        let qty = document.getElementById('quantity');
-        if (parseInt(qty.value) > 1) {
-            qty.value = parseInt(qty.value) - 1;
-            document.getElementById('quantityInput').value = qty.value;
-        }
+    if (parseInt(qty.value) <= stock) {
+        customOrderBtn.classList.add("hidden");
     }
+}
+
 
     function validateForm() {
         if (!selectedColor || !selectedSize) {
@@ -181,6 +207,13 @@
             document.getElementById("selectedSize").value = selectedSize;
         });
     });
+
+    document.getElementById('customOrderBtn').addEventListener('click', function () {
+    // สมมุติว่าคุณต้องการส่ง outfit_id ไปด้วย
+        let outfitId = "{{ $outfit->outfit_id }}";
+        window.location.href = "/custom-order/" + outfitId;
+    });
+
 
 </script>
 
