@@ -16,6 +16,7 @@ use App\Http\Controllers\OrderController;
 use App\Models\CartItem;
 use App\Models\SelectService;
 use Illuminate\Http\Request;
+use App\Http\Controllers\PaymentController;
 
 use function Laravel\Prompts\search;
 
@@ -234,6 +235,10 @@ Route::prefix('cartItem')->name('cartItem.')->group(function(){
 
 Route::post('/api/check-promotion', [PromotionController::class, 'checkPromotion']);
 
+Route::prefix('payment')->name('payment.')->group(function () {
+    Route::get('/form/{booking_id}/{cycle}', [PaymentController::class, 'showPaymentForm'])->name('form');
+    Route::post('/process', [PaymentController::class, 'processPayment'])->name('process');
+});
 
 
 });
