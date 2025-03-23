@@ -190,4 +190,114 @@ class BookingController extends Controller
             'user' => $booking->orderDetails[0]->cartItem->user,
         ]);
     }
+
+    public function stats(Request $request)
+    {
+        // Get the current shop owner's active shop
+        $shopId = \App\Models\Shop::where('shop_owner_id', Auth::id())
+                     ->where('status', 'active')
+                     ->first()->shop_id ?? null;
+        
+        if (!$shopId) {
+            return redirect()->route('shopowner.shops.my-shop')
+                ->with('error', 'คุณต้องมีร้านค้าที่ได้รับการอนุมัติก่อนใช้งานหน้านี้');
+        }
+
+        // Get period from request, default to 'daily'
+        $period = $request->input('period', 'daily');
+        
+        // Get bookings for the shop with confirmed status
+        $query = Booking::where('shop_id', $shopId)
+                        ->whereIn('status', ['confirmed', 'partial paid'])
+                        ->orderBy('purchase_date', 'desc');
+        
+        // Apply date filtering based on period
+        $today = now();
+        $startDate = null;
+        $endDate = $today;
+        
+        switch ($period) {
+            case 'daily':
+                $startDate = $today->copy()->startOfDay();
+                $labelFormat = 'H'; // Hour format
+                $groupByFormat = 'H'; // Group by hour
+                break;
+            case 'weekly':
+                $startDate = $today->copy()->startOfWeek();
+                $labelFormat = 'D'; // Day name format (Mon, Tue, etc.)
+                $groupByFormat = 'w'; // Group by day of week (0=Sunday, 6=Saturday)
+                break;
+            case 'monthly':
+                $startDate = $today->copy()->startOfMonth();
+                $labelFormat = 'd'; // Day of month format
+                $groupByFormat = 'd'; // Group by day of month
+                break;
+            case 'yearly':
+                $startDate = $today->copy()->startOfYear();
+                $labelFormat = 'M'; // Month name format
+                $groupByFormat = 'm'; // Group by month
+                break;
+        }
+        
+        // Filter bookings by date range
+        $bookings = $query->whereBetween('purchase_date', [$startDate, $endDate])->get();
+        
+        // Calculate total earnings
+        $totalEarnings = $bookings->sum('total_price');
+        
+        // Calculate total completed bookings
+        $totalBookings = $bookings->count();
+        
+        // Prepare earnings data for chart
+        $earningsData = [];
+        
+        if ($period == 'daily') {
+            // Initialize hours with 0 earnings
+            for ($i = 0; $i < 24; $i++) {
+                $earningsData[sprintf("%02d", $i)] = 0;
+            }
+            
+            // Group earnings by hour
+            foreach ($bookings as $booking) {
+                $hour = date('H', strtotime($booking->purchase_date));
+                $earningsData[$hour] += $booking->total_price;
+            }
+        } elseif ($period == 'weekly') {
+            // Initialize days with 0 earnings (1=Monday to 7=Sunday)
+            for ($i = 1; $i <= 7; $i++) {
+                $earningsData[$i] = 0;
+            }
+            
+            // Group earnings by day of week
+            foreach ($bookings as $booking) {
+                $dayOfWeek = date('N', strtotime($booking->purchase_date)); // 1 (for Monday) through 7 (for Sunday)
+                $earningsData[$dayOfWeek] += $booking->total_price;
+            }
+        } elseif ($period == 'monthly') {
+            // Initialize days with 0 earnings
+            $daysInMonth = $today->daysInMonth;
+            for ($i = 1; $i <= $daysInMonth; $i++) {
+                $earningsData[sprintf("%02d", $i)] = 0;
+            }
+            
+            // Group earnings by day of month
+            foreach ($bookings as $booking) {
+                $dayOfMonth = date('d', strtotime($booking->purchase_date));
+                $earningsData[$dayOfMonth] += $booking->total_price;
+            }
+        } elseif ($period == 'yearly') {
+            // Initialize months with 0 earnings
+            for ($i = 1; $i <= 12; $i++) {
+                $earningsData[sprintf("%02d", $i)] = 0;
+            }
+            
+            // Group earnings by month
+            foreach ($bookings as $booking) {
+                $month = date('m', strtotime($booking->purchase_date));
+                $earningsData[$month] += $booking->total_price;
+            }
+        }
+        
+        return view('shopowner.stats.income', compact('period', 'totalEarnings', 'totalBookings', 'earningsData'));
+    }
 }
