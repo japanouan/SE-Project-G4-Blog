@@ -28,10 +28,15 @@
                 {{ str_pad(e($work->select_staff_detail_id), 6, '0', STR_PAD_LEFT) }}
             </p>
             <p><strong>Location:</strong>
-                {{ e($work->selectService->address->Street) }},
-                {{ e($work->selectService->address->District) }},
-                {{ e($work->selectService->address->Province) }}
-            </p>
+    @if($work->selectService->address)
+        {{ e($work->selectService->address->Street) }},
+        {{ e($work->selectService->address->District) }},
+        {{ e($work->selectService->address->Province) }}
+    @else
+        Not specified
+    @endif
+</p>
+
             <p><strong>Appointment Time:</strong>
                 {{ \Carbon\Carbon::parse($work->selectService->reservation_date)->format('H:i') }}
             </p>

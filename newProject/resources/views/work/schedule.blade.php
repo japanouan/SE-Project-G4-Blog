@@ -37,9 +37,16 @@
                 <h4 class="text-lg font-semibold">
                     {{ \Carbon\Carbon::parse($work->selectService->reservation_date)->format('d M Y') }}
                 </h4>
-                <p><strong>Location:</strong> {{ e($work->selectService->address->Street) }}, 
-                    {{ e($work->selectService->address->District) }}, 
-                    {{ e($work->selectService->address->Province) }}</p>
+                <p><strong>Location:</strong>
+    @if($work->selectService->address)
+        {{ e($work->selectService->address->Street) }},
+        {{ e($work->selectService->address->District) }},
+        {{ e($work->selectService->address->Province) }}
+    @else
+        Not specified
+    @endif
+</p>
+
                 <p><strong>Appointment Time:</strong> 
                     {{ \Carbon\Carbon::parse($work->selectService->reservation_date)->format('H:i') }}</p>
                 <p><strong>จำนวนลูกค้าที่ต้องให้บริการ:</strong> {{ e($work->customer_count) }} คน</p>
