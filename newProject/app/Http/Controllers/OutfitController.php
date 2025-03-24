@@ -18,7 +18,7 @@ class OutfitController extends Controller
 {
     public function index()
     {
-        $outfits = ThaiOutfit::paginate(10);
+        $outfits = ThaiOutfit::paginate(1000);
         return view('main', compact('outfits'));
     }
 
