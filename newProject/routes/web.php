@@ -195,9 +195,13 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/profile/show', [ProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+
     //Customer
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::get('/profile/editCus', [ProfileController::class, 'editCus'])->name('profile.editCus');
+    Route::get('/profile/customer/address', [ProfileController::class, 'customerAddress'])->name('profile.customer.address');
+    Route::get('/profile/customer/orderHistory', [ProfileController::class, 'orderHistory'])->name('profile.customer.orderHistory');
+    Route::get('/profile/customer/orderDetail/{bookingId}', [ProfileController::class, 'orderDetail'])->name('profile.customer.orderDetail');
 
     Route::patch('/profile-edit', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile-edit', [ProfileController::class, 'destroy'])->name('profile.destroy');

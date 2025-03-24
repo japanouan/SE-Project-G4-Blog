@@ -63,6 +63,12 @@ class Booking extends Model
         return $this->belongsTo(Promotion::class, 'promotion_id', 'promotion_id');
     }
 
+    // ความสัมพันธ์กับโปรโมชั่น
+    public function payment()
+    {
+        return $this->hasMany(Payment::class, 'booking_id', 'booking_id');
+    }
+
     // ความสัมพันธ์กับผู้ใช้
     public function user()
     {
