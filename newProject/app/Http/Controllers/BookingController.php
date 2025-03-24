@@ -25,7 +25,8 @@ class BookingController extends Controller
         
         // Apply filters
         $status = $request->input('status');
-        $dateRange = $request->input('date_range');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
         $search = $request->input('search');
         
         $bookings = Booking::with(['user', 'orderDetails.cartItem.outfit'])
@@ -36,22 +37,18 @@ class BookingController extends Controller
             $bookings->where('status', $status);
         }
         
-        // Apply date range filter with better error handling
-        if ($dateRange) {
-            $dates = explode(' - ', $dateRange);
-            if (count($dates) == 2) {
-                try {
-                    // Create Carbon instances from the formatted dates
-                    $startDate = Carbon::createFromFormat('d/m/Y', trim($dates[0]))->startOfDay();
-                    $endDate = Carbon::createFromFormat('d/m/Y', trim($dates[1]))->endOfDay();
-                    
-                    // Apply the date range filter to purchase_date
-                    $bookings->whereDate('purchase_date', '>=', $startDate->toDateString())
-                             ->whereDate('purchase_date', '<=', $endDate->toDateString());
-                } catch (\Exception $e) {
-                    // Handle date parsing errors silently
-                }
-            }
+        // Apply date range filter
+        if ($startDate && $endDate) {
+            $startDateObj = Carbon::parse($startDate)->startOfDay();
+            $endDateObj = Carbon::parse($endDate)->endOfDay();
+            
+            $bookings->whereBetween('purchase_date', [$startDateObj, $endDateObj]);
+        } elseif ($startDate) {
+            $startDateObj = Carbon::parse($startDate)->startOfDay();
+            $bookings->whereDate('purchase_date', '>=', $startDateObj);
+        } elseif ($endDate) {
+            $endDateObj = Carbon::parse($endDate)->endOfDay();
+            $bookings->whereDate('purchase_date', '<=', $endDateObj);
         }
         
         // Apply search filter
@@ -217,8 +214,8 @@ class BookingController extends Controller
                 ->with('error', 'คุณต้องมีร้านค้าที่ได้รับการอนุมัติก่อนใช้งานหน้านี้');
         }
 
-        // Get period from request, default to 'daily'
-        $period = $request->input('period', 'daily');
+        // Get period from request, default to 'weekly' (changed from 'daily')
+        $period = $request->input('period', 'weekly');
         
         // Get bookings for the shop with confirmed status - eager load orderDetails
         $query = Booking::with('orderDetails')
@@ -231,27 +228,29 @@ class BookingController extends Controller
         $startDate = null;
         $endDate = $today;
         
-        switch ($period) {
-            case 'daily':
-                $startDate = $today->copy()->startOfDay();
-                $labelFormat = 'H'; // Hour format
-                $groupByFormat = 'H'; // Group by hour
-                break;
-            case 'weekly':
-                $startDate = $today->copy()->startOfWeek();
-                $labelFormat = 'D'; // Day name format (Mon, Tue, etc.)
-                $groupByFormat = 'w'; // Group by day of week (0=Sunday, 6=Saturday)
-                break;
-            case 'monthly':
-                $startDate = $today->copy()->startOfMonth();
-                $labelFormat = 'd'; // Day of month format
-                $groupByFormat = 'd'; // Group by day of month
-                break;
-            case 'yearly':
-                $startDate = $today->copy()->startOfYear();
-                $labelFormat = 'M'; // Month name format
-                $groupByFormat = 'm'; // Group by month
-                break;
+        if ($period == 'custom') {
+            // Handle custom date range
+            $startDate = $request->input('start_date') ? Carbon::parse($request->input('start_date'))->startOfDay() : Carbon::now()->subDays(30)->startOfDay();
+            $endDate = $request->input('end_date') ? Carbon::parse($request->input('end_date'))->endOfDay() : Carbon::now()->endOfDay();
+            
+            // Group by day for custom range
+            $groupByFormat = 'd';
+            $labelFormat = 'Y-m-d';
+        } else {
+            switch ($period) {
+                case 'weekly':
+                    $startDate = $today->copy()->startOfWeek();
+                    $groupByFormat = 'w';
+                    break;
+                case 'monthly':
+                    $startDate = $today->copy()->startOfMonth();
+                    $groupByFormat = 'd';
+                    break;
+                case 'yearly':
+                    $startDate = $today->copy()->startOfYear();
+                    $groupByFormat = 'm';
+                    break;
+            }
         }
         
         // Filter bookings by date range
@@ -268,16 +267,21 @@ class BookingController extends Controller
         // Prepare earnings data for chart
         $earningsData = [];
         
-        if ($period == 'daily') {
-            // Initialize hours with 0 earnings
-            for ($i = 0; $i < 24; $i++) {
-                $earningsData[sprintf("%02d", $i)] = 0;
+        if ($period == 'custom') {
+            // For custom range, we'll show data by day
+            $currentDate = $startDate->copy();
+            while ($currentDate <= $endDate) {
+                $dateKey = $currentDate->format('Y-m-d');
+                $earningsData[$dateKey] = 0;
+                $currentDate->addDay();
             }
             
-            // Group earnings by hour
+            // Group earnings by day
             foreach ($bookings as $booking) {
-                $hour = date('H', strtotime($booking->purchase_date));
-                $earningsData[$hour] += $booking->orderDetails->sum('total'); // Calculate from order details
+                $bookingDate = Carbon::parse($booking->purchase_date)->format('Y-m-d');
+                if (isset($earningsData[$bookingDate])) {
+                    $earningsData[$bookingDate] += $booking->orderDetails->sum('total');
+                }
             }
         } elseif ($period == 'weekly') {
             // Initialize days with 0 earnings (1=Monday to 7=Sunday)

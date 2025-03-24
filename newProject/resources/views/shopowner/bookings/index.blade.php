@@ -36,8 +36,20 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">ช่วงวันที่</label>
-                        <input type="text" name="date_range" id="date_range" placeholder="เลือกช่วงวันที่" value="{{ request('date_range') }}"
-                               class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                        <div class="flex space-x-2">
+                            <div class="w-1/2">
+                                <label class="block text-xs text-gray-500 mb-1">เริ่มต้น</label>
+                                <input type="date" name="start_date" id="start_date" 
+                                    value="{{ request('start_date') }}"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            </div>
+                            <div class="w-1/2">
+                                <label class="block text-xs text-gray-500 mb-1">สิ้นสุด</label>
+                                <input type="date" name="end_date" id="end_date" 
+                                    value="{{ request('end_date') }}"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="mt-4 flex justify-end">
@@ -121,7 +133,7 @@
             <div class="text-center py-10">
             <i class="fa fa-calendar text-4xl text-gray-400 mb-4"></i>
                 <p class="text-lg text-gray-600">ไม่พบข้อมูลการจอง</p>
-                @if(request('status') || request('search') || request('date_range'))
+                @if(request('status') || request('search') || request('start_date') || request('end_date'))
                     <p class="text-sm text-gray-500 mt-1">ลองเปลี่ยนตัวกรองหรือคำค้นหา</p>
                     <a href="{{ route('shopowner.bookings.index') }}" class="mt-4 inline-block px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">
                         ล้างตัวกรอง
@@ -131,5 +143,27 @@
         @endif
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get date inputs
+    const startDateInput = document.getElementById('start_date');
+    const endDateInput = document.getElementById('end_date');
+    
+    // When start date changes, ensure end date is not before start date
+    startDateInput.addEventListener('change', function() {
+        if (endDateInput.value && startDateInput.value > endDateInput.value) {
+            endDateInput.value = startDateInput.value;
+        }
+    });
+    
+    // When end date changes, ensure start date is not after end date
+    endDateInput.addEventListener('change', function() {
+        if (startDateInput.value && endDateInput.value < startDateInput.value) {
+            startDateInput.value = endDateInput.value;
+        }
+    });
+});
+</script>
 
 @endsection
