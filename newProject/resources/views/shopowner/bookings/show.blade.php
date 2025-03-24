@@ -19,6 +19,7 @@
         </div>
     @endif
 
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <!-- Order Summary Card -->
         <div class="bg-white shadow-md rounded-lg overflow-hidden">
@@ -63,7 +64,7 @@
                     </div>
                     <div class="flex justify-between items-center">
                         <span class="text-gray-600">ยอดรวม:</span>
-                        <span class="font-bold text-lg">{{ number_format($booking->total_price, 2) }} ฿</span>
+                        <span class="font-bold text-lg">{{ number_format($booking->orderDetails->sum('total'), 2) }} ฿</span>
                     </div>
                 </div>
                 
@@ -107,16 +108,16 @@
                 <h3 class="text-lg font-semibold">ข้อมูลการจัดส่ง</h3>
             </div>
             <div class="p-4">
-                @if($booking->address)
+                @if($booking->customerAddress && $booking->customerAddress->address)
                     <div class="mb-4">
                         <p class="text-gray-600 mb-1">จัดส่งที่:</p>
                         <p class="font-medium">
-                            บ้านเลขที่ {{ $booking->address->HouseNumber }}
-                            @if($booking->address->Street) ถนน{{ $booking->address->Street }} @endif
-                            @if($booking->address->Subdistrict) ตำบล/แขวง{{ $booking->address->Subdistrict }} @endif
-                            @if($booking->address->District) อำเภอ/เขต{{ $booking->address->District }} @endif
-                            @if($booking->address->Province) จังหวัด{{ $booking->address->Province }} @endif
-                            @if($booking->address->PostalCode) {{ $booking->address->PostalCode }} @endif
+                            บ้านเลขที่ {{ $booking->customerAddress->address->HouseNumber }}
+                            @if($booking->customerAddress->address->Street) ถนน{{ $booking->customerAddress->address->Street }} @endif
+                            @if($booking->customerAddress->address->Subdistrict) ตำบล/แขวง{{ $booking->customerAddress->address->Subdistrict }} @endif
+                            @if($booking->customerAddress->address->District) อำเภอ/เขต{{ $booking->customerAddress->address->District }} @endif
+                            @if($booking->customerAddress->address->Province) จังหวัด{{ $booking->customerAddress->address->Province }} @endif
+                            @if($booking->customerAddress->address->PostalCode) {{ $booking->customerAddress->address->PostalCode }} @endif
                         </p>
                     </div>
                 @else
@@ -295,7 +296,7 @@
                         <td colspan="4" class="px-6 py-4 text-right font-medium">จำนวนรวม:</td>
                         <td class="px-6 py-4 font-medium">{{ $booking->orderDetails->sum('quantity') }} ชุด</td>
                         <td colspan="2" class="px-6 py-4 text-right font-medium">ยอดรวมทั้งสิ้น:</td>
-                        <td class="px-6 py-4 font-bold">{{ number_format($booking->total_price, 2) }} ฿</td>
+                        <td class="px-6 py-4 font-bold">{{ number_format($booking->orderDetails->sum('total'), 2) }} ฿</td>
                     </tr>
                 </tfoot>
             </table>

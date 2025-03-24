@@ -71,8 +71,13 @@ class BookingController extends Controller
     
     public function show($id)
     {
-        $booking = Booking::with(['user', 'orderDetails.cartItem.outfit', 'shop', 'promotion'])
-            ->findOrFail($id);
+        $booking = Booking::with([
+            'user', 
+            'orderDetails.cartItem.outfit', 
+            'shop.address', 
+            'promotion',
+            'customerAddress.address'  // Add this to eager load the relationship chain
+        ])->findOrFail($id);
         
         // Check if this booking belongs to the current shop owner
         $shopId = \App\Models\Shop::where('shop_owner_id', Auth::id())
@@ -215,8 +220,9 @@ class BookingController extends Controller
         // Get period from request, default to 'daily'
         $period = $request->input('period', 'daily');
         
-        // Get bookings for the shop with confirmed status
-        $query = Booking::where('shop_id', $shopId)
+        // Get bookings for the shop with confirmed status - eager load orderDetails
+        $query = Booking::with('orderDetails')
+                        ->where('shop_id', $shopId)
                         ->whereIn('status', ['confirmed', 'partial paid'])
                         ->orderBy('purchase_date', 'desc');
         
@@ -251,8 +257,10 @@ class BookingController extends Controller
         // Filter bookings by date range
         $bookings = $query->whereBetween('purchase_date', [$startDate, $endDate])->get();
         
-        // Calculate total earnings
-        $totalEarnings = $bookings->sum('total_price');
+        // Calculate total earnings from order details instead of booking total_price
+        $totalEarnings = $bookings->sum(function($booking) {
+            return $booking->orderDetails->sum('total');
+        });
         
         // Calculate total completed bookings
         $totalBookings = $bookings->count();
@@ -269,7 +277,7 @@ class BookingController extends Controller
             // Group earnings by hour
             foreach ($bookings as $booking) {
                 $hour = date('H', strtotime($booking->purchase_date));
-                $earningsData[$hour] += $booking->total_price;
+                $earningsData[$hour] += $booking->orderDetails->sum('total'); // Calculate from order details
             }
         } elseif ($period == 'weekly') {
             // Initialize days with 0 earnings (1=Monday to 7=Sunday)
@@ -280,7 +288,7 @@ class BookingController extends Controller
             // Group earnings by day of week
             foreach ($bookings as $booking) {
                 $dayOfWeek = date('N', strtotime($booking->purchase_date)); // 1 (for Monday) through 7 (for Sunday)
-                $earningsData[$dayOfWeek] += $booking->total_price;
+                $earningsData[$dayOfWeek] += $booking->orderDetails->sum('total'); // Calculate from order details
             }
         } elseif ($period == 'monthly') {
             // Initialize days with 0 earnings
@@ -292,7 +300,7 @@ class BookingController extends Controller
             // Group earnings by day of month
             foreach ($bookings as $booking) {
                 $dayOfMonth = date('d', strtotime($booking->purchase_date));
-                $earningsData[$dayOfMonth] += $booking->total_price;
+                $earningsData[$dayOfMonth] += $booking->orderDetails->sum('total'); // Calculate from order details
             }
         } elseif ($period == 'yearly') {
             // Initialize months with 0 earnings
@@ -303,7 +311,7 @@ class BookingController extends Controller
             // Group earnings by month
             foreach ($bookings as $booking) {
                 $month = date('m', strtotime($booking->purchase_date));
-                $earningsData[$month] += $booking->total_price;
+                $earningsData[$month] += $booking->orderDetails->sum('total'); // Calculate from order details
             }
         }
         
