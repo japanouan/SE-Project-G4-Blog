@@ -50,6 +50,10 @@
             <div class="bg-white shadow-md rounded-lg p-6 sticky top-6">
                 <h3 class="text-xl font-semibold text-gray-800 mb-6 pb-3 border-b">รายละเอียดการสั่งซื้อ</h3>
                 
+                @php
+                    $pickupDate = $cartItems->first()?->reservation_date ?? '';
+                @endphp
+
                 <form action="{{ route('order.store') }}" method="POST">
                     @csrf
                     @foreach ($cartItems as $item)
@@ -59,9 +63,15 @@
                     <!-- วันที่รับชุด -->
                     <div class="mb-5">
                         <label for="pickup_date" class="block text-gray-700 font-medium mb-2">วันที่สะดวกสำหรับการบริการ:</label>
-                        <input type="date" id="pickup_date" name="pickup_date" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                        <input 
+                            type="date" 
+                            id="pickup_date" 
+                            name="pickup_date" 
+                            class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                            value="{{ old('pickup_date', $pickupDate) }}"
+                            required
+                        >
                     </div>
-
 
                     <!-- บริการเสริม -->
                     <div class="bg-gray-50 p-4 rounded-lg mb-5">
