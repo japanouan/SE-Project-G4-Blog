@@ -132,28 +132,4 @@
     </div>
 </div>
 
-@push('scripts')
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
-<script>
-    $(function() {
-        $('input[name="date_range"]').daterangepicker({
-            autoUpdateInput: false,
-            locale: {
-                format: 'DD/MM/YYYY',
-                cancelLabel: 'Clear'
-            }
-        });
-
-        $('input[name="date_range"]').on('apply.daterangepicker', function(ev, picker) {
-            $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
-        });
-
-        $('input[name="date_range"]').on('cancel.daterangepicker', function(ev, picker) {
-            $(this).val('');
-        });
-    });
-</script>
-@endpush
 @endsection

@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Address;
 use App\Models\CustomerAddress; 
 
+
+
 class OrderController extends Controller
 {
     public function viewAddTo(Request $request)
@@ -68,143 +70,144 @@ class OrderController extends Controller
 
 
     public function store(Request $request)
-{
-    $user = Auth::user();
-    DB::beginTransaction();
-
-    try {
-        Log::debug('เริ่ม store()');
-
-        // ✅ ตรวจสอบประเภทที่อยู่: 'customer' หรือ 'custom'
-        $addressType = $request->input('address_type');
-        $staffAddressId = null;
-        $customerAddressId = null;
-
-        if ($addressType === 'custom') {
-            $staffAddressData = $request->input('staff_address');
-            $staffAddress = new Address();
-            $staffAddress->Province = $staffAddressData['province'] ?? '';
-            $staffAddress->District = $staffAddressData['district'] ?? '';
-            $staffAddress->Subdistrict = $staffAddressData['subdistrict'] ?? '';
-            $staffAddress->PostalCode = $staffAddressData['postal_code'] ?? '';
-            $staffAddress->HouseNumber = $staffAddressData['detail'] ?? '';
-            $staffAddress->Street = $staffAddressData['street'] ?? '';
-            $staffAddress->CreatedAt = now();
-            $staffAddress->save();
-
-            $staffAddressId = $staffAddress->AddressID;
-
-            $customerAddress = new CustomerAddress();
-            $customerAddress->customer_id = $user->user_id;
-            $customerAddress->AddressID = $staffAddressId;
-            $customerAddress->AddressName = 'บริการเสริม';
-            $customerAddress->save();
-
-            $customerAddressId = $customerAddress->cus_address_id;
-        } else {
-            $user->load('customerAddress.address');
-            $customerAddress = $user->customerAddress;
-
-            if ($customerAddress && $customerAddress->address) {
-                $customerAddressId = $customerAddress->cus_address_id; // ใช้เป็น FK ไปยัง Bookings.AddressID
-                $staffAddressId = $customerAddress->address->AddressID; // ใช้เก็บใน selectService
+    {
+        $user = Auth::user();
+        DB::beginTransaction();
+    
+        try {
+            Log::debug('เริ่ม store()');
+    
+            // ✅ ตรวจสอบประเภทที่อยู่: 'customer' หรือ 'custom'
+            $addressType = $request->input('address_type');
+            $staffAddressId = null;
+            $customerAddressId = null;
+    
+            if ($addressType === 'custom') {
+                $staffAddressData = $request->input('staff_address');
+                $staffAddress = new Address();
+                $staffAddress->Province = $staffAddressData['province'] ?? '';
+                $staffAddress->District = $staffAddressData['district'] ?? '';
+                $staffAddress->Subdistrict = $staffAddressData['subdistrict'] ?? '';
+                $staffAddress->PostalCode = $staffAddressData['postal_code'] ?? '';
+                $staffAddress->HouseNumber = $staffAddressData['detail'] ?? '';
+                $staffAddress->Street = $staffAddressData['street'] ?? '';
+                $staffAddress->CreatedAt = now();
+                $staffAddress->save();
+    
+                $staffAddressId = $staffAddress->AddressID;
+    
+                $customerAddress = new CustomerAddress();
+                $customerAddress->customer_id = $user->user_id;
+                $customerAddress->AddressID = $staffAddressId;
+                $customerAddress->AddressName = 'บริการเสริม';
+                $customerAddress->save();
+    
+                $customerAddressId = $customerAddress->cus_address_id;
             } else {
-                throw new \Exception('ไม่พบที่อยู่ลูกค้า กรุณาเพิ่มที่อยู่ก่อนทำรายการ');
+                $user->load('customerAddress.address');
+                $customerAddress = $user->customerAddress;
+                if ($customerAddress && $customerAddress->address) {
+                    $customerAddressId = $customerAddress->cus_address_id;
+                    $staffAddressId = $customerAddress->address->AddressID;
+                } else {
+                    throw new \Exception('ไม่พบที่อยู่ลูกค้า กรุณาเพิ่มที่อยู่ก่อนทำรายการ');
+                }
             }
-
-        }
-
-        // ✅ ดึงรายการสินค้าในตะกร้า
-        $cartItemIds = $request->cart_item_ids;
-        $cartItems = CartItem::with('outfit')->whereIn('cart_item_id', $cartItemIds)->get();
-
-        // ✅ แยกชุด
-        $normalItems = $cartItems->where('overent', 0);
-        $overentItems = $cartItems->where('overent', 1);
-
-        // ✅ ดึง shop_id
-        $shop_id = $cartItems->first()?->outfit?->shop_id ?? 1;
-
-        // ✅ ค่าบริการเสริม
-        $services = $request->input('selected_services', []);
-        $staffTotal = collect($services)->sum(fn($s) => $s['count']) * 2000;
-
-        // ✅ ตรวจสอบโปรโมชั่น
-        $promotionCode = $request->input('promotion_code');
-        $promotion = null;
-        $discountAmount = 0;
-
-        if ($promotionCode) {
-            $promotion = Promotion::where('promotion_code', $promotionCode)
-                ->where('shop_id', $shop_id)
-                ->where('is_active', true)
-                ->where('start_date', '<=', now())
-                ->where('end_date', '>=', now())
-                ->first();
-
-            if ($promotion) {
-                $discountAmount = $promotion->discount_amount;
+    
+            // ✅ ดึงรายการสินค้าในตะกร้า
+            $cartItemIds = $request->cart_item_ids;
+            $cartItems = CartItem::with('outfit')->whereIn('cart_item_id', $cartItemIds)->get();
+    
+            // ✅ แยกชุด
+            $normalItems = $cartItems->where('overent', 0);
+            $overentItems = $cartItems->where('overent', 1);
+    
+            // ✅ ดึง shop_id
+            $shop_id = $cartItems->first()?->outfit?->shop_id ?? 1;
+    
+            // ✅ ค่าบริการเสริม
+            $services = $request->input('selected_services', []);
+            $staffTotal = collect($services)->sum(fn($s) => $s['count']) * 2000;
+    
+            // ✅ ตรวจสอบโปรโมชั่น
+            $promotionCode = $request->input('promotion_code');
+            $promotion = null;
+            $discountAmount = 0;
+    
+            if ($promotionCode) {
+                $promotion = Promotion::where('promotion_code', $promotionCode)
+                    ->where('shop_id', $shop_id)
+                    ->where('is_active', true)
+                    ->where('start_date', '<=', now())
+                    ->where('end_date', '>=', now())
+                    ->first();
+    
+                if ($promotion) {
+                    $discountAmount = $promotion->discount_amount;
+                }
             }
-        }
-
-        // ✅ ยอดรวมสินค้า
-        $productTotal = $normalItems->sum(fn($item) => $item->quantity * $item->outfit->price);
-        $totalWithDiscount = max($productTotal + $staffTotal - $discountAmount, 0);
-
-        // ✅ สถานะ
-        $bookingStatus = $overentItems->isNotEmpty() ? 'partial paid' : 'confirmed';
-
-        // ✅ สร้าง Booking
-        $booking = Booking::create([
-            'purchase_date' => now(),
-            'total_price' => $totalWithDiscount,
-            'pickup_date' => $request->pickup_date ?? now(),
-            'status' => $bookingStatus,
-            'shop_id' => $shop_id,
-            'user_id' => $user->user_id,
-            'promotion_id' => $promotion?->promotion_id,
-            'AddressID' => $customerAddressId,
-        ]);
-
-        // ✅ บันทึก OrderDetail
-        foreach ($cartItems as $item) {
-            $cycle = $item->overent == 1 ? 2 : 1;
-
-            OrderDetail::create([
-                'quantity' => $item->quantity,
-                'total' => $item->quantity * $item->outfit->price,
-                'booking_cycle' => $cycle,
-                'booking_id' => $booking->booking_id,
-                'cart_item_id' => $item->cart_item_id,
-                'deliveryOptions' => 'default',
+    
+            // ✅ ยอดรวมสินค้า
+            $productTotal = $normalItems->sum(fn($item) => $item->quantity * $item->outfit->price);
+            $totalWithDiscount = max($productTotal + $staffTotal - $discountAmount, 0);
+    
+            // ✅ สถานะ
+            $bookingStatus = $overentItems->isNotEmpty() ? 'partial paid' : 'confirmed';
+    
+            // ✅ สร้าง Booking
+            $booking = Booking::create([
+                'purchase_date' => now(),
+                'total_price' => $totalWithDiscount,
+                'pickup_date' => $request->pickup_date ?? now(),
+                'status' => $bookingStatus,
+                'shop_id' => $shop_id,
+                'user_id' => $user->user_id,
+                'promotion_id' => $promotion?->promotion_id,
+                'AddressID' => $customerAddressId,
             ]);
-
-            $item->status = 'REMOVED';
-            $item->purchased_at = now();
-            $item->save();
-        }
-
-        // ✅ บันทึกบริการเสริม
-        foreach ($services as $s) {
-            if ($s['count'] > 0) {
-                SelectService::create([
-                    'service_type' => $s['type'],
-                    'customer_count' => $s['count'],
-                    'reservation_date' => now(),
+    
+            // ✅ บันทึก OrderDetail
+            foreach ($cartItems as $item) {
+                $cycle = $item->overent == 1 ? 2 : 1;
+    
+                OrderDetail::create([
+                    'quantity' => $item->quantity,
+                    'total' => $item->quantity * $item->outfit->price,
+                    'booking_cycle' => $cycle,
                     'booking_id' => $booking->booking_id,
-                    'AddressID' => $staffAddressId,
+                    'cart_item_id' => $item->cart_item_id,
+                    'deliveryOptions' => 'default',
                 ]);
+    
+                $item->status = 'REMOVED';
+                $item->purchased_at = now();
+                $item->save();
             }
+    
+            // ✅ บันทึกบริการเสริม
+            foreach ($services as $s) {
+                if ($s['count'] > 0) {
+                    SelectService::create([
+                        'service_type' => $s['type'],
+                        'customer_count' => $s['count'],
+                        'reservation_date' => now(),
+                        'booking_id' => $booking->booking_id,
+                        'AddressID' => $staffAddressId,
+                    ]);
+                }
+            }
+    
+            DB::commit();
+            return redirect()->route('cartItem.allItem')->with('success', 'ทำรายการสำเร็จ');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('เกิดข้อผิดพลาด:', ['message' => $e->getMessage(), 'line' => $e->getLine()]);
+            return back()->withErrors(['error' => $e->getMessage()]);
         }
-
-        DB::commit();
-        return redirect()->route('cartItem.allItem')->with('success', 'ทำรายการสำเร็จ');
-    } catch (\Exception $e) {
-        DB::rollBack();
-        Log::error('เกิดข้อผิดพลาด:', ['message' => $e->getMessage(), 'line' => $e->getLine()]);
-        return back()->withErrors(['error' => $e->getMessage()]);
     }
-}
+    
+
+
 
     
     

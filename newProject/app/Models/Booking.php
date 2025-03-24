@@ -46,7 +46,7 @@ class Booking extends Model
     public function getPurchaseDateAttribute($value)
     {
         if ($value) {
-            return Carbon::parse($value)->format('Y-m-d');
+            return Carbon::parse($value);
         }
         return null;
     }
@@ -81,7 +81,7 @@ class Booking extends Model
         return $this->hasMany(SelectService::class, 'booking_id', 'booking_id');
     }
 
-    // Add this relationship to the Booking model
+    // Relationship with address
     public function address()
     {
         return $this->belongsTo(Address::class, 'AddressID', 'AddressID');

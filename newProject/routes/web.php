@@ -13,9 +13,11 @@ use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\IssueController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\AdminController;
 use App\Models\CartItem;
 use App\Models\SelectService;
 use Illuminate\Http\Request;
+use App\Http\Controllers\PaymentController;
 
 use function Laravel\Prompts\search;
 
@@ -116,6 +118,11 @@ Route::prefix('admin')->name('admin.')->middleware('auth', 'is_admin')->group(fu
     //booking
     Route::get('/booking', [BookingController::class, 'adminBooking'])->name('booking.index');
     Route::get('/order/{id}', [BookingController::class, 'adminOrderDetails'])->name('booking.detail');
+
+    //stat
+    Route::get('/statistics/shop', [AdminController::class, 'showShopStatistics'])->name('statistics.shop');
+    Route::get('/statistics/photographer', [AdminController::class, 'showPhotographerStatistics'])->name('statistics.photographer');
+    Route::get('/statistics/make-upartist', [AdminController::class, 'showMakeUpArtistStatistics'])->name('statistics.make-upartist');
 
 });
 
@@ -234,6 +241,10 @@ Route::prefix('cartItem')->name('cartItem.')->group(function(){
 
 Route::post('/api/check-promotion', [PromotionController::class, 'checkPromotion']);
 
+Route::prefix('payment')->name('payment.')->group(function () {
+    Route::get('/form/{booking_id}/{cycle}', [PaymentController::class, 'showPaymentForm'])->name('form');
+    Route::post('/process', [PaymentController::class, 'processPayment'])->name('process');
+});
 
 
 });
