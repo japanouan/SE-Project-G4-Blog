@@ -78,7 +78,7 @@
                                 <div class="text-sm font-medium text-gray-900">{{ $booking->user->name ?? 'ไม่ระบุ' }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">{{ number_format($booking->total_price, 2) }} ฿</div>
+                                <div class="text-sm text-gray-900">{{ number_format($booking->orderDetails->sum('total'), 2) }} ฿</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if($booking->status == 'pending')

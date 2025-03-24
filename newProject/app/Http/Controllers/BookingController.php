@@ -71,8 +71,13 @@ class BookingController extends Controller
     
     public function show($id)
     {
-        $booking = Booking::with(['user', 'orderDetails.cartItem.outfit', 'shop', 'promotion'])
-            ->findOrFail($id);
+        $booking = Booking::with([
+            'user', 
+            'orderDetails.cartItem.outfit', 
+            'shop.address', 
+            'promotion',
+            'customerAddress.address'  // Add this to eager load the relationship chain
+        ])->findOrFail($id);
         
         // Check if this booking belongs to the current shop owner
         $shopId = \App\Models\Shop::where('shop_owner_id', Auth::id())

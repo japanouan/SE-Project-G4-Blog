@@ -86,4 +86,10 @@ class Booking extends Model
     {
         return $this->belongsTo(Address::class, 'AddressID', 'AddressID');
     }
+
+    // Add this new relationship method to the Booking model
+    public function customerAddress()
+    {
+        return $this->belongsTo(CustomerAddress::class, 'AddressID', 'cus_address_id');
+    }
 }
