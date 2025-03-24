@@ -16,7 +16,8 @@ class OrderDetail extends Model
         'created_at', 
         'booking_id', 
         'cart_item_id',
-        'deliveryOptions'
+        'deliveryOptions',
+        'reservation_date',
     ];
 
     // Relationship with Booking

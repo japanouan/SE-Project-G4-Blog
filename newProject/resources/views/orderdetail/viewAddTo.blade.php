@@ -58,7 +58,7 @@
 
                     <!-- วันที่รับชุด -->
                     <div class="mb-5">
-                        <label for="pickup_date" class="block text-gray-700 font-medium mb-2">วันที่ต้องการรับชุด:</label>
+                        <label for="pickup_date" class="block text-gray-700 font-medium mb-2">วันที่สะดวกสำหรับการบริการ:</label>
                         <input type="date" id="pickup_date" name="pickup_date" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
                     </div>
 

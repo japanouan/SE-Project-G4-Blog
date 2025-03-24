@@ -42,7 +42,7 @@ class OrderDetailController extends Controller
             ->join('CartItems', 'OrderDetails.cart_item_id', '=', 'CartItems.cart_item_id')
             ->where('CartItems.sizeDetail_id', $sizeDetail_id)
             ->where('Bookings.status', '!=', 'cancelled')
-            ->where('Bookings.purchase_date', $date)
+            ->where('OrderDetails.reservation_date', $date)
             ->groupBy('CartItems.sizeDetail_id')
             ->select([
                 'CartItems.sizeDetail_id', // อยู่ใน GROUP BY

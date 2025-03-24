@@ -6,8 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Payment extends Model
 {
-    protected $table = 'payments';
+    protected $table = 'Payments';
     protected $primaryKey = 'payment_id';
+    const UPDATED_AT = null;
 
     protected $fillable = [
         'payment_method',
@@ -15,6 +16,7 @@ class Payment extends Model
         'status',
         'booking_cycle',
         'booking_id',
+        'created_at',
     ];
 
     public function booking()

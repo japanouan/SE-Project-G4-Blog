@@ -10,6 +10,7 @@ use App\Models\ThaiOutfit;
 use App\Models\Promotion;
 use App\Models\Booking;
 use App\Models\Shop;
+use App\Models\Payment;
 use App\Models\SelectService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -81,6 +82,7 @@ class OrderController extends Controller
             $addressType = $request->input('address_type');
             $staffAddressId = null;
             $customerAddressId = null;
+            $HasOverrented = false;
     
             if ($addressType === 'custom') {
                 $staffAddressData = $request->input('staff_address');
@@ -154,18 +156,24 @@ class OrderController extends Controller
             // ✅ สถานะ
             $bookingStatus = $overentItems->isNotEmpty() ? 'partial paid' : 'confirmed';
     
+            foreach ($cartItems as $item) {
+                if($item->overent == 1){
+                    $HasOverrented =true;
+                }
+            }
             // ✅ สร้าง Booking
             $booking = Booking::create([
                 'purchase_date' => now(),
                 'total_price' => $totalWithDiscount,
-                'pickup_date' => $request->pickup_date ?? now(),
                 'status' => $bookingStatus,
                 'shop_id' => $shop_id,
                 'user_id' => $user->user_id,
                 'promotion_id' => $promotion?->promotion_id,
                 'AddressID' => $customerAddressId,
+                'hasOverrented' => $HasOverrented,
             ]);
     
+            // dd($cartItems);
             // ✅ บันทึก OrderDetail
             foreach ($cartItems as $item) {
                 $cycle = $item->overent == 1 ? 2 : 1;
@@ -176,8 +184,19 @@ class OrderController extends Controller
                     'booking_cycle' => $cycle,
                     'booking_id' => $booking->booking_id,
                     'cart_item_id' => $item->cart_item_id,
+                    'reservation_date' => $item->reservation_date,
                     'deliveryOptions' => 'default',
                 ]);
+    
+                if($cycle == 1){
+                    Payment::create([
+                        'payment_method' => 'paypal',
+                        'total' => $item->quantity * $item->outfit->price,
+                        'status' => 'paid',
+                        'booking_cycle' => '1',
+                        'booking_id' => $booking->booking_id,
+                    ]);
+                }
     
                 $item->status = 'REMOVED';
                 $item->purchased_at = now();
@@ -190,7 +209,7 @@ class OrderController extends Controller
                     SelectService::create([
                         'service_type' => $s['type'],
                         'customer_count' => $s['count'],
-                        'reservation_date' => now(),
+                        'reservation_date' => $request->pickup_date ?? now(),
                         'booking_id' => $booking->booking_id,
                         'AddressID' => $staffAddressId,
                     ]);

@@ -80,7 +80,7 @@
             <!-- คงเหลือ -->
             <p class="text-sm text-gray-500">
                 คงเหลือ: 
-                {{ $cartItem->overent == 1 ? '-' : ($cartItem->sizeAndColor->amount ?? 'ไม่ระบุ') }}
+                {{ $cartItem->overent == 1 ? '-' : ($cartItem->stockRemaining ?? 'ไม่ระบุ') }}
             </p>
 
             <!-- จำนวน -->

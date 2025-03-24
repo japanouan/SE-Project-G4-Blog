@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\ThaiOutfit;
 use App\Models\CartItem;
+use App\Models\OrderDetail;
+use App\Models\Booking;
 use App\Models\User;
 use App\Models\ThaiOutfitSizeAndColor;
 
@@ -41,18 +43,40 @@ class CartItemController extends Controller
         if (!$cartItem->sizeAndColor) {
             $cartItem->sizeAndColor = (object) ['amount' => 0]; // กำหนดค่าเริ่มต้นให้เป็น 0
         }
+        
+        $sizeDetail_id = $cartItem->sizeDetail_id;
+        $date = $cartItem->reservation_date;
+        // คำนวณสินค้าคงเหลือ โดยการลบปริมาณที่ถูกสั่งไปจาก orderdetails
+        $stockData = Booking::query()
+        ->join('OrderDetails', 'Bookings.booking_id', '=', 'OrderDetails.booking_id')
+        ->join('CartItems', 'OrderDetails.cart_item_id', '=', 'CartItems.cart_item_id')
+        ->where('CartItems.sizeDetail_id', $sizeDetail_id)
+        ->where('Bookings.status', '!=', 'cancelled')
+        ->where('OrderDetails.reservation_date', $date)
+        ->groupBy('CartItems.sizeDetail_id')
+        ->select([
+            'CartItems.sizeDetail_id', // อยู่ใน GROUP BY
+            \DB::raw('SUM(OrderDetails.quantity) as total_quantity'), // ผลรวมของ quantity
+             // ผลรวมของ total
+        ])
+        ->get(); // หายอดรวม quantity จาก orderdetails
+
+        
+        $soldQuantity = $stockData->first()->total_quantity ?? 0;
+    
+        // คำนวณสินค้าคงเหลือ
+        $cartItem->stockRemaining = $cartItem->sizeAndColor->amount - $soldQuantity;
+
+        // เพิ่มค่า stockRemaining ให้กับ attribute ที่สามารถใช้ใน view ได้
+        $cartItem->append('stockRemaining');
     }
+
+    // dd($cartItems);
 
     
 
     return view('cartItem.index', compact('cartItems'));
 }
-
-
-
-
-    
-
     
 
 
@@ -69,6 +93,7 @@ public function addToCart(Request $request)
     $quantity = (int) $request->input('quantity', 1);
     $overent = $request->input('overent');
     $sizeDetail_id = $request->input('sizeDetail_id');
+    $reservation_date = $request->input('reservation_date');
 
     // ดึงความสัมพันธ์ sizeAndColor เพื่อเช็ค stock
     $sizeAndColor = ThaiOutfitSizeAndColor::where('outfit_id', $outfit_id)
@@ -108,6 +133,7 @@ public function addToCart(Request $request)
             'quantity' => $quantity,
             'overent' => $overent,
             'sizeDetail_id' => $sizeDetail_id,
+            'reservation_date' => $reservation_date,
         ]);
     }
 
