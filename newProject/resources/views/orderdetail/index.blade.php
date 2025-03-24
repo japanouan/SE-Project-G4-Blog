@@ -23,6 +23,10 @@
                 <p class="text-gray-600">ค่าปรับ: {{ number_format($outfit->penaltyfee, 2) }} บาท</p>
             </div>
 
+            <!-- เลือกวันที่ -->
+            <p class="mt-4 font-semibold">เลือกวันที่:</p>
+            <input type="date" id="selectedDate" class="border rounded-md px-3 py-2 mt-2 w-full">
+
             <!-- สีของชุด -->
             <p class="mt-4 font-semibold">สีชุด:</p>
             <div class="flex gap-2 mt-2">
@@ -60,6 +64,7 @@
                 <input type="hidden" name="size_id" id="selectedSize" value="">
                 <input type="hidden" name="color_id" id="selectedColor" value="">
                 <input type="hidden" name="overent" value="0">
+                <input type="hidden" name="sizeDetail_id" id="selectedsizeDetail_id" value="">
                 <input type="hidden" id="quantityInput" name="quantity" value="1">
 
                 <div class="mt-6 flex gap-4">
@@ -86,6 +91,7 @@
                 <input type="hidden" name="outfit_id" value="{{ $outfit->outfit_id }}">
                 <input type="hidden" name="size_id" id="selectedSizeExtra" value="">
                 <input type="hidden" name="color_id" id="selectedColorExtra" value="">
+                <input type="hidden" name="sizeDetail_id" id="selectedsizeDetail_idExtra" value="">
                 <input type="hidden" name="overent" value="1">
                 <label for="extraQuantity" class="block text-gray-700">กรอกจำนวนเพิ่มเติมที่ต้องการ:</label>
                 <input type="number" id="extraQuantity" name="quantity" min="1" class="mt-1 border rounded-md px-3 py-2 w-32" value="1">
@@ -102,6 +108,15 @@
         let stockData = @json($outfit->sizeAndColors);
         let selectedColor = null;
         let selectedSize = null;
+        let selectedDate = null;
+
+        // คำนวณจำนวนที่เหลือเมื่อมีการเลือกวัน
+        document.getElementById("selectedDate").addEventListener("change", function() {
+            selectedDate = this.value;
+            if (selectedDate) {
+                document.getElementById("colorSelection").style.display = "flex";
+            }
+        });
 
         function updateStockDisplay() {
             if (selectedColor && selectedSize) {
@@ -109,6 +124,8 @@
                     item.color_id == selectedColor && item.size_id == selectedSize
                 );
                 let stockAmount = stockItem ? stockItem.amount : 0;
+                document.getElementById("selectedsizeDetail_id").value = stockItem.sizeDetail_id;
+                console.log(document.getElementById("selectedsizeDetail_id").value);
                 document.getElementById("stockAmount").innerText = stockAmount;
             } else {
                 document.getElementById("stockAmount").innerText = "0";

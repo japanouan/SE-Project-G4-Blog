@@ -35,4 +35,11 @@ class ThaiOutfitSizeAndColor extends Model
         return $this->belongsTo(ThaiOutfitColor::class, 'color_id', 'color_id');
     }
     
+    // Get the color
+    public function cartItem()
+    {
+        return $this->belongsTo(CartItem::class,'sizeDetail_id', 'sizeDetail_id'); // หรือ field ที่ใช้เชื่อม
+    
+    }
+    
 }

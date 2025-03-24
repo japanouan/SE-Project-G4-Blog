@@ -9,7 +9,7 @@ class CartItem extends Model
     protected $table = 'CartItems';
     protected $primaryKey = 'cart_item_id';
     protected $guarded = ['cart_item_id'];
-    protected $fillable = ['quantity', 'created_at', 'purchased_at', 'outfit_id', 'userId', 'size_id', 'color_id', 'overent'];
+    protected $fillable = ['quantity', 'created_at', 'purchased_at', 'outfit_id', 'userId', 'size_id', 'color_id', 'overent','sizeDetail_id'];
 
     public function outfit()
     {
@@ -33,6 +33,11 @@ class CartItem extends Model
     {
         return $this->belongsTo(User::class,'userId', 'user_id'); // หรือ field ที่ใช้เชื่อม
     }
-
+    
+    // Relations with thaioutfit_sizeandcolor
+    public function thaioutfit_sizeandcolor()
+    {
+        return $this->belongsTo(ThaiOutfitSizeAndColor::class,'sizeDetail_id', 'sizeDetail_id'); // หรือ field ที่ใช้เชื่อม
+    }
     
 }

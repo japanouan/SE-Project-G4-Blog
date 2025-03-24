@@ -68,6 +68,7 @@ public function addToCart(Request $request)
     $color_id = $request->input('color_id');
     $quantity = (int) $request->input('quantity', 1);
     $overent = $request->input('overent');
+    $sizeDetail_id = $request->input('sizeDetail_id');
 
     // ดึงความสัมพันธ์ sizeAndColor เพื่อเช็ค stock
     $sizeAndColor = ThaiOutfitSizeAndColor::where('outfit_id', $outfit_id)
@@ -106,6 +107,7 @@ public function addToCart(Request $request)
             'color_id' => $color_id,
             'quantity' => $quantity,
             'overent' => $overent,
+            'sizeDetail_id' => $sizeDetail_id,
         ]);
     }
 

@@ -16,11 +16,14 @@ use Illuminate\Support\Facades\Auth;
 
 class OrderDetailController extends Controller
 {
+    //Outfit details
     public function index($idOutfit)
     {
         $outfit = ThaiOutfit::with(['categories', 'sizeAndColors.size', 'sizeAndColors.color'])
                             ->findOrFail($idOutfit);
+        $booking = CartItem::all();
 
+        // dd($booking->first());
         
         return view('orderdetail.index', compact('outfit'));
     }
