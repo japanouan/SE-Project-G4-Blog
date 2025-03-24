@@ -51,6 +51,12 @@
 
             <!-- จำนวนชุด -->
             <p class="mt-4 font-semibold">จำนวนชุด: <span id="stockAmount">0</span></p>
+            <!-- loading screen -->
+            <div id="loadingIndicator" style="display: none;">
+                <img src="{{ asset('images/loading.gif') }}" alt="Loading..." class="w-6 h-6 inline-block">
+            </div>
+
+
             <div class="flex items-center gap-2">
                 <button type="button" class="px-3 py-2 border rounded-md bg-gray-200 text-gray-700" onclick="decreaseQty()">-</button>
                 <input type="text" id="quantity" value="1" class="w-12 text-center border rounded-md" readonly>
@@ -102,59 +108,16 @@
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <!-- JavaScript -->
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        let stockData = @json($outfit->sizeAndColors);
-        let selectedColor = null;
-        let selectedSize = null;
-        let selectedDate = null;
+    // ตัวแปร global
+    let stockData = @json($outfit->sizeAndColors);
+    let selectedColor = null;
+    let selectedSize = null;
+    let selectedDate = null;
 
-        // คำนวณจำนวนที่เหลือเมื่อมีการเลือกวัน
-        document.getElementById("selectedDate").addEventListener("change", function() {
-            selectedDate = this.value;
-            if (selectedDate) {
-                document.getElementById("colorSelection").style.display = "flex";
-            }
-        });
-
-        function updateStockDisplay() {
-            if (selectedColor && selectedSize) {
-                let stockItem = stockData.find(item =>
-                    item.color_id == selectedColor && item.size_id == selectedSize
-                );
-                let stockAmount = stockItem ? stockItem.amount : 0;
-                document.getElementById("selectedsizeDetail_id").value = stockItem.sizeDetail_id;
-                console.log(document.getElementById("selectedsizeDetail_id").value);
-                document.getElementById("stockAmount").innerText = stockAmount;
-            } else {
-                document.getElementById("stockAmount").innerText = "0";
-            }
-        }
-
-        document.querySelectorAll(".color-option").forEach(button => {
-            button.addEventListener("click", function () {
-                selectedColor = this.getAttribute("data-color-id");
-                document.getElementById("selectedColor").value = selectedColor;
-                document.getElementById("selectedColorExtra").value = selectedColor;
-                document.querySelectorAll(".color-option").forEach(btn => btn.classList.remove("bg-blue-500", "text-white"));
-                this.classList.add("bg-blue-500", "text-white");
-                updateStockDisplay();
-            });
-        });
-
-        document.querySelectorAll(".size-option").forEach(button => {
-            button.addEventListener("click", function () {
-                selectedSize = this.getAttribute("data-size-id");
-                document.getElementById("selectedSize").value = selectedSize;
-                document.getElementById("selectedSizeExtra").value = selectedSize;
-                document.querySelectorAll(".size-option").forEach(btn => btn.classList.remove("bg-blue-500", "text-white"));
-                this.classList.add("bg-blue-500", "text-white");
-                updateStockDisplay();
-            });
-        });
-    });
-
+    // ฟังก์ชันที่อยู่ใน global scope
     function increaseQty() {
         let qty = document.getElementById('quantity');
         let stock = parseInt(document.getElementById('stockAmount').innerText) || 0;
@@ -200,21 +163,120 @@
         return true;
     }
 
-    // ✅ ส่งทั้งสองฟอร์มพร้อมกัน
-    document.getElementById('submitBothForms').addEventListener('click', function () {
-        const qtyExtra = parseInt(document.getElementById('extraQuantity').value);
-        if (isNaN(qtyExtra) || qtyExtra < 1) {
-            alert("กรุณากรอกจำนวนเพิ่มเติมให้ถูกต้อง");
-            return;
+    function updateStockDisplay() {
+        if (selectedColor && selectedSize) {
+            let stockItem = stockData.find(item =>
+                item.color_id == selectedColor && item.size_id == selectedSize
+            );
+            if (stockItem) {
+                document.getElementById("selectedsizeDetail_id").value = stockItem.sizeDetail_id;
+                // console.log(document.getElementById("selectedsizeDetail_id").value);
+            }
         }
+    }
 
-        // ส่งฟอร์มแรก
-        document.getElementById('normalForm').submit();
+    // ฟังก์ชัน debounced สำหรับคำนวณสต็อก
+    function debounce(func, delay) {
+        let timeoutId;
+        return function() {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(func, delay);
+        };
+    }
 
-        // รอเล็กน้อยก่อนส่งฟอร์มที่สอง
-        setTimeout(() => {
-            document.getElementById('overForm').submit();
-        }, 500);
+    // ฟังก์ชันคำนวณจำนวนสินค้าที่เหลือ
+    function calculateStock() {
+        if (selectedColor && selectedSize && selectedDate) {
+            // แสดงรูปโหลด
+            document.getElementById('loadingIndicator').style.display = 'block';
+
+            fetch('{{ route('orderdetail.calculate.stock') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    sizeDetail_id: document.getElementById("selectedsizeDetail_id").value,
+                    date: selectedDate,
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // อัปเดตจำนวนสินค้าที่เหลือ
+                document.getElementById('stockAmount').innerText = data.stockAmount;
+            })
+            .catch(error => {
+                alert("เกิดข้อผิดพลาดในการคำนวณ");
+            })
+            .finally(() => {
+                // ซ่อนรูปโหลดเมื่อ AJAX เสร็จสิ้น (ไม่ว่าจะสำเร็จหรือล้มเหลว)
+                document.getElementById('loadingIndicator').style.display = 'none';
+            });
+        }
+    }
+
+    // ฟังก์ชันที่ต้องรอ DOM โหลด
+    document.addEventListener("DOMContentLoaded", function () {
+        // คำนวณจำนวนที่เหลือเมื่อมีการเลือกวัน
+        document.getElementById("selectedDate").addEventListener("change", function() {
+            selectedDate = this.value;
+            
+            const colorSelectionElement = document.getElementById("colorSelection");
+            
+            if (selectedDate && colorSelectionElement) {
+                colorSelectionElement.style.display = "flex";
+            }
+        });
+
+        // ใช้ Vanilla JS แทน jQuery สำหรับการคลิกสี
+        document.querySelectorAll(".color-option").forEach(button => {
+            button.addEventListener("click", function () {
+                selectedColor = this.getAttribute("data-color-id");
+                document.getElementById("selectedColor").value = selectedColor;
+                document.getElementById("selectedColorExtra").value = selectedColor;
+                document.querySelectorAll(".color-option").forEach(btn => btn.classList.remove("bg-blue-500", "text-white"));
+                this.classList.add("bg-blue-500", "text-white");
+                updateStockDisplay();
+            });
+        });
+
+        // ใช้ Vanilla JS แทน jQuery สำหรับการคลิกขนาด
+        document.querySelectorAll(".size-option").forEach(button => {
+            button.addEventListener("click", function () {
+                selectedSize = this.getAttribute("data-size-id");
+                document.getElementById("selectedSize").value = selectedSize;
+                document.getElementById("selectedSizeExtra").value = selectedSize;
+                document.querySelectorAll(".size-option").forEach(btn => btn.classList.remove("bg-blue-500", "text-white"));
+                this.classList.add("bg-blue-500", "text-white");
+                updateStockDisplay();
+            });
+        });
+
+        const debouncedCalculateStock = debounce(calculateStock, 300);
+
+        document.getElementById('selectedDate').addEventListener('change', debouncedCalculateStock);
+        document.querySelectorAll('.color-option').forEach(button => {
+            button.addEventListener('click', debouncedCalculateStock);
+        });
+        document.querySelectorAll('.size-option').forEach(button => {
+            button.addEventListener('click', debouncedCalculateStock);
+        });
+
+        // ส่งทั้งสองฟอร์มพร้อมกัน
+        document.getElementById('submitBothForms').addEventListener('click', function () {
+            const qtyExtra = parseInt(document.getElementById('extraQuantity').value);
+            if (isNaN(qtyExtra) || qtyExtra < 1) {
+                alert("กรุณากรอกจำนวนเพิ่มเติมให้ถูกต้อง");
+                return;
+            }
+
+            document.getElementById('normalForm').submit();
+
+            setTimeout(() => {
+                document.getElementById('overForm').submit();
+            }, 500);
+        });
     });
 </script>
 @endsection

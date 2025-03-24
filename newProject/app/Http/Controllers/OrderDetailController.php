@@ -12,6 +12,7 @@ use App\Models\ThaiOutfitSizeAndColor;
 use App\Models\Promotion;
 use App\Models\Booking;
 use App\Models\Shop;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
 class OrderDetailController extends Controller
@@ -21,12 +22,68 @@ class OrderDetailController extends Controller
     {
         $outfit = ThaiOutfit::with(['categories', 'sizeAndColors.size', 'sizeAndColors.color'])
                             ->findOrFail($idOutfit);
-        $booking = CartItem::all();
 
         // dd($booking->first());
         
         return view('orderdetail.index', compact('outfit'));
     }
+
+
+    public function calculateStock(Request $request)
+    {
+        // รับค่าที่ส่งมาจาก AJAX
+        $sizeDetail_id = $request->input('sizeDetail_id');
+        $stock = ThaiOutfitSizeAndColor::findOrFail($sizeDetail_id)->amount;
+        $date = $request->input('date');
+
+        // คำนวณจำนวนสินค้าที่เหลือ
+        $stockData = Booking::query()
+            ->join('OrderDetails', 'Bookings.booking_id', '=', 'OrderDetails.booking_id')
+            ->join('CartItems', 'OrderDetails.cart_item_id', '=', 'CartItems.cart_item_id')
+            ->where('CartItems.sizeDetail_id', $sizeDetail_id)
+            ->where('Bookings.status', '!=', 'cancelled')
+            ->where('Bookings.purchase_date', $date)
+            ->groupBy('CartItems.sizeDetail_id')
+            ->select([
+                'CartItems.sizeDetail_id', // อยู่ใน GROUP BY
+                \DB::raw('SUM(OrderDetails.quantity) as total_quantity'), // ผลรวมของ quantity
+                 // ผลรวมของ total
+            ])
+            ->get();
+
+        // dd($stockData);
+
+        $totalQuantity = $stockData->first()->total_quantity ?? 0;
+        $stockAmount = $stock-$totalQuantity;
+
+        // ส่งค่าผลลัพธ์กลับไปยังหน้า Blade
+        return response()->json(['stockAmount' => $stockAmount]);
+    }
+
+    // use for calculating 
+    public function test($id)
+    {
+        $date ='2025-03-24';
+        $stockData = Booking::query()
+            ->join('OrderDetails', 'Bookings.booking_id', '=', 'OrderDetails.booking_id')
+            ->join('CartItems', 'OrderDetails.cart_item_id', '=', 'CartItems.cart_item_id')
+            ->where('CartItems.sizeDetail_id', $id)
+            ->where('Bookings.status', '!=', 'cancelled')
+            ->where('Bookings.purchase_date', $date )
+            ->groupBy('CartItems.sizeDetail_id')
+            ->select([
+                'CartItems.sizeDetail_id', // อยู่ใน GROUP BY
+                \DB::raw('SUM(OrderDetails.quantity) as total_quantity'), // ผลรวมของ quantity
+                 // ผลรวมของ total
+            ])
+            ->get();
+            
+        $stock = ThaiOutfitSizeAndColor::findOrFail($id)->amount;
+        $totalQuantity = $stockData->first()->total_quantity ?? 0;
+    
+        dd($stock-$totalQuantity,$stock,$totalQuantity,($stockData->first()->total_quantity));
+    }
+
 
     public function viewAddTo(Request $request)
 {

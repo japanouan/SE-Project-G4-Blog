@@ -218,6 +218,8 @@ Route::prefix('order')->name('order.')->group(function(){
 
 Route::prefix('orderdetail')->name('orderdetail.')->group(function(){
     Route::get('/outfit/{idOutfit}', [OrderDetailController::class, 'index'])->name('index');
+    Route::post('/calculate-stock', [OrderDetailController::class, 'calculateStock'])->name('calculate.stock');
+    Route::get('/test/{id}', [OrderDetailController::class, 'test'])->name('test');
     Route::match(['get', 'post'], '/viewAddTo', [OrderDetailController::class, 'viewAddTo'])->name('viewAddTo');
     Route::post('/orderdetail/addTo', [OrderDetailController::class, 'addTo'])->name('addTo');
 
