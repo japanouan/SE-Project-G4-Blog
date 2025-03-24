@@ -56,6 +56,12 @@
                         @endif
                     </h3>
                     <p class="text-green-600 font-bold">{{ number_format($cartItem->outfit->price, 0) }}฿ /1 days</p>
+                    
+                    <!-- Add reservation date display here -->
+                    <p class="text-gray-600 text-sm mt-1">
+                        <span class="font-medium">วันที่จอง:</span> 
+                        {{ $cartItem->reservation_date ? date('d/m/Y', strtotime($cartItem->reservation_date)) : 'ไม่ระบุ' }}
+                    </p>
                 </div>
             </div>
 
