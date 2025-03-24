@@ -50,11 +50,12 @@
             </div>
 
             <!-- จำนวนชุด -->
-            <p class="mt-4 font-semibold">จำนวนชุด: <span id="stockAmount">0</span></p>
-            <!-- loading screen -->
-            <div id="loadingIndicator" style="display: none;">
-                <img src="{{ asset('images/loading.gif') }}" alt="Loading..." class="w-6 h-6 inline-block">
-            </div>
+            <p class="mt-4 font-semibold flex items-center">จำนวนชุด: <span id="stockAmount">0</span>
+                <!-- loading screen -->
+                <span id="loadingIndicator" style="display: none;" class="ml-2">
+                    <img src="{{ asset('images/loading.gif') }}" alt="Loading..." class="w-6 h-6 inline-block">
+                </span>
+            </p>
 
 
             <div class="flex items-center gap-2">
@@ -152,6 +153,10 @@
     }
 
     function validateForm() {
+        if (!selectedDate) {
+            alert("กรุณาเลือกวันที่ก่อนเพิ่มลงตะกร้า!");
+            return false;
+        }
         if (!document.getElementById('selectedColor').value || !document.getElementById('selectedSize').value) {
             alert("กรุณาเลือกสีและขนาดก่อนเพิ่มลงตะกร้า!");
             return false;
@@ -218,20 +223,56 @@
 
     // ฟังก์ชันที่ต้องรอ DOM โหลด
     document.addEventListener("DOMContentLoaded", function () {
-        // คำนวณจำนวนที่เหลือเมื่อมีการเลือกวัน
-        document.getElementById("selectedDate").addEventListener("change", function() {
-            selectedDate = this.value;
+        // Set minimum date to today
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        const todayStr = `${yyyy}-${mm}-${dd}`;
+        
+        const dateInput = document.getElementById("selectedDate");
+        dateInput.min = todayStr;
+        
+        // Add validation for date changes
+        dateInput.addEventListener("change", function() {
+            const selectedValue = new Date(this.value);
+            selectedValue.setHours(0, 0, 0, 0);
+            
+            const currentDate = new Date();
+            currentDate.setHours(0, 0, 0, 0);
+            
+            // If selected date is before today, reset to today
+            if (selectedValue < currentDate) {
+                alert("ไม่สามารถเลือกวันที่ผ่านมาแล้วได้ กรุณาเลือกวันที่ปัจจุบันหรือในอนาคต");
+                this.value = todayStr;
+                selectedDate = todayStr;
+            } else {
+                selectedDate = this.value;
+            }
             
             const colorSelectionElement = document.getElementById("colorSelection");
-            
             if (selectedDate && colorSelectionElement) {
                 colorSelectionElement.style.display = "flex";
+            }
+        });
+
+        // Also add prevention for the clear button if it exists
+        document.getElementById("selectedDate").addEventListener("click", function(e) {
+            // Prevent the clear button from working by stopping propagation on elements that might be the clear button
+            if (e.offsetX > this.offsetWidth - 20) {
+                e.preventDefault();
+                e.stopPropagation();
             }
         });
 
         // ใช้ Vanilla JS แทน jQuery สำหรับการคลิกสี
         document.querySelectorAll(".color-option").forEach(button => {
             button.addEventListener("click", function () {
+                if (!selectedDate) {
+                    alert("กรุณาเลือกวันที่ก่อนเลือกสี!");
+                    return;
+                }
+                
                 selectedColor = this.getAttribute("data-color-id");
                 document.getElementById("selectedColor").value = selectedColor;
                 document.getElementById("selectedColorExtra").value = selectedColor;
@@ -244,6 +285,11 @@
         // ใช้ Vanilla JS แทน jQuery สำหรับการคลิกขนาด
         document.querySelectorAll(".size-option").forEach(button => {
             button.addEventListener("click", function () {
+                if (!selectedDate) {
+                    alert("กรุณาเลือกวันที่ก่อนเลือกขนาด!");
+                    return;
+                }
+                
                 selectedSize = this.getAttribute("data-size-id");
                 document.getElementById("selectedSize").value = selectedSize;
                 document.getElementById("selectedSizeExtra").value = selectedSize;
@@ -265,6 +311,11 @@
 
         // ส่งทั้งสองฟอร์มพร้อมกัน
         document.getElementById('submitBothForms').addEventListener('click', function () {
+            if (!selectedDate) {
+                alert("กรุณาเลือกวันที่ก่อนสั่งซื้อ!");
+                return;
+            }
+            
             const qtyExtra = parseInt(document.getElementById('extraQuantity').value);
             if (isNaN(qtyExtra) || qtyExtra < 1) {
                 alert("กรุณากรอกจำนวนเพิ่มเติมให้ถูกต้อง");
