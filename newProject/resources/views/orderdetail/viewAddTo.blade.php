@@ -139,6 +139,70 @@
                             <span class="font-semibold">ยอดชำระทั้งสิ้น:</span>
                             <span id="grand_total" class="font-bold text-green-600">{{ number_format($cartItems->sum(fn($i) => $i->quantity * $i->outfit->price), 2) }} ฿</span>
                         </div>
+
+                        <!-- เลือกประเภทที่อยู่บริการเสริม -->
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-medium mb-2">ที่อยู่สำหรับบริการเสริม:</label>
+                            <div class="flex gap-4">
+                                <label class="flex items-center gap-2">
+                                    <input type="radio" name="address_type" value="customer" checked onchange="toggleAddressInput()">
+                                    <span>ใช้ที่อยู่เดียวกับลูกค้า</span>
+                                </label>
+
+                                
+                                <label class="flex items-center gap-2">
+                                    <input type="radio" name="address_type" value="custom" onchange="toggleAddressInput()">
+                                    <span>กรอกที่อยู่ใหม่</span>
+                                </label>
+                            </div>
+                        </div>
+
+
+                        <!-- ที่อยู่สำหรับช่างภาพและช่างแต่งหน้า -->
+                    <!-- ฟอร์มกรอกที่อยู่ใหม่ -->
+                    <div id="custom-address-form" class="bg-gray-50 p-4 rounded-lg mb-5 hidden">
+                        <h4 class="font-medium text-gray-800 mb-3">ที่อยู่สำหรับบริการเสริม</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-1">จังหวัด</label>
+                                <select id="staff_province" name="staff_address[province]"
+                                        class="w-full border border-gray-300 rounded-lg p-3">
+                                    <option value="">-- เลือกจังหวัด --</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-1">อำเภอ</label>
+                                <select id="staff_district" name="staff_address[district]"
+                                        class="w-full border border-gray-300 rounded-lg p-3">
+                                    <option value="">-- เลือกอำเภอ --</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-1">ตำบล</label>
+                                <select id="staff_subdistrict" name="staff_address[subdistrict]"
+                                        class="w-full border border-gray-300 rounded-lg p-3">
+                                    <option value="">-- เลือกตำบล --</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-1">รหัสไปรษณีย์</label>
+                                <input type="text" id="staff_postal_code" name="staff_address[postal_code]" readonly
+                                    class="w-full border border-gray-300 bg-gray-100 rounded-lg p-3">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-gray-700 font-medium mb-1">บ้านเลขที่</label>
+                                <input type="text" name="staff_address[detail]"
+                                    class="w-full border border-gray-300 rounded-lg p-3" placeholder="เช่น 123/4">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-gray-700 font-medium mb-1">ถนน</label>
+                                <input type="text" name="staff_address[street]"
+                                    class="w-full border border-gray-300 rounded-lg p-3" placeholder="เช่น สุขุมวิท 24">
+                            </div>
+                        </div>
+                    </div>
+
+
                     </div>
 
                    <!-- ปุ่มสั่งซื้อ -->
@@ -156,11 +220,6 @@
                     <input type="hidden" id="selected_photographer" name="selected_services[0][count]" value="0">
                     <input type="hidden" name="selected_services[1][type]" value="make-up artist">
                     <input type="hidden" id="selected_makeup" name="selected_services[1][count]" value="0">
-
-
-                    
-
-
                 </form>
             </div>
         </div>
@@ -240,5 +299,76 @@
     }
 
     document.addEventListener("DOMContentLoaded", updateTotal);
+
+    const provinceSelect = document.getElementById('staff_province');
+    const districtSelect = document.getElementById('staff_district');
+    const subdistrictSelect = document.getElementById('staff_subdistrict');
+    const postalCodeInput = document.getElementById('staff_postal_code');
+
+    let addressData = [];
+
+    async function loadThaiAddress() {
+        try {
+            const res = await fetch('https://raw.githubusercontent.com/kongvut/thai-province-data/master/api_province_with_amphure_tambon.json');
+            addressData = await res.json();
+
+            // Fill provinces
+            addressData.forEach(province => {
+                const option = document.createElement('option');
+                option.value = province.name_th;
+                option.textContent = province.name_th;
+                option.dataset.id = province.id;
+                provinceSelect.appendChild(option);
+            });
+        } catch (error) {
+            alert('ไม่สามารถโหลดข้อมูลที่อยู่ได้');
+        }
+    }
+
+    provinceSelect.addEventListener('change', () => {
+        districtSelect.innerHTML = '<option value="">-- เลือกอำเภอ --</option>';
+        subdistrictSelect.innerHTML = '<option value="">-- เลือกตำบล --</option>';
+        postalCodeInput.value = '';
+
+        const selectedProvince = addressData.find(p => p.name_th === provinceSelect.value);
+        selectedProvince?.amphure?.forEach(district => {
+            const option = document.createElement('option');
+            option.value = district.name_th;
+            option.textContent = district.name_th;
+            option.dataset.id = district.id;
+            districtSelect.appendChild(option);
+        });
+    });
+
+    districtSelect.addEventListener('change', () => {
+        subdistrictSelect.innerHTML = '<option value="">-- เลือกตำบล --</option>';
+        postalCodeInput.value = '';
+
+        const selectedProvince = addressData.find(p => p.name_th === provinceSelect.value);
+        const selectedDistrict = selectedProvince?.amphure?.find(d => d.name_th === districtSelect.value);
+        selectedDistrict?.tambon?.forEach(subdistrict => {
+            const option = document.createElement('option');
+            option.value = subdistrict.name_th;
+            option.textContent = subdistrict.name_th;
+            option.dataset.zip = subdistrict.zip_code;
+            subdistrictSelect.appendChild(option);
+        });
+    });
+
+    subdistrictSelect.addEventListener('change', () => {
+        const zip = subdistrictSelect.options[subdistrictSelect.selectedIndex]?.dataset?.zip;
+        postalCodeInput.value = zip || '';
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+        loadThaiAddress();
+    });
+
+    function toggleAddressInput() {
+    const customAddressForm = document.getElementById('custom-address-form');
+    const selected = document.querySelector('input[name="address_type"]:checked').value;
+    customAddressForm.classList.toggle('hidden', selected !== 'custom');
+}
+
 </script>
 @endsection

@@ -50,4 +50,11 @@ class User extends Authenticatable
         return $this->hasOne(CustomerAddress::class, 'customer_id', 'user_id');
     }
 
+    public function customerAddress()
+{
+    return $this->hasOne(CustomerAddress::class, 'customer_id', 'user_id');
+}
+
+ 
+
 }

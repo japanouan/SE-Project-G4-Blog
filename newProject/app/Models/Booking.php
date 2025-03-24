@@ -23,7 +23,8 @@ class Booking extends Model
         'shop_id', 
         'promotion_id',
         'user_id',
-        'pickup_date'
+        'pickup_date',
+        'AddressID'
     ];
 
     // Define which attributes should be treated as dates
