@@ -98,4 +98,31 @@ class Booking extends Model
     {
         return $this->belongsTo(CustomerAddress::class, 'AddressID', 'cus_address_id');
     }
+
+    /**
+     * ตรวจสอบว่ามีชุดทดแทนหรือไม่
+     */
+    public function hasSuggestions()
+    {
+        return SelectOutfitDetail::where('booking_id', $this->booking_id)
+            ->exists();
+    }
+
+    /**
+     * ตรวจสอบว่ามีชุดทดแทนที่รอตอบรับหรือไม่
+     */
+    public function hasPendingSuggestions()
+    {
+        return SelectOutfitDetail::where('booking_id', $this->booking_id)
+            ->where('status', 'Pending Selection')
+            ->exists();
+    }
+
+    /**
+     * ดึงข้อมูลชุดทดแทนทั้งหมด
+     */
+    public function outfitSuggestions()
+    {
+        return $this->hasMany(SelectOutfitDetail::class, 'booking_id', 'booking_id');
+    }
 }

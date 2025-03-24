@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Models\OrderDetail;
+use App\Models\ThaiOutfit; // เพิ่มบรรทัดนี้
+use App\Models\ThaiOutfitSizeAndColor; // เพิ่มบรรทัดนี้
+use App\Models\SelectOutfitDetail; // เพิ่มบรรทัดนี้
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
@@ -63,7 +66,11 @@ class BookingController extends Controller
         // Order by newest first
         $bookings = $bookings->orderBy('purchase_date', 'desc')->paginate(10);
         
-        return view('shopowner.bookings.index', compact('bookings', 'status'));
+        $insufficientCount = Booking::where('shop_id', $shopId)
+            ->where('status', 'partial paid')
+            ->count();
+
+        return view('shopowner.bookings.index', compact('bookings', 'status', 'insufficientCount'));
     }
     
     public function show($id)
@@ -320,5 +327,128 @@ class BookingController extends Controller
         }
         
         return view('shopowner.stats.income', compact('period', 'totalEarnings', 'totalBookings', 'earningsData'));
+    }
+
+    /**
+     * แสดงรายการจองที่มีชุดไม่เพียงพอ
+     */
+    public function insufficientStock()
+    {
+        // Get the current shop owner's active shop
+        $shopId = \App\Models\Shop::where('shop_owner_id', Auth::id())
+                     ->where('status', 'active')
+                     ->first()->shop_id ?? null;
+        
+        if (!$shopId) {
+            return redirect()->route('shopowner.shops.my-shop')
+                ->with('error', 'คุณต้องมีร้านค้าที่ได้รับการอนุมัติก่อนใช้งานหน้านี้');
+        }
+        
+        // ดึงเฉพาะการจองที่มีสถานะ partial paid ซึ่งหมายถึงมีชุดที่จำนวนไม่พอ
+        $bookings = Booking::with(['user', 'orderDetails.cartItem.outfit', 'orderDetails.cartItem.size', 'orderDetails.cartItem.color'])
+                ->where('shop_id', $shopId)
+                ->where('status', 'partial paid')
+                ->where('hasOverrented', true)
+                ->orderBy('purchase_date', 'desc')
+                ->paginate(10);
+        
+        return view('shopowner.bookings.insufficient-stock', compact('bookings'));
+    }
+
+    /**
+     * แสดงรายละเอียดชุดที่ไม่เพียงพอและตัวเลือกทดแทน
+     */
+    public function suggestAlternatives($bookingId, $orderDetailId)
+    {
+        // Get the current shop owner's active shop
+        $shopId = \App\Models\Shop::where('shop_owner_id', Auth::id())
+                     ->where('status', 'active')
+                     ->first()->shop_id ?? null;
+        
+        if (!$shopId) {
+            return redirect()->route('shopowner.shops.my-shop')
+                ->with('error', 'คุณต้องมีร้านค้าที่ได้รับการอนุมัติก่อนใช้งานหน้านี้');
+        }
+        
+        // ดึงข้อมูลการจอง
+        $booking = Booking::with(['user', 'orderDetails.cartItem.outfit.categories', 
+                             'orderDetails.cartItem.size', 'orderDetails.cartItem.color'])
+                ->where('shop_id', $shopId)
+                ->findOrFail($bookingId);
+        
+        // ดึงข้อมูล OrderDetail ที่มีปัญหา
+        $orderDetail = $booking->orderDetails->where('orderDetail_id', $orderDetailId)->first();
+        
+        if (!$orderDetail) {
+            return redirect()->route('shopowner.bookings.index')
+                ->with('error', 'ไม่พบข้อมูลรายการสั่งซื้อที่ระบุ');
+        }
+        
+        $cartItem = $orderDetail->cartItem;
+        $originalOutfit = $cartItem->outfit;
+        
+        // ดึงข้อมูลหมวดหมู่ของชุด
+        $categoryIds = $originalOutfit->categories->pluck('category_id')->toArray();
+        
+        // หาชุดทดแทนที่มีหมวดหมู่เดียวกัน ขนาดเดียวกัน สีเดียวกัน และมีจำนวนเพียงพอ
+        $alternativeOutfits = ThaiOutfit::with(['categories', 'sizeAndColors.size', 'sizeAndColors.color'])
+                        ->where('shop_id', $shopId)
+                        ->where('outfit_id', '!=', $originalOutfit->outfit_id)
+                        ->where('status', 'active')
+                        ->whereHas('categories', function($q) use ($categoryIds) {
+                            // Fix the ambiguous column reference by specifying the table name
+                            $q->whereIn('ThaiOutfitCategories.category_id', $categoryIds);
+                        })
+                        ->whereHas('sizeAndColors', function($q) use ($cartItem, $orderDetail) {
+                            $q->where('size_id', $cartItem->size_id)
+                              ->where('color_id', $cartItem->color_id)
+                              ->where('amount', '>=', $orderDetail->quantity);
+                        })
+                        ->get();
+        
+        return view('shopowner.bookings.suggest-alternatives', compact(
+            'booking', 'orderDetail', 'cartItem', 'originalOutfit', 'alternativeOutfits'
+        ));
+    }
+
+    /**
+     * บันทึกการเลือกชุดทดแทน
+     */
+    public function saveSelection(Request $request)
+    {
+        $request->validate([
+            'booking_id' => 'required|exists:Bookings,booking_id',
+            'orderDetail_id' => 'required|exists:OrderDetails,orderDetail_id',
+            'outfit_id' => 'required|exists:ThaiOutfits,outfit_id',
+            'sizeDetail_id' => 'required|exists:Thaioutfit_SizeAndColor,sizeDetail_id',
+        ]);
+        
+        $bookingId = $request->booking_id;
+        $orderDetailId = $request->orderDetail_id;
+        $outfitId = $request->outfit_id;
+        $sizeDetailId = $request->sizeDetail_id;
+        
+        // ดึงข้อมูลที่จำเป็น
+        $booking = Booking::findOrFail($bookingId);
+        $orderDetail = OrderDetail::findOrFail($orderDetailId);
+        $outfit = ThaiOutfit::findOrFail($outfitId);
+        $sizeAndColor = ThaiOutfitSizeAndColor::findOrFail($sizeDetailId);
+        
+        // สร้างข้อเสนอชุดทดแทน
+        $selection = new SelectOutfitDetail();
+        $selection->booking_id = $bookingId;
+        $selection->customer_id = $booking->user_id;
+        $selection->chooser_id = Auth::id();
+        $selection->outfit_id = $outfitId;
+        $selection->quantity = $orderDetail->quantity;
+        $selection->size_id = $sizeAndColor->size_id;
+        $selection->color_id = $sizeAndColor->color_id;
+        $selection->sizeDetail_id = $sizeDetailId;
+        $selection->status = SelectOutfitDetail::STATUS_PENDING; // ใช้ constant ที่นิยามในโมเดล
+        $selection->created_at = now();
+        $selection->save();
+        
+        return redirect()->route('shopowner.bookings.index')
+                 ->with('success', 'เสนอชุดทดแทนให้ลูกค้าเรียบร้อยแล้ว กรุณารอการตอบรับจากลูกค้า');
     }
 }

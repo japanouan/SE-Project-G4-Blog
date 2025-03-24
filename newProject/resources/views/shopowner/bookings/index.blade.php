@@ -7,7 +7,16 @@
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold">จัดการการจอง</h2>
     </div>
-
+     <!-- เปลี่ยนจากปุ่มลิงก์เป็นปุ่มกรอง -->
+    <div>
+        <button id="filterPartialPaidBtn" class="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600">
+            <i class="fa fa-exclamation-triangle mr-2"></i>แสดงชุดที่มีจำนวนไม่เพียงพอ
+            @if(isset($insufficientCount) && $insufficientCount > 0)
+                <span class="ml-1 px-2 py-1 bg-red-500 text-white text-xs rounded-full">{{ $insufficientCount }}</span>
+            @endif
+        </button>
+    </div>
+</div>
     @if(session('error'))
         <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
             {{ session('error') }}
@@ -17,16 +26,16 @@
     <div class="bg-white shadow-md rounded-lg overflow-hidden mb-6">
         <div class="p-6 bg-gray-50 border-b">
             <h3 class="text-lg font-semibold mb-4">ค้นหาและกรอง</h3>
-            <form action="{{ route('shopowner.bookings.index') }}" method="GET">
+            <form action="{{ route('shopowner.bookings.index') }}" method="GET" id="searchForm">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">ค้นหา</label>
-                        <input type="text" name="search" placeholder="ค้นหาตาม ID หรือชื่อลูกค้า" value="{{ request('search') }}"
+                        <input type="text" name="search" id="search-input" placeholder="ค้นหาตาม ID หรือชื่อลูกค้า" value="{{ request('search') }}"
                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">สถานะ</label>
-                        <select name="status" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                        <select name="status" id="status-select" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                             <option value="">ทั้งหมด</option>
                             <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>รอการยืนยัน</option>
                             <option value="confirmed" {{ request('status') == 'confirmed' ? 'selected' : '' }}>ยืนยันแล้ว</option>
@@ -162,6 +171,16 @@ document.addEventListener('DOMContentLoaded', function() {
         if (startDateInput.value && endDateInput.value < startDateInput.value) {
             startDateInput.value = endDateInput.value;
         }
+    });
+
+    // Add event listener for the new filter button
+    const filterPartialPaidBtn = document.getElementById('filterPartialPaidBtn');
+    filterPartialPaidBtn.addEventListener('click', function() {
+        // Set the status dropdown to 'partial paid'
+        document.getElementById('status-select').value = 'partial paid';
+        
+        // Submit the form to apply the filter
+        document.getElementById('searchForm').submit();
     });
 });
 </script>

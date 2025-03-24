@@ -184,7 +184,11 @@ Route::prefix('shopowner')->name('shopowner.')->middleware('auth', 'is_shopowner
         Route::post('/store', [IssueController::class, 'shopownerStore'])->name('store');
         Route::get('/{id}', [IssueController::class, 'shopownerShow'])->name('show');
     });
-
+    
+    // Routes สำหรับจัดการชุดที่มีไม่เพียงพอ - MOVED INSIDE THE is_shopowner GROUP
+    Route::get('/bookings/insufficient-stock', [BookingController::class, 'insufficientStock'])->name('bookings.insufficient-stock');
+    Route::get('/bookings/{booking}/suggest-alternatives/{orderDetail}', [BookingController::class, 'suggestAlternatives'])->name('bookings.suggest-alternatives');
+    Route::post('/bookings/save-selection', [BookingController::class, 'saveSelection'])->name('bookings.save-selection');
 });
 
 // Move this outside the shopowner group if you want it accessible to all users
@@ -205,10 +209,13 @@ Route::middleware('auth')->group(function () {
 
     Route::patch('/profile-edit', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile-edit', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // เพิ่ม route ใหม่สำหรับดูและตอบรับชุดทดแทน
+    Route::get('/profile/customer/outfit-suggestions/{bookingId}', [ProfileController::class, 'outfitSuggestions'])
+        ->name('profile.customer.outfit-suggestions');
+    Route::post('/profile/customer/confirm-selection', [ProfileController::class, 'confirmSelection'])
+        ->name('profile.customer.confirm-selection');
 });
-
-
-
 
 Route::middleware(['auth', 'is_customer'])->group(function () {
     Route::get('/outfit/all', [OutfitController::class, 'index'])->name('outfit.all');

@@ -9,6 +9,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use App\Models\Booking;
+use App\Models\SelectOutfitDetail;
+use App\Models\ThaiOutfit;
+use App\Models\CartItem;
+use App\Models\OrderDetail;
+use App\Models\Payment;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
@@ -140,8 +145,18 @@ class ProfileController extends Controller
         $booking = Booking::with([
             'orderDetails.cartItem.thaioutfit_sizeandcolor.outfit.shop',
             'selectService',
-            'payment' // เพิ่ม relationship payment
+            'payment'
         ])->findOrFail($bookingId);
+
+        // เพิ่มการตรวจสอบว่ามีชุดทดแทนหรือไม่
+        $hasSuggestions = SelectOutfitDetail::where('booking_id', $bookingId)
+            ->where('customer_id', Auth::id())
+            ->exists();
+    
+        $hasPendingSuggestions = SelectOutfitDetail::where('booking_id', $bookingId)
+            ->where('customer_id', Auth::id())
+            ->where('status', 'Pending Selection')
+            ->exists();
 
         // ตรวจสอบสถานะการชำระเงินสำหรับแต่ละ orderDetail
         foreach ($booking->orderDetails as $orderDetail) {
@@ -160,7 +175,79 @@ class ProfileController extends Controller
         
         // dd($booking);
 
-        // ส่งข้อมูลไปยัง Blade
-        return view('profile.customer.order-detail', compact('booking'));
+        // ส่งข้อมูลไปยัง Blade พร้อมข้อมูลเพิ่มเติม
+        return view('profile.customer.order-detail', compact(
+            'booking', 
+            'hasSuggestions',
+            'hasPendingSuggestions'
+        ));
+    }
+    /**
+ * แสดงชุดทดแทนที่ได้รับการแนะนำ
+ */
+public function outfitSuggestions($bookingId)
+{
+    // ตรวจสอบว่าการจองเป็นของผู้ใช้ปัจจุบันหรือไม่
+    $booking = Booking::where('booking_id', $bookingId)
+        ->where('user_id', Auth::id())
+        ->firstOrFail();
+    
+    // ดึงรายการสินค้าที่มีจำนวนไม่เพียงพอ (booking_cycle = 2)
+    $unavailableItems = OrderDetail::with(['cartItem.outfit', 'cartItem.size', 'cartItem.color'])
+        ->where('booking_id', $bookingId)
+        ->where('booking_cycle', 2)
+        ->get();
+    
+    // ดึงชุดทดแทนที่ได้รับการแนะนำจากร้านค้า
+    $suggestions = SelectOutfitDetail::with(['outfit', 'size', 'color'])
+        ->where('booking_id', $bookingId)
+        ->where('customer_id', Auth::id())
+        ->orderBy('created_at', 'desc')
+        ->get();
+    
+    return view('profile.customer.outfit-suggestions', compact('booking', 'unavailableItems', 'suggestions'));
+}
+
+    /*** ตอบรับหรือปฏิเสธชุดทดแทน*/
+    public function confirmSelection(Request $request)
+    {
+        $request->validate([
+            'selection_id' => 'required|exists:SelectOutfitsDetails,select_outfit_id',
+            'action' => 'required|in:accept,reject'
+        ]);
+        
+        $selectionId = $request->selection_id;
+        $action = $request->action;
+        
+        // ดึงข้อมูลการเสนอชุดทดแทน
+        $selection = SelectOutfitDetail::findOrFail($selectionId);
+        
+        // ตรวจสอบว่าเป็นของผู้ใช้ปัจจุบันหรือไม่
+        if ($selection->customer_id != Auth::id()) {
+            return back()->with('error', 'คุณไม่มีสิทธิ์ดำเนินการกับรายการนี้');
+        }
+        
+        // ตรวจสอบว่าสถานะเป็น Pending Selection หรือไม่
+        if ($selection->status != 'Pending Selection') {
+            return back()->with('error', 'รายการนี้ได้รับการตอบรับหรือปฏิเสธไปแล้ว');
+        }
+        
+        // อัพเดทสถานะตามการตัดสินใจของลูกค้า
+        if ($action == 'accept') {
+            $selection->status = 'Selected';
+            $selection->save();
+            
+            // อาจจะอัพเดทสถานะการจองหรือรายการสั่งซื้อตามความเหมาะสม
+            // เช่น หากทุกรายการได้รับการยืนยันแล้ว ให้เปลี่ยนสถานะการจองเป็น confirmed
+            
+            return redirect()->route('profile.customer.outfit-suggestions', ['bookingId' => $selection->booking_id])
+                ->with('success', 'ยอมรับชุดทดแทนเรียบร้อยแล้ว ทางร้านค้าจะดำเนินการต่อไป');
+        } else {
+            $selection->status = 'Rejected';
+            $selection->save();
+            
+            return redirect()->route('profile.customer.outfit-suggestions', ['bookingId' => $selection->booking_id])
+                ->with('success', 'ปฏิเสธชุดทดแทนเรียบร้อยแล้ว ทางร้านค้าอาจเสนอชุดทดแทนอื่นเพิ่มเติม');
+        }
     }
 }

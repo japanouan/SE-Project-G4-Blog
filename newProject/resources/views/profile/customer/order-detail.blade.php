@@ -139,4 +139,59 @@
             </div>
         </div>
     </div>
+        <!-- เพิ่มก่อนส่วนแสดงรายการสินค้า -->
+        @php
+                // ใช้ Auth::id() อย่างชัดเจน
+                use Illuminate\Support\Facades\Auth;
+                use App\Models\SelectOutfitDetail;
+                
+                // ตรวจสอบว่ามีรายการที่ไม่เพียงพอ
+                $hasUnavailableItems = $booking->orderDetails->where('booking_cycle', 2)->count() > 0;
+                
+                // ตรวจสอบว่ามีข้อเสนอชุดทดแทนหรือไม่
+                $hasSuggestions = \App\Models\SelectOutfitDetail::where('booking_id', $booking->booking_id)
+                    ->where('customer_id', Auth::id())
+                    ->exists();
+                
+                // ตรวจสอบว่ามีรายการที่รอการตอบรับหรือไม่
+                $hasPendingSuggestions = \App\Models\SelectOutfitDetail::where('booking_id', $booking->booking_id)
+                    ->where('customer_id', Auth::id())
+                    ->where('status', 'Pending Selection')
+                    ->exists();
+                
+                // ดีบัก - แสดงข้อมูลเพื่อตรวจสอบ
+                // dd($hasUnavailableItems, $hasSuggestions, $hasPendingSuggestions, Auth::id(), $booking->booking_id);
+            @endphp
+
+                @if($hasUnavailableItems || $hasSuggestions)
+                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-yellow-700">
+                                    <strong>โปรดทราบ:</strong> 
+                                    @if($hasUnavailableItems && !$hasSuggestions)
+                                        การสั่งซื้อนี้มีชุดที่มีจำนวนไม่เพียงพอ กรุณารอการเสนอชุดทดแทนจากร้านค้า
+                                    @elseif($hasSuggestions)
+                                        มีชุดทดแทนที่แนะนำสำหรับการสั่งซื้อนี้
+                                    @endif
+                                </p>
+                                @if($hasSuggestions)
+                                    <div class="mt-2">
+                                        <a href="{{ route('profile.customer.outfit-suggestions', ['bookingId' => $booking->booking_id]) }}" 
+                                            class="inline-block bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600">
+                                            ดูชุดทดแทนที่แนะนำ
+                                            @if($hasPendingSuggestions)
+                                                <span class="ml-1 px-2 py-0.5 bg-red-500 text-white rounded-full text-xs">รอตอบรับ</span>
+                                            @endif
+                                        </a>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
 @endsection
