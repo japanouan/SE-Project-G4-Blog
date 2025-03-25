@@ -60,19 +60,31 @@ class PaymentController extends Controller
 
     public function index()
     {
-        $bookings = Booking::with(['payments', 'orderDetails'])
+        $bookings = Booking::with(['payments', 'orderDetails', 'selectService'])
             ->whereBelongsTo(auth()->user())
+            ->where('status', 'confirmed') // ✅ เพิ่มเงื่อนไขตรงนี้
             ->orderBy('created_at', 'desc')
             ->get();
 
-
         foreach ($bookings as $booking) {
             $paid = $booking->payments->sum('total');
+
+            // ✅ คิดเฉพาะค่าชุดทั้งหมด (เฉพาะที่สถานะ booking = confirmed แล้ว)
+            $total = $booking->orderDetails->sum('total');
+
+            $booking->total_price = $total;
             $booking->paid = $paid;
-            $booking->unpaid = $booking->total_price - $paid;
+            $booking->unpaid = $total - $paid;
+            $booking->total_with_staff = $total;
         }
 
         return view('payment.index', compact('bookings'));
     }
+
+
+    
+
+
+
 
 }
