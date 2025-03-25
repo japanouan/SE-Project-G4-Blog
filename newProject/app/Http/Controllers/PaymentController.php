@@ -67,28 +67,40 @@ class PaymentController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        foreach ($bookings as $booking) {
-            $paid = $booking->payments->sum('total');
-
-            // ✅ คิดเฉพาะค่าชุดทั้งหมด (เฉพาะที่สถานะ booking = confirmed แล้ว)
-            $total = $booking->orderDetails->sum('total');
-
-            $booking->total_price = $total;
-            $booking->paid = $paid;
-            $booking->unpaid = $total - $paid;
-            $booking->total_with_staff = $total;
-        }
+            foreach ($bookings as $booking) {
+                // คำนวณยอดรวมจาก order details (ทั้งรอบ 1 และ 2)
+                $total = $booking->orderDetails->sum('total');
+            
+                // รวมยอดจ่ายจริง เฉพาะที่ payment ถูกชำระแล้ว
+                $paid = $booking->payments->where('status', 'paid')->sum('total');
+            
+                // คำนวณยอดค้าง
+                $unpaid = max(0, $total - $paid); // กันลบแล้วติดลบ
+            
+                // สร้าง property ให้ใช้ใน Blade
+                $booking->total_with_staff = $total; // รวมค่าบริการแล้วถ้ามี
+                $booking->paid = $paid;
+                $booking->unpaid = $unpaid;
+            }
+            
 
         return view('payment.index', compact('bookings'));
     }
 
 
-    public function viewUpdate($booking_id)
+    public function viewUpdate($booking_id, Request $request)
 {
+    $action = $request->query('action');
+
     $booking = Booking::with(['payments'])->where('booking_id', $booking_id)->firstOrFail();
 
     // ✅ ต้องใช้ ->filter() หรือ ->where() บน Collection
-    $payments = $booking->payments->where('status', 'unpaid');
+    if ($action === 'pay_remaining') {
+        $payments = $booking->payments->where('status', 'paid')->where('booking_cycle', '2');
+    }else{
+        $payments = $booking->payments->where('status', 'unpaid');
+    }
+    
 
     return view('payment.viewUpdate', compact('payments', 'booking'));
 }
@@ -96,17 +108,39 @@ class PaymentController extends Controller
 public function updateMethod(Request $request, $id)
 {
     $request->validate([
-        'payment_method' => 'required|in:credit_card,paypal',
+        'payment_method' => 'required|in:paypal,credit_card',
     ]);
 
     $payment = Payment::findOrFail($id);
+    $booking = Booking::with(['orderDetails', 'payments'])->findOrFail($payment->booking_id);
 
+    // คำนวณยอดรวมที่ต้องจ่ายทั้งหมด
+    $totalRequired = $booking->orderDetails->sum('total');
+
+    // คำนวณยอดที่จ่ายไปแล้ว (รวมรอบก่อนหน้า)
+    $alreadyPaid = $booking->payments->where('status', 'paid')->sum('total');
+
+    // คำนวณยอดค้างที่ต้องเพิ่ม
+    $amountToAdd = max(0, $totalRequired - $alreadyPaid);
+
+    // ✅ เพิ่มยอดค้างไปใน payment ปัจจุบัน
     $payment->payment_method = $request->payment_method;
-    $payment->status = 'paid'; // หากต้องการให้ระบบจ่ายทันที
+    $payment->total += $amountToAdd; // 🔥 บวกยอดเพิ่มเข้าไป
+    $payment->status = 'paid';
     $payment->save();
 
-    return redirect()->route('payment.index')->with('success', 'บันทึกการชำระเงินเรียบร้อยแล้ว');
+    // ✅ เปลี่ยน OrderDetail รอบ 2 → 1
+    OrderDetail::where('booking_id', $booking->booking_id)
+        ->where('booking_cycle', 2)
+        ->update(['booking_cycle' => 1]);
+
+    // ✅ ปิด hasOverrented
+    $booking->hasOverrented = 0;
+    $booking->save();
+
+    return redirect()->route('payment.index')->with('success', 'อัปเดตการชำระเงินสำเร็จ');
 }
+
 
 
 

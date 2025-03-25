@@ -36,36 +36,52 @@
         <h2 class="text-2xl font-bold text-gray-800 mb-4">รายการการชำระเงิน</h2>
 
         @forelse ($bookings as $booking)
-            <div class="bg-white p-4 rounded shadow mb-4">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="font-semibold text-gray-700">
-                            Booking #{{ $booking->booking_id }}
-                            <span class="text-sm text-gray-500">({{ $booking->purchase_date->format('Y-m-d') }})</span>
-                        </p>
-                        <p class="text-sm text-gray-600">สถานะ: {{ $booking->status }}</p>
-                    </div>
-                    <div class="text-right">
-                        <p>ยอดรวม: ฿{{ number_format($booking->total_with_staff, 2) }}</p>
-                        <p>ชำระแล้ว: ฿{{ number_format($booking->paid, 2) }}</p>
-                        <p class="{{ $booking->unpaid > 0 ? 'text-red-500' : 'text-green-600' }}">
-                            ค้างชำระ: ฿{{ number_format($booking->unpaid, 2) }}
-                        </p>
+        <div class="bg-white p-4 rounded shadow mb-4">
+    <div class="flex justify-between items-start">
+        <div>
+            <p class="font-semibold text-gray-700">
+                Booking #{{ $booking->booking_id }}
+                <span class="text-sm text-gray-500">({{ $booking->purchase_date->format('Y-m-d') }})</span>
+            </p>
+            <p class="text-sm text-gray-600">สถานะ: {{ $booking->status }}</p>
+        </div>
+
+        <div class="text-right">
+            <p>ยอดรวม: ฿{{ number_format($booking->total_with_staff, 2) }}</p>
+            <p>ชำระแล้ว: ฿{{ number_format($booking->paid, 2) }}</p>
+
+            {{-- ✅ ส่วนที่คุณถามมา --}}
+            <p class="{{ $booking->unpaid > 0 ? 'text-red-500' : 'text-green-600' }}">
+                ค้างชำระ: ฿{{ number_format($booking->unpaid, 2) }}
+            </p>
+
+            @if($booking->unpaid == 0)
+                <span class="text-sm text-green-500">✔ ชำระครบแล้ว</span>
+            @endif
+
+            {{-- ✅ เงื่อนไขใหม่: ต้องมี overrent และยังค้างชำระ --}}
+            @if($booking->hasOverrented == 1 && $booking->unpaid > 0)
+                <a href="{{ route('payment.viewUpdate', $booking->booking_id) . '?action=pay_remaining' }}"
+                    class="inline-block mt-2 px-4 py-1 bg-purple-600 text-white text-sm rounded hover:bg-purple-700">
+                    ชำระเงิน (รอบ 2)
+                </a>
+            @endif
+        </div>
+    </div>
+
+    <div class="mt-2">
+        <a href="{{ route('profile.customer.orderDetail', $booking->booking_id) }}"
+            class="text-blue-500 hover:underline text-sm">ดูรายละเอียดคำสั่งซื้อ</a>
+    </div>
+</div>
 
 
+    @empty
+        <div class="bg-white p-4 rounded shadow text-gray-500">
+            ไม่พบข้อมูลการชำระเงิน
+        </div>
+    @endforelse
 
-                    </div>
-                </div>
-                <div class="mt-2">
-                    <a href="{{ route('profile.customer.orderDetail', $booking->booking_id) }}"
-                        class="text-blue-500 hover:underline text-sm">ดูรายละเอียดคำสั่งซื้อ</a>
-                </div>
-            </div>
-        @empty
-            <div class="bg-white p-4 rounded shadow text-gray-500">
-                ไม่พบข้อมูลการชำระเงิน
-            </div>
-        @endforelse
     </div>
 </div>
 @endsection
