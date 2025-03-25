@@ -13,7 +13,7 @@
                 <li class="flex items-center py-2 px-3 bg-purple-50 text-purple-600 font-semibold rounded-md">
                     <i class="fas fa-user mr-3 w-4 text-center"></i> Profile
                 </li>
-                <a href="{{ route('profile.customer.address') }}" class="flex items-center py-2 px-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-colors cursor-pointer">
+                <a href="{{ route('profile.customer.address.index') }}" class="flex items-center py-2 px-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-colors cursor-pointer">
                     <i class="fas fa-map-marker-alt mr-3 w-4 text-center"></i> Address
                 </a>
                 <li class="flex items-center py-2 px-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-colors cursor-pointer">
