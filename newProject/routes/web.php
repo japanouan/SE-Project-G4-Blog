@@ -203,7 +203,7 @@ Route::middleware('auth')->group(function () {
     //Customer
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::get('/profile/editCus', [ProfileController::class, 'editCus'])->name('profile.editCus');
-    Route::get('/profile/customer/address', [ProfileController::class, 'customerAddress'])->name('profile.customer.address');
+   
     Route::get('/profile/customer/orderHistory', [ProfileController::class, 'orderHistory'])->name('profile.customer.orderHistory');
     Route::get('/profile/customer/orderDetail/{bookingId}', [ProfileController::class, 'orderDetail'])->name('profile.customer.orderDetail');
 
@@ -258,6 +258,16 @@ Route::prefix('payment')->name('payment.')->group(function () {
     Route::get('/form/{booking_id}/{cycle}', [PaymentController::class, 'showPaymentForm'])->name('form');
     Route::post('/process', [PaymentController::class, 'processPayment'])->name('process');
 });
+
+Route::prefix('/profile/customer/address')->name('profile.customer.address.')->middleware('auth', 'is_customer')->group(function () {
+    Route::get('/', [ProfileController::class, 'customerAddress'])->name('index'); // แสดงรายการที่อยู่
+    Route::get('/create', [ProfileController::class, 'createAddress'])->name('create'); // แบบฟอร์มเพิ่ม
+    Route::post('/store', [ProfileController::class, 'storeAddress'])->name('store'); // บันทึกข้อมูลใหม่
+    Route::get('/{cus_address_id}/edit', [ProfileController::class, 'editAddress'])->name('edit'); // แบบฟอร์มแก้ไข
+    Route::put('/{cus_address_id}', [ProfileController::class, 'updateAddress'])->name('update'); // อัปเดต
+    Route::delete('/{cus_address_id}', [ProfileController::class, 'deleteAddress'])->name('delete'); // ลบ
+});
+
 
 
 });
