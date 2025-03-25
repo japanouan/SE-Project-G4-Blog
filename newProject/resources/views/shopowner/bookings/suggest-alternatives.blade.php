@@ -6,8 +6,8 @@
 <div class="container mx-auto py-6">
     <div class="flex justify-between items-center mb-6">
         <div>
-            <a href="{{ route('shopowner.bookings.insufficient-stock') }}" class="text-blue-600 hover:text-blue-800">
-                <i class="fa fa-arrow-left mr-2"></i>กลับไปยังรายการจองที่มีชุดไม่เพียงพอ
+            <a href="{{ route('shopowner.bookings.index') }}" class="text-blue-600 hover:text-blue-800">
+                <i class="fa fa-arrow-left mr-2"></i>กลับไปยังรายการจอง
             </a>
             <h2 class="text-2xl font-bold mt-2">เสนอชุดทดแทน</h2>
         </div>
@@ -41,6 +41,7 @@
                         <p class="font-medium mb-1">สี: {{ $cartItem->color->color ?? 'ไม่ระบุ' }}</p>
                         <p class="font-medium mb-1">จำนวนที่ต้องการ: <span class="text-red-600">{{ $orderDetail->quantity }} ชุด</span></p>
                         <p class="font-medium">ราคาต่อชุด: {{ number_format($originalOutfit->price, 2) }} ฿</p>
+                        <p class="font-medium mt-2">วันที่จอง: <span id="reservation-date">{{ $orderDetail->reservation_date ? \Carbon\Carbon::parse($orderDetail->reservation_date)->format('d/m/Y') : 'ไม่ระบุ' }}</span></p>
                     </div>
                 </div>
                 
@@ -94,7 +95,7 @@
         @if($alternativeOutfits->count() > 0)
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
                 @foreach($alternativeOutfits as $outfit)
-                    <div class="border rounded-lg overflow-hidden hover:shadow-md transition duration-300">
+                    <div class="border rounded-lg overflow-hidden hover:shadow-md transition duration-300" id="outfit-card-{{ $outfit->outfit_id }}">
                         @if($outfit->image)
                             <img src="{{ asset($outfit->image) }}" alt="{{ $outfit->name }}" class="w-full h-48 object-cover">
                         @else
@@ -107,32 +108,70 @@
                             <h4 class="text-lg font-semibold mb-2">{{ $outfit->name }}</h4>
                             <p class="text-gray-600 text-sm mb-3">{{ Str::limit($outfit->description, 100) }}</p>
                             
+                            <!-- Shop Information -->
+                            <p class="text-sm text-blue-600 mb-3">
+                                <i class="fa fa-store mr-1"></i> ร้าน: {{ $outfit->shop->shop_name ?? 'ไม่ระบุ' }}
+                            </p>
+                            
                             <div class="mb-3">
-                                <p class="text-sm">ขนาด: {{ $cartItem->size->size ?? 'ไม่ระบุ' }}</p>
-                                <p class="text-sm">สี: {{ $cartItem->color->color ?? 'ไม่ระบุ' }}</p>
-                                @foreach($outfit->sizeAndColors as $sizeColor)
-                                    @if($sizeColor->size_id == $cartItem->size_id && $sizeColor->color_id == $cartItem->color_id)
-                                        <p class="text-sm">จำนวนคงเหลือ: <span class="font-medium">{{ $sizeColor->amount }} ชุด</span></p>
-                                    @endif
-                                @endforeach
+                                <!-- Size Selection -->
+                                <div class="mb-2">
+                                    <label for="size-{{ $outfit->outfit_id }}" class="block text-sm font-medium text-gray-700">ขนาด:</label>
+                                    <select 
+                                        id="size-{{ $outfit->outfit_id }}" 
+                                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md size-selector"
+                                        data-outfit-id="{{ $outfit->outfit_id }}"
+                                    >
+                                        @foreach($outfit->sizeAndColors->pluck('size')->unique('size_id') as $size)
+                                            <option 
+                                                value="{{ $size->size_id }}" 
+                                                {{ $size->size_id == $cartItem->size_id ? 'selected' : '' }}
+                                            >
+                                                {{ $size->size }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                
+                                <!-- Color Selection -->
+                                <div class="mb-2">
+                                    <label for="color-{{ $outfit->outfit_id }}" class="block text-sm font-medium text-gray-700">สี:</label>
+                                    <select 
+                                        id="color-{{ $outfit->outfit_id }}" 
+                                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md color-selector"
+                                        data-outfit-id="{{ $outfit->outfit_id }}"
+                                    >
+                                        @foreach($outfit->sizeAndColors->pluck('color')->unique('color_id') as $color)
+                                            <option 
+                                                value="{{ $color->color_id }}" 
+                                                {{ $color->color_id == $cartItem->color_id ? 'selected' : '' }}
+                                            >
+                                                {{ $color->color }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                
+                                <!-- Stock Information -->
+                                <div id="stock-info-{{ $outfit->outfit_id }}" class="text-sm mb-2">
+                                    <p>จำนวนคงเหลือ: <span id="stock-amount-{{ $outfit->outfit_id }}" class="font-medium">กำลังตรวจสอบ...</span></p>
+                                </div>
+                                
+                                <!-- Hidden sizeDetail_id field -->
+                                <input type="hidden" id="sizeDetail-{{ $outfit->outfit_id }}" value="">
                             </div>
                             
                             <div class="flex justify-between items-center">
                                 <span class="text-lg font-bold">{{ number_format($outfit->price, 2) }} ฿</span>
                                 
-                                <form action="{{ route('shopowner.bookings.save-selection') }}" method="POST" onsubmit="return confirm('คุณแน่ใจหรือไม่ที่จะเลือกชุดนี้เป็นชุดทดแทน?');">
+                                <form action="{{ route('shopowner.bookings.save-selection') }}" method="POST" id="selection-form-{{ $outfit->outfit_id }}" onsubmit="return validateSelection({{ $outfit->outfit_id }});">
                                     @csrf
                                     <input type="hidden" name="booking_id" value="{{ $booking->booking_id }}">
                                     <input type="hidden" name="orderDetail_id" value="{{ $orderDetail->orderDetail_id }}">
                                     <input type="hidden" name="outfit_id" value="{{ $outfit->outfit_id }}">
+                                    <input type="hidden" name="sizeDetail_id" id="form-sizeDetail-{{ $outfit->outfit_id }}" value="">
                                     
-                                    @foreach($outfit->sizeAndColors as $sizeColor)
-                                        @if($sizeColor->size_id == $cartItem->size_id && $sizeColor->color_id == $cartItem->color_id)
-                                            <input type="hidden" name="sizeDetail_id" value="{{ $sizeColor->sizeDetail_id }}">
-                                        @endif
-                                    @endforeach
-                                    
-                                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700" id="submit-btn-{{ $outfit->outfit_id }}">
                                         เลือกชุดนี้
                                     </button>
                                 </form>
@@ -150,4 +189,131 @@
         @endif
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get reservation date from the original outfit
+    const reservationDateStr = document.getElementById('reservation-date').textContent.trim();
+    let reservationDate = '';
+    
+    if (reservationDateStr !== 'ไม่ระบุ') {
+        // Convert date format from DD/MM/YYYY to YYYY-MM-DD for API calls
+        const parts = reservationDateStr.split('/');
+        reservationDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+    } else {
+        // Use today's date as fallback
+        const today = new Date();
+        reservationDate = today.toISOString().split('T')[0];
+    }
+    
+    // For each outfit, check stock for default size and color
+    @foreach($alternativeOutfits as $outfit)
+        updateStockInfo({{ $outfit->outfit_id }}, reservationDate);
+    @endforeach
+    
+    // Add event listeners to size and color selectors
+    document.querySelectorAll('.size-selector, .color-selector').forEach(selector => {
+        selector.addEventListener('change', function() {
+            const outfitId = this.dataset.outfitId;
+            updateStockInfo(outfitId, reservationDate);
+        });
+    });
+    
+    // Function to update stock information
+    function updateStockInfo(outfitId, date) {
+        const sizeSelector = document.getElementById(`size-${outfitId}`);
+        const colorSelector = document.getElementById(`color-${outfitId}`);
+        const stockAmountElement = document.getElementById(`stock-amount-${outfitId}`);
+        const sizeDetailInput = document.getElementById(`sizeDetail-${outfitId}`);
+        const formSizeDetailInput = document.getElementById(`form-sizeDetail-${outfitId}`);
+        const submitBtn = document.getElementById(`submit-btn-${outfitId}`);
+        
+        if (!sizeSelector || !colorSelector) return;
+        
+        const sizeId = sizeSelector.value;
+        const colorId = colorSelector.value;
+        
+        // Disable the button while checking
+        if (submitBtn) submitBtn.disabled = true;
+        
+        // Update stock display to show loading
+        if (stockAmountElement) stockAmountElement.textContent = 'กำลังตรวจสอบ...';
+        
+        // Call the API to get sizeDetail_id and stock amount
+        fetch(`/api/outfit-stock?outfit_id=${outfitId}&size_id=${sizeId}&color_id=${colorId}&date=${date}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update sizeDetail_id in hidden inputs
+                    if (sizeDetailInput) sizeDetailInput.value = data.sizeDetail_id;
+                    if (formSizeDetailInput) formSizeDetailInput.value = data.sizeDetail_id;
+                    
+                    // Update stock display
+                    if (stockAmountElement) {
+                        if (data.stockAmount > 0) {
+                            stockAmountElement.textContent = `${data.stockAmount} ชุด`;
+                            stockAmountElement.classList.remove('text-red-600');
+                            stockAmountElement.classList.add('text-green-600');
+                            
+                            // Enable submit button
+                            if (submitBtn) submitBtn.disabled = false;
+                        } else {
+                            stockAmountElement.textContent = 'หมด';
+                            stockAmountElement.classList.remove('text-green-600');
+                            stockAmountElement.classList.add('text-red-600');
+                            
+                            // Disable submit button
+                            if (submitBtn) submitBtn.disabled = true;
+                        }
+                    }
+                } else {
+                    // Show error
+                    if (stockAmountElement) {
+                        stockAmountElement.textContent = 'ไม่พบข้อมูล';
+                        stockAmountElement.classList.remove('text-green-600');
+                        stockAmountElement.classList.add('text-red-600');
+                    }
+                    
+                    // Disable submit button
+                    if (submitBtn) submitBtn.disabled = true;
+                }
+            })
+            .catch(error => {
+                console.error('Error checking stock:', error);
+                if (stockAmountElement) {
+                    stockAmountElement.textContent = 'เกิดข้อผิดพลาด';
+                    stockAmountElement.classList.remove('text-green-600');
+                    stockAmountElement.classList.add('text-red-600');
+                }
+                
+                // Disable submit button
+                if (submitBtn) submitBtn.disabled = true;
+            });
+    }
+    
+    // Validation function before form submission
+    window.validateSelection = function(outfitId) {
+        const sizeDetailInput = document.getElementById(`form-sizeDetail-${outfitId}`);
+        const stockAmountElement = document.getElementById(`stock-amount-${outfitId}`);
+        
+        if (!sizeDetailInput || !sizeDetailInput.value) {
+            alert('กรุณารอให้ระบบตรวจสอบจำนวนสินค้าคงเหลือให้เสร็จสิ้นก่อน');
+            return false;
+        }
+        
+        if (stockAmountElement && stockAmountElement.textContent === 'หมด') {
+            alert('ขออภัย สินค้านี้หมด ไม่สามารถเลือกได้');
+            return false;
+        }
+        
+        // Check if stock is still being checked
+        if (stockAmountElement && stockAmountElement.textContent === 'กำลังตรวจสอบ...') {
+            alert('กรุณารอให้ระบบตรวจสอบจำนวนสินค้าคงเหลือให้เสร็จสิ้นก่อน');
+            return false;
+        }
+        
+        return true;
+    };
+});
+</script
 @endsection
