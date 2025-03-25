@@ -66,11 +66,12 @@
 
             {{-- ✅ เงื่อนไขใหม่: ต้องมี overrent และยังค้างชำระ --}}
             @if($booking->hasOverrented == 1 && $booking->unpaid > 0)
-                <a href="{{ route('payment.viewUpdate', $booking->booking_id) . '?action=pay_remaining' }}"
+                <a href="{{ route('payment.createCycle2', $booking->booking_id) }}"
                     class="inline-block mt-2 px-4 py-1 bg-purple-600 text-white text-sm rounded hover:bg-purple-700">
                     ชำระเงิน (รอบ 2)
                 </a>
             @endif
+
         </div>
     </div>
 
