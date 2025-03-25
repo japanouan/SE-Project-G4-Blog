@@ -40,4 +40,15 @@ class CartItem extends Model
         return $this->belongsTo(ThaiOutfitSizeAndColor::class,'sizeDetail_id', 'sizeDetail_id'); // หรือ field ที่ใช้เชื่อม
     }
     
+    // เพิ่มความสัมพันธ์กับ OrderDetail
+    public function orderDetail()
+    {
+        return $this->belongsTo(OrderDetail::class, 'cart_item_id', 'cart_item_id');
+    }
+    
+    // หรือถ้ามีความสัมพันธ์ many-to-many กับ OrderDetail
+    // public function orderDetail()
+    // {
+    //     return $this->hasMany(OrderDetail::class, 'cart_item_id', 'cart_item_id');
+    // }
 }

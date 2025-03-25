@@ -1,3 +1,8 @@
+@extends('layouts.admin-layout')
+
+@section('title', 'User Management')
+
+@section('content')
 <div class="container">
     <div class="flex justify-between items-center mb-8">
         <h1 class="text-3xl font-bold text-gray-800">
@@ -441,3 +446,4 @@ $(document).ready(function() {
     });
 });
 </script>
+@endsection

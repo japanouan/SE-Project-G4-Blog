@@ -272,21 +272,52 @@ class OutfitController extends Controller
             $outfitCategory->save();
         }
     
-        // Update size and color combinations
-        ThaiOutfitSizeAndColor::where('outfit_id', $id)->delete();
+        // Get existing size and color combinations
+        $existingSizeColors = ThaiOutfitSizeAndColor::where('outfit_id', $id)->get();
+        $updatedCombinations = [];
     
         if (isset($request->sizes) && isset($request->colors) && isset($request->amount)) {
-            foreach ($request->sizes as $sizeIndex => $sizeId) {
-                foreach ($request->colors as $colorIndex => $colorId) {
+            foreach ($request->sizes as $sizeId) {
+                foreach ($request->colors as $colorId) {
                     $key = $sizeId . '_' . $colorId;
                     if (isset($request->amount[$key]) && $request->amount[$key] > 0) {
-                        ThaiOutfitSizeAndColor::create([
-                            'outfit_id' => $outfit->outfit_id,
-                            'size_id' => $sizeId,
-                            'color_id' => $colorId,
-                            'amount' => $request->amount[$key]
-                        ]);
+                        // Check if this combination already exists
+                        $existing = $existingSizeColors->first(function($item) use ($sizeId, $colorId) {
+                            return $item->size_id == $sizeId && $item->color_id == $colorId;
+                        });
+                        
+                        if ($existing) {
+                            // Update existing combination
+                            $existing->amount = $request->amount[$key];
+                            $existing->save();
+                            $updatedCombinations[] = $existing->sizeDetail_id;
+                        } else {
+                            // Create new combination
+                            $new = ThaiOutfitSizeAndColor::create([
+                                'outfit_id' => $outfit->outfit_id,
+                                'size_id' => $sizeId,
+                                'color_id' => $colorId,
+                                'amount' => $request->amount[$key]
+                            ]);
+                            $updatedCombinations[] = $new->sizeDetail_id;
+                        }
                     }
+                }
+            }
+        }
+    
+        // Delete combinations that weren't updated, only if they're not referenced by cart items
+        foreach ($existingSizeColors as $existing) {
+            if (!in_array($existing->sizeDetail_id, $updatedCombinations)) {
+                // Check if this size/color is used in any cart items
+                $cartItemExists = \App\Models\CartItem::where('sizeDetail_id', $existing->sizeDetail_id)->exists();
+                
+                if (!$cartItemExists) {
+                    $existing->delete();
+                } else {
+                    // If it's referenced, just set amount to 0 instead of deleting
+                    $existing->amount = 0;
+                    $existing->save();
                 }
             }
         }
@@ -372,5 +403,52 @@ class OutfitController extends Controller
         return view('main', compact('outfits'));
     }
 
-
+    public function checkOutfitStock(Request $request)
+    {
+        try {
+            $outfitId = $request->input('outfit_id');
+            $sizeId = $request->input('size_id');
+            $colorId = $request->input('color_id');
+            $date = $request->input('date');
+        
+            // ดึงข้อมูล sizeDetail_id และจำนวนสินค้าคงเหลือ
+            $sizeAndColor = ThaiOutfitSizeAndColor::where('outfit_id', $outfitId)
+                ->where('size_id', $sizeId)
+                ->where('color_id', $colorId)
+                ->first();
+        
+            if (!$sizeAndColor) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'ไม่พบข้อมูลขนาดและสีนี้'
+                ]);
+            }
+        
+            // ตรวจสอบสินค้าที่ถูกจองในวันที่กำหนด
+            $bookedAmount = 0;
+            if ($date) {
+                $bookedAmount = \App\Models\CartItem::where('sizeDetail_id', $sizeAndColor->sizeDetail_id)
+                    ->whereHas('orderDetail', function($query) use ($date) {
+                        $query->where('reservation_date', $date);
+                    })
+                    ->sum('quantity');
+            }
+        
+            $stockAmount = max(0, $sizeAndColor->amount - $bookedAmount);
+        
+            return response()->json([
+                'success' => true,
+                'sizeDetail_id' => $sizeAndColor->sizeDetail_id,
+                'stockAmount' => $stockAmount
+            ]);
+        } catch (\Exception $e) {
+            // ส่งข้อความ error ที่มีรายละเอียดมากขึ้นเพื่อช่วยในการ debug
+            return response()->json([
+                'success' => false,
+                'message' => 'เกิดข้อผิดพลาด: ' . $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ], 500);
+        }
+    }
 }

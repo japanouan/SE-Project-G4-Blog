@@ -129,6 +129,8 @@ Route::prefix('admin')->name('admin.')->middleware('auth', 'is_admin')->group(fu
 
 
 // shop owner
+Route::get('/api/outfit-stock', [OutfitController::class, 'checkOutfitStock']);
+
 Route::prefix('shopowner')->name('shopowner.')->middleware('auth', 'is_shopowner')->group(function () {
     // เปลี่ยนจาก dashboard เป็น redirect ไปที่ my-shop
     Route::get('/dashboard', function () {
@@ -189,6 +191,7 @@ Route::prefix('shopowner')->name('shopowner.')->middleware('auth', 'is_shopowner
     Route::get('/bookings/insufficient-stock', [BookingController::class, 'insufficientStock'])->name('bookings.insufficient-stock');
     Route::get('/bookings/{booking}/suggest-alternatives/{orderDetail}', [BookingController::class, 'suggestAlternatives'])->name('bookings.suggest-alternatives');
     Route::post('/bookings/save-selection', [BookingController::class, 'saveSelection'])->name('bookings.save-selection');
+    
 });
 
 // Move this outside the shopowner group if you want it accessible to all users
