@@ -19,6 +19,8 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
+use App\Models\CustomerAddress;
+use App\Models\Address;
 
 class ProfileController extends Controller
 {
@@ -125,8 +127,92 @@ class ProfileController extends Controller
 
     public function customerAddress(Request $request)
     {
-        //
+        $customerId = auth()->id();
+    
+        $addresses = CustomerAddress::with('address')
+            ->where('customer_id', $customerId)
+            ->get();
+    
+        return view('profile.customer.address', compact('addresses'));
     }
+
+    public function createAddress()
+    {
+        return view('profile.customer.createAddress');
+    }
+
+    public function storeAddress(Request $request)
+    {
+        $request->validate([
+            'AddressName' => 'required|string|max:255',
+            'Province' => 'required|string',
+            'District' => 'required|string',
+            'Subdistrict' => 'required|string',
+            'PostalCode' => 'required',
+            'HouseNumber' => 'required|string',
+            'Street' => 'nullable|string'
+        ]);
+
+        $address = Address::create($request->only(['Province', 'District', 'Subdistrict', 'PostalCode', 'HouseNumber', 'Street']));
+
+        CustomerAddress::create([
+            'customer_id' => Auth::id(),
+            'AddressID' => $address->AddressID,
+            'AddressName' => $request->AddressName
+        ]);
+
+        return redirect()->route('profile.customer.address.index')->with('success', 'เพิ่มที่อยู่เรียบร้อยแล้ว');
+    }
+
+    public function editAddress($cus_address_id)
+    {
+        $cusAddress = CustomerAddress::with('address')->findOrFail($cus_address_id);
+
+        if ($cusAddress->customer_id != Auth::id()) {
+            abort(403);
+        }
+
+        return view('profile.customer.editAddress', compact('cusAddress'));
+    }
+
+    public function updateAddress(Request $request, $cus_address_id)
+    {
+        $request->validate([
+            'AddressName' => 'required|string|max:255',
+            'Province' => 'required|string',
+            'District' => 'required|string',
+            'Subdistrict' => 'required|string',
+            'PostalCode' => 'required',
+            'HouseNumber' => 'required|string',
+            'Street' => 'nullable|string'
+        ]);
+
+        $cusAddress = CustomerAddress::with('address')->findOrFail($cus_address_id);
+
+        if ($cusAddress->customer_id != Auth::id()) {
+            abort(403);
+        }
+
+        $cusAddress->update(['AddressName' => $request->AddressName]);
+        $cusAddress->address->update($request->only(['Province', 'District', 'Subdistrict', 'PostalCode', 'HouseNumber', 'Street']));
+
+        return redirect()->route('profile.customer.address.index')->with('success', 'แก้ไขที่อยู่เรียบร้อย');
+    }
+
+    public function deleteAddress($cus_address_id)
+    {
+        $cusAddress = CustomerAddress::findOrFail($cus_address_id);
+
+        if ($cusAddress->customer_id != Auth::id()) {
+            abort(403);
+        }
+
+        $cusAddress->address()->delete();
+        $cusAddress->delete();
+
+        return redirect()->route('profile.customer.address.index')->with('success', 'ลบที่อยู่เรียบร้อยแล้ว');
+    }
+
 
 
 
