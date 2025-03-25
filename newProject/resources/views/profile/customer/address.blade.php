@@ -8,21 +8,28 @@
             <h3 class="text-lg font-semibold text-gray-800">Account Settings</h3>
         </div>
         <ul class="p-4 space-y-2 text-sm">
-        <a href="{{ route('profile.customer.address.index') }}" class="flex items-center py-2 px-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-colors cursor-pointer">
+            <!-- Profile -->
+            <a href="{{ route('profile.index') }}" class="flex items-center py-2 px-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-colors cursor-pointer">
                 <i class="fas fa-user mr-3 w-4 text-center"></i> Profile
             </a>
-            
+
+            <!-- Address -->
             <a href="{{ route('profile.customer.address.index') }}" class="flex items-center py-2 px-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-colors cursor-pointer">
                 <i class="fas fa-map-marker-alt mr-3 w-4 text-center"></i> Address
             </a>
-            <li class="flex items-center py-2 px-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-colors cursor-pointer">
+
+            <!-- Payment -->
+            <a href="{{ route('payment.index') }}" class="flex items-center py-2 px-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-colors cursor-pointer">
                 <i class="fas fa-credit-card mr-3 w-4 text-center"></i> Payment
-            </li>
+            </a>
+
+            <!-- History -->
             <a href="{{ route('profile.customer.orderHistory') }}" class="flex items-center py-2 px-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-colors cursor-pointer">
                 <i class="fas fa-history mr-3 w-4 text-center"></i> History
             </a>
         </ul>
     </div>
+
 
     <!-- Content -->
     <div class="w-full md:w-3/4">
