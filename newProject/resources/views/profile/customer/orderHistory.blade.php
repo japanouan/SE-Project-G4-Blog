@@ -44,10 +44,10 @@
                             <!-- สถานะ -->
                             <div class="status">
                                 <span class="inline-block px-3 py-1 rounded-full text-sm font-semibold
-                                    {{ $booking->status == 'confirmed' ? 'bg-red-100 text-red-600' : 
+                                    {{ $booking->status == 'confirmed' ? 'bg-green-100 text-green-600' : 
                                        ($booking->status == 'pending' ? 'bg-orange-100 text-orange-600' : 
                                        ($booking->status == 'partial paid' ? 'bg-blue-100 text-blue-600' : 
-                                       'bg-gray-100 text-gray-600')) }}">
+                                       'bg-red-100 text-red-600')) }}">
                                     {{ $booking->status }}
                                 </span>
                             </div>
