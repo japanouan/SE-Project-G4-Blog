@@ -48,21 +48,28 @@
                 <img src="{{ $cartItem->outfit->image ? asset($cartItem->outfit->image) : asset('images/default-placeholder.png') }}" 
                     class="w-24 h-24 rounded-lg object-cover">
 
-                <div class="ml-4">
-                    <h3 class="text-lg font-semibold flex items-center gap-2">
-                        {{ $cartItem->outfit->name }}
-                        @if($cartItem->overent == 1)
-                            <span class="text-xs bg-yellow-400 text-white px-2 py-1 rounded-full">สั่งเพิ่ม</span>
-                        @endif
-                    </h3>
-                    <p class="text-green-600 font-bold">{{ number_format($cartItem->outfit->price, 0) }}฿ /1 days</p>
-                    
-                    <!-- Add reservation date display here -->
-                    <p class="text-gray-600 text-sm mt-1">
-                        <span class="font-medium">วันที่จอง:</span> 
-                        {{ $cartItem->reservation_date ? date('d/m/Y', strtotime($cartItem->reservation_date)) : 'ไม่ระบุ' }}
-                    </p>
-                </div>
+                    <div class="ml-4">
+                        <h3 class="text-lg font-semibold flex items-center gap-2">
+                            {{ $cartItem->outfit->name }}
+                            @if($cartItem->overent == 1)
+                                <span class="text-xs bg-yellow-400 text-white px-2 py-1 rounded-full">สั่งเพิ่ม</span>
+                            @endif
+                        </h3>
+                        <h6 class="text-sm font-semibold flex items-center gap-2 mt-2">
+                            @if($cartItem->overent == 1)
+                                <span class="text-xs bg-yellow-400 text-white px-2 py-1 rounded-full">สั่งเพิ่ม</span>
+                            @else
+                                ร้าน: {{ $cartItem->shop_name ?? 'ไม่ระบุร้าน' }}
+                            @endif
+                        </h6>
+                        <p class="text-green-600 font-bold mt-2">{{ number_format($cartItem->outfit->price, 0) }}฿ /1 days</p>
+                        
+                        <!-- Add reservation date display here -->
+                        <p class="text-gray-600 text-sm mt-2">
+                            <span class="font-medium">วันที่จอง:</span> 
+                            {{ $cartItem->reservation_date ? date('d/m/Y', strtotime($cartItem->reservation_date)) : 'ไม่ระบุ' }}
+                        </p>
+                    </div>
             </div>
 
             <!-- สี -->

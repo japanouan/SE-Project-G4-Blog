@@ -24,7 +24,7 @@ class CartItemController extends Controller
     $user = Auth::user();
 
     // ดึงข้อมูลสินค้าทั้งหมดในตะกร้าของ User นั้นๆ
-    $cartItems = CartItem::with(['outfit', 'size', 'color'])
+    $cartItems = CartItem::with(['outfit', 'size', 'color','thaioutfit_sizeandcolor.outfit.shop'])
             ->where('userId', $user->user_id)
             ->where('status', 'INUSE')
             ->orderBy('overent', 'asc') // ✅ เพิ่มตรงนี้: ให้ overent = 0 มาก่อน
@@ -42,6 +42,8 @@ class CartItemController extends Controller
         // ✅ ตรวจสอบว่าค่าถูกต้องหรือไม่
         if (!$cartItem->sizeAndColor) {
             $cartItem->sizeAndColor = (object) ['amount' => 0]; // กำหนดค่าเริ่มต้นให้เป็น 0
+        }else{
+            $cartItem->shop_name = $cartItem->thaioutfit_sizeandcolor->outfit->shop->shop_name;
         }
         
         $sizeDetail_id = $cartItem->sizeDetail_id;
@@ -69,6 +71,7 @@ class CartItemController extends Controller
 
         // เพิ่มค่า stockRemaining ให้กับ attribute ที่สามารถใช้ใน view ได้
         $cartItem->append('stockRemaining');
+        $cartItem->append('shop_name');
     }
 
     // dd($cartItems);
