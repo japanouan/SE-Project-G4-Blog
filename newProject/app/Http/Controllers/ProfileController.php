@@ -132,8 +132,15 @@ class ProfileController extends Controller
 
     public function orderHistory()
     {
+        $userId = Auth::user()->user_id;
         // ดึงข้อมูลการจอง (Booking) พร้อมกับข้อมูลที่เกี่ยวข้อง
-        $bookings = Booking::with(['orderDetails.cartItem.thaioutfit_sizeandcolor.outfit.shop', 'selectService'])->get();
+        $bookings = Booking::with([
+            'orderDetails.cartItem.thaioutfit_sizeandcolor.outfit.shop', 
+            'selectService'
+        ])
+        ->where('user_id', $userId)
+        ->get();
+        
 
         // ส่งข้อมูลไปยังหน้า Blade
         return view('profile.customer.orderHistory', compact('bookings'));
