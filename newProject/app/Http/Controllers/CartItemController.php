@@ -40,7 +40,7 @@ class CartItemController extends Controller
             ->first();
 
         // ✅ ตรวจสอบว่าค่าถูกต้องหรือไม่
-        if (!$cartItem->sizeAndColor) {
+        if (!$cartItem->sizeAndColor || !$cartItem->sizeAndColor->thaioutfit_sizeandcolor) {
             $cartItem->sizeAndColor = (object) ['amount' => 0]; // กำหนดค่าเริ่มต้นให้เป็น 0
         }else{
             $cartItem->shop_name = $cartItem->thaioutfit_sizeandcolor->outfit->shop->shop_name;
@@ -65,9 +65,15 @@ class CartItemController extends Controller
 
         
         $soldQuantity = $stockData->first()->total_quantity ?? 0;
+        if($cartItem->overent){
+            $stock = 9999999999;
+        }else{
+            $stock = $cartItem->thaioutfit_sizeandcolor->amount;
+        }
+        // dd($cartItem->thaioutfit_sizeandcolor->amount);
     
         // คำนวณสินค้าคงเหลือ
-        $cartItem->stockRemaining = $cartItem->sizeAndColor->amount - $soldQuantity;
+        $cartItem->stockRemaining = $stock - $soldQuantity;
 
         // เพิ่มค่า stockRemaining ให้กับ attribute ที่สามารถใช้ใน view ได้
         $cartItem->append('stockRemaining');
@@ -108,13 +114,14 @@ public function addToCart(Request $request)
         return redirect()->back()->with('error', 'ไม่พบข้อมูลขนาดและสีของชุด');
     }
 
-    // เช็คว่ามี item เดิมอยู่ในตะกร้าไหม
+    // เช็คว่ามี item เดิมอยู่ในตะกร้าไหม โดยรวม reservation_date ในการเช็ค
     $item = CartItem::where('outfit_id', $outfit_id)
         ->where('size_id', $size_id)
         ->where('color_id', $color_id)
         ->where('userId', $user->user_id)
         ->where('overent', $overent)
         ->where('status', 'INUSE')
+        ->where('reservation_date', $reservation_date) // เพิ่มเงื่อนไขนี้
         ->first();
 
     $existingQty = $item ? $item->quantity : 0;
