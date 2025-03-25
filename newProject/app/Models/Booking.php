@@ -64,7 +64,7 @@ class Booking extends Model
     }
 
     // ความสัมพันธ์กับโปรโมชั่น
-    public function payment()
+    public function payments()
     {
         return $this->hasMany(Payment::class, 'booking_id', 'booking_id');
     }
