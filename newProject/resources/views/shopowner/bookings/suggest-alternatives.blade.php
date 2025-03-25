@@ -92,6 +92,21 @@
             <h3 class="text-lg font-semibold">ชุดทดแทนที่มีหมวดหมู่เดียวกัน ({{ $alternativeOutfits->count() }} ชุด)</h3>
         </div>
         
+        <div class="flex space-x-4 p-4 text-sm">
+            <div class="flex items-center">
+                <span class="w-3 h-3 rounded-full bg-green-500 inline-block mr-1"></span>
+                <span>เพียงพอ</span>
+            </div>
+            <div class="flex items-center">
+                <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block mr-1"></span>
+                <span>ไม่เพียงพอ</span>
+            </div>
+            <div class="flex items-center">
+                <span class="w-3 h-3 rounded-full bg-red-500 inline-block mr-1"></span>
+                <span>หมด/ไม่พบข้อมูล</span>
+            </div>
+        </div>
+        
         @if($alternativeOutfits->count() > 0)
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
                 @foreach($alternativeOutfits as $outfit)
@@ -171,7 +186,7 @@
                                     <input type="hidden" name="outfit_id" value="{{ $outfit->outfit_id }}">
                                     <input type="hidden" name="sizeDetail_id" id="form-sizeDetail-{{ $outfit->outfit_id }}" value="">
                                     
-                                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700" id="submit-btn-{{ $outfit->outfit_id }}">
+                                    <button type="submit" class="bg-gray-400 text-white px-4 py-2 rounded-md" id="submit-btn-{{ $outfit->outfit_id }}" disabled>
                                         เลือกชุดนี้
                                     </button>
                                 </form>
@@ -189,6 +204,25 @@
         @endif
     </div>
 </div>
+
+<style>
+    button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .stock-sufficient {
+        color: #10B981; /* เขียว */
+    }
+    
+    .stock-insufficient {
+        color: #F59E0B; /* เหลือง */
+    }
+    
+    .stock-empty {
+        color: #EF4444; /* แดง */
+    }
+</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -218,6 +252,9 @@ document.addEventListener('DOMContentLoaded', function() {
             updateStockInfo(outfitId, reservationDate);
         });
     });
+    
+    // ดึงค่าจำนวนชุดที่ลูกค้าต้องการ
+    const requiredQuantity = {{ $orderDetail->quantity }};
     
     // Function to update stock information
     function updateStockInfo(outfitId, date) {
@@ -250,44 +287,73 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     // Update stock display
                     if (stockAmountElement) {
-                        if (data.stockAmount > 0) {
-                            stockAmountElement.textContent = `${data.stockAmount} ชุด`;
-                            stockAmountElement.classList.remove('text-red-600');
+                        // ลบคลาสสีทั้งหมดก่อน
+                        stockAmountElement.classList.remove('text-green-600', 'text-yellow-600', 'text-red-600');
+                        
+                        // เช็คว่าจำนวนคงเหลือพอกับที่ลูกค้าต้องการหรือไม่
+                        if (data.stockAmount >= requiredQuantity) {
+                            stockAmountElement.textContent = `${data.stockAmount} ชุด (เพียงพอ)`;
                             stockAmountElement.classList.add('text-green-600');
                             
-                            // Enable submit button
-                            if (submitBtn) submitBtn.disabled = false;
+                            // เปิดใช้งานปุ่ม submit
+                            if (submitBtn) {
+                                submitBtn.disabled = false;
+                                submitBtn.classList.remove('bg-gray-400');
+                                submitBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                            }
+                        } else if (data.stockAmount > 0) {
+                            stockAmountElement.textContent = `${data.stockAmount} ชุด (ไม่พอ ต้องการ ${requiredQuantity} ชุด)`;
+                            stockAmountElement.classList.add('text-yellow-600');
+                            
+                            // ปิดใช้งานปุ่ม submit
+                            if (submitBtn) {
+                                submitBtn.disabled = true;
+                                submitBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                                submitBtn.classList.add('bg-gray-400');
+                            }
                         } else {
                             stockAmountElement.textContent = 'หมด';
-                            stockAmountElement.classList.remove('text-green-600');
                             stockAmountElement.classList.add('text-red-600');
                             
-                            // Disable submit button
-                            if (submitBtn) submitBtn.disabled = true;
+                            // ปิดใช้งานปุ่ม submit
+                            if (submitBtn) {
+                                submitBtn.disabled = true;
+                                submitBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                                submitBtn.classList.add('bg-gray-400');
+                            }
                         }
                     }
                 } else {
-                    // Show error
+                    // กรณีเกิดข้อผิดพลาด
                     if (stockAmountElement) {
+                        stockAmountElement.classList.remove('text-green-600', 'text-yellow-600', 'text-red-600');
                         stockAmountElement.textContent = 'ไม่พบข้อมูล';
-                        stockAmountElement.classList.remove('text-green-600');
                         stockAmountElement.classList.add('text-red-600');
                     }
                     
-                    // Disable submit button
-                    if (submitBtn) submitBtn.disabled = true;
+                    // ปิดใช้งานปุ่ม submit
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                        submitBtn.classList.add('bg-gray-400');
+                    }
                 }
             })
             .catch(error => {
+                // กรณีเกิดข้อผิดพลาดในการเรียก API
                 console.error('Error checking stock:', error);
                 if (stockAmountElement) {
+                    stockAmountElement.classList.remove('text-green-600', 'text-yellow-600', 'text-red-600');
                     stockAmountElement.textContent = 'เกิดข้อผิดพลาด';
-                    stockAmountElement.classList.remove('text-green-600');
                     stockAmountElement.classList.add('text-red-600');
                 }
                 
-                // Disable submit button
-                if (submitBtn) submitBtn.disabled = true;
+                // ปิดใช้งานปุ่ม submit
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                    submitBtn.classList.add('bg-gray-400');
+                }
             });
     }
     
