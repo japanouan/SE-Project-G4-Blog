@@ -1,14 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.admin-layout')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Outfits Management</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
+@section('title', 'User Management')
 
-<body>
+@section('content')
     <div class="container mx-auto p-6">
         <h2 class="text-2xl font-semibold mb-4">จัดการชุด</h2>
 
@@ -71,6 +65,4 @@
             {{ $outfits->links() }}
         </div>
     </div>
-</body>
-
-</html>
+@endsection

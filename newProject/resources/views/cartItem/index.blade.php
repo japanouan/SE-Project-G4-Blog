@@ -229,7 +229,7 @@
         let checkbox = document.querySelector(`input[value="${cartId}"]`);
         let stockStatus = itemDiv.querySelector('.stock-status p');
 
-        @foreach($sortedItems as $cartItem)
+        @foreach($cartItems as $cartItem)
             if (cartId === '{{ $cartItem->cart_item_id }}') {
                 let stockRemaining = {{ $cartItem->overent == 1 ? 'null' : ($cartItem->stockRemaining ?? 0) }};
                 let isDatePassed = {{ $isDatePassed ? 'true' : 'false' }};
@@ -256,9 +256,7 @@
                 } else {
                     checkbox.disabled = true;
                     checkbox.title = isDatePassed ? 'วันที่จองล่วงเลยมาแล้ว' : 
-                                    (isStockInsufficient ? 'สินค้าคงเหลือلیکیشن
-
-ไม่เพียงพอ' : 'ต้องเลือกสินค้าที่มีในร้านก่อน');
+                                    (isStockInsufficient ? 'สินค้าคงเหลือไม่เพียงพอ' : 'ต้องเลือกสินค้าที่มีในร้านก่อน');
                 }
             }
         @endforeach
@@ -283,7 +281,7 @@
 
     // เพิ่ม event listener เมื่อหน้าโหลด
     document.addEventListener('DOMContentLoaded', function() {
-        @foreach($sortedItems as $cartItem)
+        @foreach($cartItems as $cartItem)
             updateItemStatus('{{ $cartItem->cart_item_id }}', {{ $cartItem->quantity }});
         @endforeach
     });
