@@ -133,7 +133,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth', 'is_admin')->group(fu
     //stat
     Route::get('/statistics/shop', [AdminController::class, 'showShopStatistics'])->name('statistics.shop');
     Route::get('/statistics/photographer', [AdminController::class, 'showPhotographerStatistics'])->name('statistics.photographer');
-    Route::get('/statistics/make-up', [AdminController::class, 'showMakeupStatistics'])->name('statistics.make-up');
+    Route::get('/statistics/make-up', [AdminController::class, 'showMakeupStatistics'])->name('statistics.make-upartist');
 
     //categories
     Route::resource('categories', CategoryController::class);
