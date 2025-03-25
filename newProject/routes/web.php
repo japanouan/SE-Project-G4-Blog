@@ -76,9 +76,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth', 'is_admin')->group(fu
         return view('admin.dashboard');
     });
 
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard',  [UserController::class, 'index'])->name('dashboard');
 
     // เปลี่ยนสถานะผู้ใช้
     Route::post('/users/{user_id}/toggleStatus', [UserController::class, 'toggleStatus'])->name('users.toggleStatus');
@@ -123,6 +121,10 @@ Route::prefix('admin')->name('admin.')->middleware('auth', 'is_admin')->group(fu
     Route::get('/statistics/shop', [AdminController::class, 'showShopStatistics'])->name('statistics.shop');
     Route::get('/statistics/photographer', [AdminController::class, 'showPhotographerStatistics'])->name('statistics.photographer');
     Route::get('/statistics/make-upartist', [AdminController::class, 'showMakeUpArtistStatistics'])->name('statistics.make-upartist');
+
+    //categories
+    Route::resource('categories', CategoryController::class);
+
 
 });
 

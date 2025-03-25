@@ -1,14 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.admin-layout')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
+@section('title', 'Booking')
 
-<body>
+@section('content')
     <div class="max-w-5xl mx-auto bg-white p-8 shadow-md rounded-lg mt-10 border">
         <h2 class="text-2xl font-bold text-indigo-700 mb-6">📋 รายละเอียดการจอง #{{ $booking->booking_id }}</h2>
 
@@ -97,7 +91,4 @@
             </a>
         </div>
     </div>
-
-</body>
-
-</html>
+@endsection

@@ -1,14 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.admin-layout')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <title>Acceptance</title>
-</head>
+@section('title', 'Booking')
 
-<body class="bg-gray-100">
+@section('content')
 
     <div class="container mx-auto p-6">
         <h1 class="text-3xl font-bold text-gray-800 mb-6 justify-self-center">Acceptance</h1>
@@ -88,6 +82,4 @@
             }
         });
     </script>
-</body>
-
-</html>
+@endsection

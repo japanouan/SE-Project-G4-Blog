@@ -18,8 +18,8 @@ class IssueController extends Controller
 
     public function replyPage($id)
     {
-        $issue = Issue::findOrFail($id);
-        return view('issue.issue_reply',compact('issue'));
+        $issue = Issue::with('user')->findOrFail($id);
+        return view('admin.issue.issue_reply',compact('issue'));
     }
     
     public function reply(Request $request, $id)
@@ -100,11 +100,23 @@ class IssueController extends Controller
     // show Notifications ของ admin
     public function showNotifications()
     {
-        $notifications = Notifications::join('issues', 'notifications.issue_id', '=', 'issues.id')->where('status','!=', 'fixed')->get();
+        $notifications = Notifications::join('issues', 'notifications.issue_id', '=', 'issues.id')
+                                        ->join('Users','issues.user_id' ,'=', 'Users.user_id')
+                                        ->where('issues.status','!=', 'fixed')
+                                        ->select(
+                                            'notifications.issue_id as issue_id',
+                                            'issues.created_at as created_at',
+                                            'issues.title as title',
+                                            'issues.status as status',
+                                            'Users.name as username',
+                                            'Users.user_id as user_id',
+                                            'issues.description as description',
+                                            'issues.id as id'
+                                        )->get();
 
         // dd($notifications);
         
-        return view('notifications.index', compact('notifications'));
+        return view('admin.issue.index', compact('notifications'));
     }
 
     // show Notifications ของ user

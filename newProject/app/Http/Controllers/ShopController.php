@@ -7,6 +7,7 @@ use App\Models\Shop;
 use App\Models\Address;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class ShopController extends Controller
 {
@@ -81,13 +82,15 @@ class ShopController extends Controller
     $shop->fill($validated);
     $shop->save();
     
+    if (Auth::user()->userType == 'admin'){
+        // Normal redirect for non-AJAX requests
+        return redirect()->route('admin.shops.index')->with('success', 'Shop updated successfully');
+    }
     // Check if request is AJAX
     if ($request->ajax() || $request->has('is_ajax')) {
         return response()->json(['success' => true, 'message' => 'Shop updated successfully']);
     }
-    
-    // Normal redirect for non-AJAX requests
-    return redirect()->route('admin.dashboard')->with('success', 'Shop updated successfully');
+    return redirect()->route('dashboard')->with('success', 'Shop updated successfully');
 }
 
 

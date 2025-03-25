@@ -1,19 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reply</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body>
+@extends('layouts.admin-layout')
+
+@section('title', 'Issue Reply')
+
+@section('content')
 <div class="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-xl border border-gray-200 mt-10">
     <h2 class="text-2xl font-semibold text-gray-800 mb-4 border-b pb-2">📝 การตอบกลับ</h2>
 
     <div class="space-y-2 text-gray-700">
-        <p><strong>🔸 หัวข้อปัญหา:</strong> {{ $issue->title }}</p>
-        <p><strong>📝 อธิบายปัญหา:</strong> {{ $issue->description }}</p>
-        <p><strong>📌 สถานะ:</strong> 
+        <p><strong> หัวข้อปัญหา:</strong> {{ $issue->title }}</p>
+        <p><strong> อธิบายปัญหา:</strong> {{ $issue->description }}</p>
+        <p><strong> ผู้แจ้ง:</strong> #{{ $issue->user->user_id.' '.$issue->user->name }}</p>
+        <p><strong> สถานะ:</strong> 
             <span class="px-2 py-1 rounded-full 
                 @if($issue->status == 'in_progress') bg-yellow-300 text-yellow-800 
                 @elseif($issue->status == 'fixed') bg-green-300 text-green-800 
@@ -61,5 +58,4 @@
     </form>
 </div>
 
-</body>
-</html>
+@endsection

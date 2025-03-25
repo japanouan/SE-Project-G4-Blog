@@ -24,12 +24,12 @@ class Issue extends Model
     // กำหนดว่า `user_id` จะถูกเชื่อมโยงกับ `id` ในตาราง `users`
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class,'user_id','user_id');
     }
 
     // ความสัมพันธ์หนึ่งกับหลายกับตาราง `notifications`
     public function notifications()
     {
-        return $this->hasMany(Notifications::class);
+        return $this->hasMany(Notifications::class,'issue_id');
     }
 }
