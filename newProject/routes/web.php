@@ -89,7 +89,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth', 'is_admin')->group(fu
         return view('admin.dashboard');
     });
 
-    Route::get('/dashboard',  [UserController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard',  [AdminController::class, 'index'])->name('dashboard');
 
     // เปลี่ยนสถานะผู้ใช้
     Route::post('/users/{user_id}/toggleStatus', [UserController::class, 'toggleStatus'])->name('users.toggleStatus');

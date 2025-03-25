@@ -247,7 +247,7 @@
                     <div class="mt-6">
                         <button type="submit" onclick="return validateForm()" class="w-full px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition font-medium flex items-center justify-center gap-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-                            ยืนยันการสั่งซื้อ
+                            ยืนยันการสั่งซื้อ 
                         </button>
                     </div>
 

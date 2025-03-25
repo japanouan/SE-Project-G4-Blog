@@ -262,6 +262,13 @@
             // Get current route name
             $currentRouteName = Route::currentRouteName();
         @endphp
+
+        <div class="menu-item {{ $currentRouteName == 'admin.dashboard' ? 'active' : '' }}">
+            <a href="{{ route('admin.dashboard') }}" data-section="dashboard-home">
+                <i class="fas fa-tachometer-alt mr-3"></i>
+                <span>Dashboard</span>
+            </a>
+        </div>
         
         <div class="menu-item {{ $currentRouteName == 'admin.users.index' ? 'active' : '' }}">
             <a href="{{ route('admin.users.index') }}">
@@ -381,4 +388,3 @@
 
 </body>
 </html>
-
