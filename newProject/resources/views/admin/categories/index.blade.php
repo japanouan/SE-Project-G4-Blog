@@ -1,4 +1,4 @@
-@extends('layouts.shopowner-layout')
+@extends('layouts.admin-layout')
 
 @section('title', 'จัดการหมวดหมู่')
 
@@ -6,7 +6,7 @@
 <div class="container mx-auto">
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold">จัดการหมวดหมู่</h2>
-        <a href="{{ route('shopowner.categories.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+        <a href="{{ route('admin.categories.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
             <i class="fa fa-plus mr-2"></i> เพิ่มหมวดหมู่ใหม่
         </a>
     </div>
@@ -40,10 +40,10 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $category->category_name }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex space-x-2">
-                                <a href="{{ route('shopowner.categories.edit', $category->category_id) }}" class="text-indigo-600 hover:text-indigo-900">
+                                <a href="{{ route('admin.categories.edit', $category->category_id) }}" class="text-indigo-600 hover:text-indigo-900">
                                     <i class="fa fa-edit"></i> แก้ไข
                                 </a>
-                                <form action="{{ route('shopowner.categories.destroy', $category->category_id) }}" method="POST" class="inline-block">
+                                <form action="{{ route('admin.categories.destroy', $category->category_id) }}" method="POST" class="inline-block">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('คุณแน่ใจหรือไม่ที่จะลบหมวดหมู่นี้?')">
@@ -62,7 +62,7 @@
         @else
             <div class="p-6 text-center text-gray-500">
                 <p>ยังไม่มีหมวดหมู่</p>
-                <a href="{{ route('shopowner.categories.create') }}" class="mt-4 inline-block px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                <a href="{{ route('admin.categories.create') }}" class="mt-4 inline-block px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
                     <i class="fa fa-plus mr-2"></i> เพิ่มหมวดหมู่ใหม่
                 </a>
             </div>

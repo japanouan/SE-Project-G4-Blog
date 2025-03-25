@@ -1,12 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <title>แก้ไขชุดโง่วๆ</title>
-</head>
-<body>
+@extends('layouts.admin-layout')
+
+@section('title', 'Edit Outfit')
+
+@section('content')
 <div class="container mx-auto">
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold">แก้ไขชุด: {{ $outfit->name }}</h2>
@@ -111,5 +107,4 @@
         </form>
     </div>
 </div>
-</body>
-</html>
+@endsection

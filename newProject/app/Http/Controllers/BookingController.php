@@ -390,24 +390,30 @@ class BookingController extends Controller
         // ดึงข้อมูลหมวดหมู่ของชุด
         $categoryIds = $originalOutfit->categories->pluck('category_id')->toArray();
         
-        // หาชุดทดแทนที่มีหมวดหมู่เดียวกัน ขนาดเดียวกัน สีเดียวกัน และมีจำนวนเพียงพอ
-        $alternativeOutfits = ThaiOutfit::with(['categories', 'sizeAndColors.size', 'sizeAndColors.color'])
-                        ->where('shop_id', $shopId)
-                        ->where('outfit_id', '!=', $originalOutfit->outfit_id)
+        // หาชุดทดแทนที่มีหมวดหมู่เดียวกัน และมีสถานะเป็น active (จากทุกร้าน)
+        $alternativeOutfits = ThaiOutfit::with(['categories', 'sizeAndColors.size', 'sizeAndColors.color', 'shop'])
+                        ->where('outfit_id', '!=', $originalOutfit->outfit_id) // ไม่ใช่ชุดเดิม
                         ->where('status', 'active')
+                        ->whereHas('shop', function($q) {
+                            $q->where('status', 'active'); // เฉพาะร้านที่ active
+                        })
                         ->whereHas('categories', function($q) use ($categoryIds) {
-                            // Fix the ambiguous column reference by specifying the table name
+                            // หมวดหมู่เดียวกับชุดเดิม
                             $q->whereIn('ThaiOutfitCategories.category_id', $categoryIds);
                         })
-                        ->whereHas('sizeAndColors', function($q) use ($cartItem, $orderDetail) {
-                            $q->where('size_id', $cartItem->size_id)
-                              ->where('color_id', $cartItem->color_id)
-                              ->where('amount', '>=', $orderDetail->quantity);
+                        ->whereHas('sizeAndColors', function($q) {
+                            // มีสินค้าคงเหลือ
+                            $q->where('amount', '>', 0);
                         })
                         ->get();
         
+        // แยกชุดเป็น 2 กลุ่ม: ร้านของเราและร้านอื่น
+        $myShopOutfits = $alternativeOutfits->where('shop_id', $shopId);
+        $otherShopsOutfits = $alternativeOutfits->where('shop_id', '!=', $shopId);
+        
         return view('shopowner.bookings.suggest-alternatives', compact(
-            'booking', 'orderDetail', 'cartItem', 'originalOutfit', 'alternativeOutfits'
+            'booking', 'orderDetail', 'cartItem', 'originalOutfit', 
+            'alternativeOutfits', 'myShopOutfits', 'otherShopsOutfits'
         ));
     }
 

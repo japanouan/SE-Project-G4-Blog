@@ -262,38 +262,56 @@
             // Get current route name
             $currentRouteName = Route::currentRouteName();
         @endphp
-        
-        <div class="menu-item {{ $currentRouteName == 'dashboard' ? 'active' : '' }}" id="dashboardMenuItem">
-            <a href="{{ route('admin.dashboard') }}">
-                <i class="fas fa-home mr-3"></i>
+
+        <div class="menu-item {{ $currentRouteName == 'admin.dashboard' ? 'active' : '' }}">
+            <a href="{{ route('admin.dashboard') }}" data-section="dashboard-home">
+                <i class="fas fa-tachometer-alt mr-3"></i>
                 <span>Dashboard</span>
             </a>
         </div>
         
         <div class="menu-item {{ $currentRouteName == 'admin.users.index' ? 'active' : '' }}">
             <a href="{{ route('admin.users.index') }}">
-                <i class="fas fa-store mr-3"></i>
+                <i class="fas fa-user mr-3"></i>
                 <span>Users</span>
             </a>
         </div>
         
         <div class="menu-item {{ $currentRouteName == 'admin.shops.index' ? 'active' : '' }}">
             <a href="{{ route('admin.shops.index') }}">
-                <i class="fas fa-calendar mr-3"></i>
+                <i class="fas fa-store mr-3"></i>
                 <span>Shops</span>
             </a>
         </div>
 
         <div class="menu-item {{ $currentRouteName == 'admin.outfits.adminindex' ? 'active' : '' }}">
             <a href="{{ route('admin.outfits.adminindex') }}">
-                <i class="fas fa-chart-bar mr-3"></i>
+                <i class="fas fa-tshirt mr-3"></i>
                 <span>Outfits</span>
+            </a>
+        </div>
+        <div class="menu-item {{ $currentRouteName == 'admin.categories.index' ? 'active' : '' }}">
+            <a href="{{ route('admin.categories.index') }}">
+                <i class="fas fa-tshirt mr-3"></i>
+                <span>Category</span>
+            </a>
+        </div>
+        <div class="menu-item {{ $currentRouteName == 'admin.booking.index' ? 'active' : '' }}">
+            <a href="{{ route('admin.booking.index') }}">
+                <i class="fas fa-calendar-check mr-3"></i>
+                <span>Bookings</span>
             </a>
         </div>
         <div class="menu-item {{ $currentRouteName == 'admin.issue.show' ? 'active' : '' }}">
             <a href="{{ route('admin.issue.show') }}">
                 <i class="fas fa-flag mr-3"></i>
                 <span>Issue Reported</span>
+            </a>
+        </div>
+        <div class="menu-item {{ $currentRouteName == 'admin.statistics.shop' ? 'active' : '' }}">
+            <a href="{{ route('admin.statistics.shop') }}">
+                <i class="fas fa-chart-bar fa-rotate-270 mr-3"></i>
+                <span>Statics</span>
             </a>
         </div>
     </div>
@@ -313,6 +331,8 @@
             @yield('content')
         </div>
     </div>
+    <!-- เพิ่ม Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
    <!-- In the JavaScript section at the bottom of shopowner-layout.blade.php -->
    <script>
@@ -368,4 +388,3 @@
 
 </body>
 </html>
-

@@ -7,6 +7,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use App\Models\Booking;
 use App\Models\SelectOutfitDetail;
@@ -21,6 +22,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 use App\Models\CustomerAddress;
 use App\Models\Address;
+
 
 class ProfileController extends Controller
 {
@@ -313,7 +315,7 @@ public function outfitSuggestions($bookingId)
         $action = $request->action;
         
         // ดึงข้อมูลการเสนอชุดทดแทน
-        $selection = SelectOutfitDetail::findOrFail($selectionId);
+        $selection = SelectOutfitDetail::with(['outfit.shop'])->findOrFail($selectionId);
         
         // ตรวจสอบว่าเป็นของผู้ใช้ปัจจุบันหรือไม่
         if ($selection->customer_id != Auth::id()) {
@@ -327,15 +329,171 @@ public function outfitSuggestions($bookingId)
         
         // อัพเดทสถานะตามการตัดสินใจของลูกค้า
         if ($action == 'accept') {
-            $selection->status = 'Selected';
-            $selection->save();
+            DB::beginTransaction();
             
-            // อาจจะอัพเดทสถานะการจองหรือรายการสั่งซื้อตามความเหมาะสม
-            // เช่น หากทุกรายการได้รับการยืนยันแล้ว ให้เปลี่ยนสถานะการจองเป็น confirmed
+            try {
+                // อัพเดทสถานะการเลือก
+                $selection->status = 'Selected';
+                $selection->save();
+                
+                // ปรับสถานะของชุดอื่นๆ ที่ไม่ได้เลือกให้เป็น Rejected
+                SelectOutfitDetail::where('booking_id', $selection->booking_id)
+                    ->where('select_outfit_id', '!=', $selection->select_outfit_id)
+                    ->where('status', 'Pending Selection')
+                    ->update(['status' => 'Rejected']);
+                
+                // ดึงข้อมูล booking ที่เกี่ยวข้อง
+                $booking = Booking::findOrFail($selection->booking_id);
+                
+                // ดึงข้อมูล outfit ที่ถูกเลือก
+                $selectedOutfit = $selection->outfit;
+                
+                // ตรวจสอบว่าเป็นชุดจากร้านเดียวกันหรือไม่
+                if ($selectedOutfit->shop_id == $booking->shop_id) {
+                    // กรณีเป็นร้านเดียวกัน
+                    
+                    // ค้นหา OrderDetail ที่มี booking_cycle=2 ที่ต้องการเปลี่ยน
+                    $oldOrderDetails = OrderDetail::where('booking_id', $booking->booking_id)
+                        ->where('booking_cycle', 2)
+                        ->get();
+                    
+                    // ลบ OrderDetail เก่าที่มี booking_cycle=2
+                    foreach ($oldOrderDetails as $oldDetail) {
+                        // ปรับสถานะ CartItem เป็น REMOVED
+                        $oldCartItem = CartItem::find($oldDetail->cart_item_id);
+                        if ($oldCartItem) {
+                            $oldCartItem->status = 'REMOVED';
+                            $oldCartItem->save();
+                        }
+                        
+                        // ลบ OrderDetail เก่า
+                        $oldDetail->delete();
+                    }
+                    
+                    // สร้าง CartItem ใหม่สำหรับชุดที่เลือก
+                    $cartItem = new CartItem();
+                    $cartItem->userId = Auth::id();
+                    $cartItem->outfit_id = $selectedOutfit->outfit_id;
+                    $cartItem->size_id = $selection->size_id;
+                    $cartItem->color_id = $selection->color_id;
+                    $cartItem->sizeDetail_id = $selection->sizeDetail_id;
+                    $cartItem->quantity = $selection->quantity;
+                    $cartItem->overent = 0; // ไม่เช่าเกินแล้วเพราะได้ชุดทดแทนแล้ว
+                    $cartItem->reservation_date = $booking->orderDetails()->first()->reservation_date;
+                    $cartItem->status = 'REMOVED'; // กำหนดเป็น REMOVED แทน INUSE
+                    $cartItem->created_at = now();
+                    $cartItem->purchased_at = now();
+                    $cartItem->save();
+                    
+                    // สร้าง OrderDetail ใหม่สำหรับรอบที่ 2
+                    $orderDetail = new OrderDetail();
+                    $orderDetail->quantity = $selection->quantity;
+                    $orderDetail->total = $selectedOutfit->price * $selection->quantity;
+                    $orderDetail->booking_cycle = 2; // รอบที่ 2
+                    $orderDetail->booking_id = $booking->booking_id;
+                    $orderDetail->cart_item_id = $cartItem->cart_item_id;
+                    $orderDetail->created_at = now();
+                    $orderDetail->reservation_date = $booking->orderDetails()->first()->reservation_date;
+                    $orderDetail->deliveryOptions = 'default'; // กำหนดเป็น default แทน NULL
+                    $orderDetail->save();
+                    
+                    // อัพเดทราคาใน booking
+                    $totalBooking = OrderDetail::where('booking_id', $booking->booking_id)
+                        ->sum('total');
+                    $booking->total_price = $totalBooking;
+                    
+                    // คงสถานะ "partial paid" เพราะยังต้องจ่ายเงินอีก
+                    $booking->status = 'partial paid';
+                    $booking->save();
+                    
+                    // สร้างลิงค์ไปยังหน้าชำระเงิน
+                    $paymentUrl = route('payment.form', ['booking_id' => $booking->booking_id, 'cycle' => 2]);
+                    
+                    DB::commit();
+                    
+                    return redirect()->route('profile.customer.outfit-suggestions', ['bookingId' => $selection->booking_id])
+                        ->with('success', 'ยอมรับชุดทดแทนเรียบร้อยแล้ว โปรด<a href="'.$paymentUrl.'">ชำระเงิน</a>สำหรับชุดนี้เพื่อดำเนินการต่อไป');
+                    
+                } else {
+                    // กรณีเป็นร้านคนละร้าน
+                    
+                    // ค้นหาและลบ OrderDetail ที่มี booking_cycle=2 ของ booking เดิม
+                    $oldOrderDetails = OrderDetail::where('booking_id', $booking->booking_id)
+                        ->where('booking_cycle', 2)
+                        ->get();
+                    
+                    // ลบ OrderDetail เก่าที่มี booking_cycle=2
+                    foreach ($oldOrderDetails as $oldDetail) {
+                        // ปรับสถานะ CartItem เป็น REMOVED
+                        $oldCartItem = CartItem::find($oldDetail->cart_item_id);
+                        if ($oldCartItem) {
+                            $oldCartItem->status = 'REMOVED';
+                            $oldCartItem->save();
+                        }
+                        
+                        // ลบ OrderDetail เก่า
+                        $oldDetail->delete();
+                    }
+                    
+                    // เปลี่ยนสถานะ booking เก่าเป็น "confirmed"
+                    $booking->status = 'confirmed';
+                    $booking->save();
+                    
+                    // สร้าง Booking ใหม่
+                    $newBooking = new Booking();
+                    $newBooking->purchase_date = now();
+                    $newBooking->total_price = $selectedOutfit->price * $selection->quantity;
+                    $newBooking->status = 'pending';
+                    $newBooking->shop_id = $selectedOutfit->shop_id;
+                    $newBooking->user_id = Auth::id();
+                    $newBooking->hasOverrented = false;
+                    $newBooking->AddressID = $booking->AddressID; // ใช้ที่อยู่เดิม
+                    $newBooking->created_at = now();
+                    $newBooking->save();
+                    
+                    // สร้าง CartItem ใหม่
+                    $cartItem = new CartItem();
+                    $cartItem->userId = Auth::id();
+                    $cartItem->outfit_id = $selectedOutfit->outfit_id;
+                    $cartItem->size_id = $selection->size_id;
+                    $cartItem->color_id = $selection->color_id;
+                    $cartItem->sizeDetail_id = $selection->sizeDetail_id;
+                    $cartItem->quantity = $selection->quantity;
+                    $cartItem->overent = 0;
+                    $cartItem->reservation_date = $booking->orderDetails()->first()->reservation_date;
+                    $cartItem->status = 'REMOVED'; // กำหนดเป็น REMOVED แทน INUSE
+                    $cartItem->created_at = now();
+                    $cartItem->purchased_at = now();
+                    $cartItem->save();
+                    
+                    // สร้าง OrderDetail ใหม่
+                    $orderDetail = new OrderDetail();
+                    $orderDetail->quantity = $selection->quantity;
+                    $orderDetail->total = $selectedOutfit->price * $selection->quantity;
+                    $orderDetail->booking_cycle = 1; // รอบแรกสำหรับ booking ใหม่
+                    $orderDetail->booking_id = $newBooking->booking_id;
+                    $orderDetail->cart_item_id = $cartItem->cart_item_id;
+                    $orderDetail->created_at = now();
+                    $orderDetail->reservation_date = $booking->orderDetails()->first()->reservation_date;
+                    $orderDetail->deliveryOptions = 'default'; // กำหนดเป็น default แทน NULL
+                    $orderDetail->save();
+                    
+                    // สร้างลิงค์ไปยังหน้าชำระเงิน
+                    $paymentUrl = route('payment.form', ['booking_id' => $newBooking->booking_id, 'cycle' => 1]);
+                    
+                    DB::commit();
+                    
+                    return redirect()->route('profile.customer.outfit-suggestions', ['bookingId' => $selection->booking_id])
+                        ->with('success', 'ยอมรับชุดทดแทนจากร้านอื่นเรียบร้อยแล้ว โปรด<a href="'.$paymentUrl.'">ชำระเงิน</a>สำหรับการจองใหม่นี้');
+                }
+                
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return back()->with('error', 'เกิดข้อผิดพลาด: ' . $e->getMessage());
+            }
             
-            return redirect()->route('profile.customer.outfit-suggestions', ['bookingId' => $selection->booking_id])
-                ->with('success', 'ยอมรับชุดทดแทนเรียบร้อยแล้ว ทางร้านค้าจะดำเนินการต่อไป');
         } else {
+            // กรณีปฏิเสธ
             $selection->status = 'Rejected';
             $selection->save();
             

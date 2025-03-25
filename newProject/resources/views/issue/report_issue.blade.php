@@ -1,12 +1,8 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>แจ้งปัญหา - ThaiWijit</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+@extends('layouts.main')
+
+@section('title', 'Issue')
+
+@section('content')
 
   <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-lg">
     <h2 class="text-2xl font-bold mb-6 text-center text-indigo-600">แจ้งปัญหา</h2>

@@ -3,6 +3,83 @@
 @section('title', 'รายละเอียดการสั่งซื้อ')
 
 @section('content')
+    <!-- Notification Alert - With enhanced condition check -->
+    @php
+        // ใช้ Auth::id() อย่างชัดเจน
+        use Illuminate\Support\Facades\Auth;
+        use App\Models\SelectOutfitDetail;
+        
+        // ตรวจสอบว่ามีรายการที่ไม่เพียงพอ
+        $unavailableItems = $booking->orderDetails->where('booking_cycle', 2);
+        $hasUnavailableItems = $unavailableItems->count() > 0;
+        
+        // ตรวจสอบว่ามีข้อเสนอชุดทดแทนหรือไม่
+        $suggestions = \App\Models\SelectOutfitDetail::where('booking_id', $booking->booking_id)
+            ->where('customer_id', Auth::id())
+            ->get();
+        $hasSuggestions = $suggestions->count() > 0;
+        
+        // ตรวจสอบว่ามีรายการที่รอการตอบรับหรือไม่
+        $hasPendingSuggestions = $suggestions->where('status', 'Pending Selection')->count() > 0;
+        
+        // เช็คว่ามีการยอมรับชุดทดแทนสำหรับชุดที่ไม่เพียงพอแล้วหรือไม่
+        $hasAcceptedSuggestion = false;
+        
+        // ถ้ามีรายการที่ไม่เพียงพอและมีข้อเสนอชุดทดแทน
+        if ($hasUnavailableItems && $hasSuggestions) {
+            // เช็คว่ามีอย่างน้อยหนึ่งรายการที่ยอมรับแล้ว
+            $acceptedSuggestions = $suggestions->where('status', 'Selected');
+            
+            if ($acceptedSuggestions->count() > 0) {
+                // ถ้ามีอย่างน้อยหนึ่งรายการที่ยอมรับแล้ว ไม่ต้องแสดง notification
+                $hasAcceptedSuggestion = true;
+            }
+        }
+        
+        // กำหนดเงื่อนไขแสดง notification
+        // 1. แสดงเมื่อมีรายการที่ไม่เพียงพอหรือมีข้อเสนอและยังไม่มีการยอมรับรายการใดๆ
+        // 2. ไม่แสดงเมื่อไม่มีรายการที่ไม่เพียงพอแต่มีข้อเสนอ (เพิ่มเงื่อนไขใหม่)
+        $showNotification = ($hasUnavailableItems || ($hasSuggestions && $hasPendingSuggestions)) 
+                         && !$hasAcceptedSuggestion
+                         && !(!$hasUnavailableItems && $hasSuggestions);
+    @endphp
+
+    @if($showNotification)
+        <div id="notification-alert" class="fixed top-0 left-0 right-0 z-50 bg-yellow-50 border-b-4 border-yellow-400 p-4 shadow-lg transform transition-transform duration-500 ease-in-out animate-bounce">
+            <div class="container mx-auto">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 mr-2">
+                            <i class="fas fa-exclamation-triangle text-yellow-400 text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-yellow-700 font-medium">
+                                <strong>โปรดทราบ:</strong> 
+                                @if($hasUnavailableItems && !$hasSuggestions)
+                                    การสั่งซื้อนี้มีชุดที่มีจำนวนไม่เพียงพอ กรุณารอการเสนอชุดทดแทนจากร้านค้า
+                                @elseif($hasUnavailableItems && $hasSuggestions && $hasPendingSuggestions)
+                                    มีชุดทดแทนที่แนะนำสำหรับการสั่งซื้อนี้
+                                @endif
+                            </p>
+                            @if($hasSuggestions && $hasPendingSuggestions)
+                                <div class="mt-2">
+                                    <a href="{{ route('profile.customer.outfit-suggestions', ['bookingId' => $booking->booking_id]) }}" 
+                                        class="inline-block bg-yellow-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-yellow-600 transition-colors duration-300">
+                                        ดูชุดทดแทนที่แนะนำ
+                                        <span class="ml-1 px-2 py-0.5 bg-red-500 text-white rounded-full text-xs">รอตอบรับ</span>
+                                    </a>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                    <button id="close-notification" class="text-yellow-400 hover:text-yellow-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <div class="container mx-auto my-5 flex flex-col md:flex-row gap-5 min-h-screen">
         <!-- Sidebar -->
         <div class="w-full md:w-1/4 bg-white rounded-lg shadow sticky top-5 h-fit">
@@ -147,59 +224,26 @@
             </div>
         </div>
     </div>
-        <!-- เพิ่มก่อนส่วนแสดงรายการสินค้า -->
-        @php
-                // ใช้ Auth::id() อย่างชัดเจน
-                use Illuminate\Support\Facades\Auth;
-                use App\Models\SelectOutfitDetail;
-                
-                // ตรวจสอบว่ามีรายการที่ไม่เพียงพอ
-                $hasUnavailableItems = $booking->orderDetails->where('booking_cycle', 2)->count() > 0;
-                
-                // ตรวจสอบว่ามีข้อเสนอชุดทดแทนหรือไม่
-                $hasSuggestions = \App\Models\SelectOutfitDetail::where('booking_id', $booking->booking_id)
-                    ->where('customer_id', Auth::id())
-                    ->exists();
-                
-                // ตรวจสอบว่ามีรายการที่รอการตอบรับหรือไม่
-                $hasPendingSuggestions = \App\Models\SelectOutfitDetail::where('booking_id', $booking->booking_id)
-                    ->where('customer_id', Auth::id())
-                    ->where('status', 'Pending Selection')
-                    ->exists();
-                
-                // ดีบัก - แสดงข้อมูลเพื่อตรวจสอบ
-                // dd($hasUnavailableItems, $hasSuggestions, $hasPendingSuggestions, Auth::id(), $booking->booking_id);
-            @endphp
 
-                @if($hasUnavailableItems || $hasSuggestions)
-                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
-                        <div class="flex">
-                            <div class="flex-shrink-0">
-                                <i class="fas fa-exclamation-triangle text-yellow-400"></i>
-                            </div>
-                            <div class="ml-3">
-                                <p class="text-sm text-yellow-700">
-                                    <strong>โปรดทราบ:</strong> 
-                                    @if($hasUnavailableItems && !$hasSuggestions)
-                                        การสั่งซื้อนี้มีชุดที่มีจำนวนไม่เพียงพอ กรุณารอการเสนอชุดทดแทนจากร้านค้า
-                                    @elseif($hasSuggestions)
-                                        มีชุดทดแทนที่แนะนำสำหรับการสั่งซื้อนี้
-                                    @endif
-                                </p>
-                                @if($hasSuggestions)
-                                    <div class="mt-2">
-                                        <a href="{{ route('profile.customer.outfit-suggestions', ['bookingId' => $booking->booking_id]) }}" 
-                                            class="inline-block bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600">
-                                            ดูชุดทดแทนที่แนะนำ
-                                            @if($hasPendingSuggestions)
-                                                <span class="ml-1 px-2 py-0.5 bg-red-500 text-white rounded-full text-xs">รอตอบรับ</span>
-                                            @endif
-                                        </a>
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                @endif
-
+    <!-- Add JavaScript for notification behavior -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const closeBtn = document.getElementById('close-notification');
+            const notificationAlert = document.getElementById('notification-alert');
+            
+            if (closeBtn && notificationAlert) {
+                closeBtn.addEventListener('click', function() {
+                    notificationAlert.classList.add('transform', '-translate-y-full');
+                    setTimeout(() => {
+                        notificationAlert.style.display = 'none';
+                    }, 500);
+                });
+                
+                // Auto hide bounce animation after 3 seconds
+                setTimeout(() => {
+                    notificationAlert.classList.remove('animate-bounce');
+                }, 3000);
+            }
+        });
+    </script>
 @endsection

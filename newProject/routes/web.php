@@ -54,8 +54,14 @@ Route::prefix('make-upartist')->name('make-upartist.')->middleware('auth', 'is_m
     Route::get('/work-list', [StaffController::class, 'getAvailableJobs'])->name('work-list');
     Route::get('/earning', [StaffController::class, 'earning'])->name('work.earning');
 
-
     Route::post('/accept-job', [StaffController::class, 'acceptJob'])->name('accept-job');
+
+    Route::prefix('issue')->name('issue.')->group(function () {
+        Route::get('/', [IssueController::class, 'workIndex'])->name('index');
+        Route::get('/create', [IssueController::class, 'workCreate'])->name('create');
+        Route::post('/store', [IssueController::class, 'workStore'])->name('store');
+        Route::get('/{id}', [IssueController::class, 'workShow'])->name('show');
+    });
 });
 
 // photographer
@@ -67,6 +73,13 @@ Route::prefix('photographer')->name('photographer.')->middleware('auth', 'is_pho
     Route::get('/earning', [StaffController::class, 'earning'])->name('work.earning');
 
     Route::post('/accept-job', [StaffController::class, 'acceptJob'])->name('accept-job');
+    
+    Route::prefix('issue')->name('issue.')->group(function () {
+        Route::get('/', [IssueController::class, 'workIndex'])->name('index');
+        Route::get('/create', [IssueController::class, 'workCreate'])->name('create');
+        Route::post('/store', [IssueController::class, 'workStore'])->name('store');
+        Route::get('/{id}', [IssueController::class, 'workShow'])->name('show');
+    });
 });
 
 
@@ -76,9 +89,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth', 'is_admin')->group(fu
         return view('admin.dashboard');
     });
 
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard',  [AdminController::class, 'index'])->name('dashboard');
 
     // เปลี่ยนสถานะผู้ใช้
     Route::post('/users/{user_id}/toggleStatus', [UserController::class, 'toggleStatus'])->name('users.toggleStatus');
@@ -122,7 +133,11 @@ Route::prefix('admin')->name('admin.')->middleware('auth', 'is_admin')->group(fu
     //stat
     Route::get('/statistics/shop', [AdminController::class, 'showShopStatistics'])->name('statistics.shop');
     Route::get('/statistics/photographer', [AdminController::class, 'showPhotographerStatistics'])->name('statistics.photographer');
-    Route::get('/statistics/make-upartist', [AdminController::class, 'showMakeUpArtistStatistics'])->name('statistics.make-upartist');
+    Route::get('/statistics/make-up', [AdminController::class, 'showMakeupStatistics'])->name('statistics.make-upartist');
+
+    //categories
+    Route::resource('categories', CategoryController::class);
+
 
 });
 
@@ -206,7 +221,9 @@ Route::middleware('auth')->group(function () {
     //Customer
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::get('/profile/editCus', [ProfileController::class, 'editCus'])->name('profile.editCus');
-   
+
+    Route::get('/profile/issue', [IssueController::class, 'CustomerIssue'])->name('profile.customer.issue');
+    Route::get('/profile/issue/create', [IssueController::class, 'CustomerCreate'])->name('profile.customer.create');
     Route::get('/profile/customer/orderHistory', [ProfileController::class, 'orderHistory'])->name('profile.customer.orderHistory');
     Route::get('/profile/customer/orderDetail/{bookingId}', [ProfileController::class, 'orderDetail'])->name('profile.customer.orderDetail');
 

@@ -1,15 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.admin-layout')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Statistics</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
+@section('title', 'Shop Statistics')
 
-<body class="bg-gray-100">
+@section('content')
 
     <div class="container mx-auto p-6">
         <!-- Filter by Month -->
@@ -27,7 +20,7 @@
 
         <!-- Graphs -->
         <div class="mb-6">
-            <canvas id="barChart" class="w-full h-96"></canvas>
+            <canvas id="barChart" height="100"></canvas>
         </div>
 
         <!-- Report Table -->
@@ -67,117 +60,117 @@
         const shopStatsTop10 = @json($ShopstatsTop10); // Assuming data is passed from the backend
         const shopStatsAll = @json($ShopstatsAll); // Assuming data is passed from the backend
 
-        // Initialize the chart for Shop data
-        const ctx = document.getElementById('barChart').getContext('2d');
-        const barChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: shopStatsTop10.map(shop => shop.shop_name), // Mapping shop name for X-axis
-                datasets: [{
-                    label: 'Total Sales (Baht)',
-                    data: shopStatsTop10.map(shop => shop.total_sales), // Mapping sales for Y-axis
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
+        
+        document.addEventListener("DOMContentLoaded", function () {
+            // Initialize the chart for Shop data
+            const ctx = document.getElementById('barChart').getContext('2d');
+            const barChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: shopStatsTop10.map(shop => shop.shop_name), // Mapping shop name for X-axis
+                    datasets: [{
+                        label: 'Total Sales (Baht)',
+                        data: shopStatsTop10.map(shop => shop.total_sales), // Mapping sales for Y-axis
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
                     }
                 }
+            });
+
+            // Update the report table for Shop data
+            function updateShopTable() {
+                const shopReport = document.getElementById('shopReport');
+                shopReport.innerHTML = shopStatsTop10.map(shop => `
+                    <tr>
+                        <td class="px-4 py-2">${shop.shop_id}</td>
+                        <td class="px-4 py-2">${shop.shop_name}</td>
+                        <td class="px-4 py-2">${shop.total_sales}</td>
+                    </tr>
+                `).join('');
             }
-        });
 
-        // Update the report table for Shop data
-        function updateShopTable() {
-            const shopReport = document.getElementById('shopReport');
-            shopReport.innerHTML = shopStatsTop10.map(shop => `
-                <tr>
-                    <td class="px-4 py-2">${shop.shop_id}</td>
-                    <td class="px-4 py-2">${shop.shop_name}</td>
-                    <td class="px-4 py-2">${shop.total_sales}</td>
-                </tr>
-            `).join('');
-        }
+            // Update the report table for all Shop data
+            function updateAllShopTable() {
+                const allShopReport = document.getElementById('allShopReport');
+                allShopReport.innerHTML = shopStatsAll.map(shop => `
+                    <tr>
+                        <td class="px-4 py-2">${shop.shop_id}</td>
+                        <td class="px-4 py-2">${shop.shop_name}</td>
+                        <td class="px-4 py-2">${shop.total_sales}</td>
+                    </tr>
+                `).join('');
+            }
 
-        // Update the report table for all Shop data
-        function updateAllShopTable() {
-            const allShopReport = document.getElementById('allShopReport');
-            allShopReport.innerHTML = shopStatsAll.map(shop => `
-                <tr>
-                    <td class="px-4 py-2">${shop.shop_id}</td>
-                    <td class="px-4 py-2">${shop.shop_name}</td>
-                    <td class="px-4 py-2">${shop.total_sales}</td>
-                </tr>
-            `).join('');
-        }
-
-        // Initialize tables on load
-        updateShopTable();
-        updateAllShopTable();
-
-        // Switch between different charts when the button is clicked
-        document.getElementById('shopBtn').addEventListener('click', function () {
-            // Update the chart for Shop data
-            barChart.data.labels = shopStatsTop10.map(shop => shop.shop_name);
-            barChart.data.datasets[0].data = shopStatsTop10.map(shop => shop.total_sales);
-            barChart.update();
-
-            // Update the report table
+            // Initialize tables on load
             updateShopTable();
             updateAllShopTable();
-        });
 
-        document.getElementById('photographerBtn').addEventListener('click', function () {
-            // Update the chart for Photographer data
-            barChart.data.labels = photographerStatsTop10.map(photographer => photographer.staff_id);
-            barChart.data.datasets[0].data = photographerStatsTop10.map(photographer => photographer.total_payment);
-            barChart.update();
+            // Switch between different charts when the button is clicked
+            document.getElementById('shopBtn').addEventListener('click', function () {
+                // Update the chart for Shop data
+                barChart.data.labels = shopStatsTop10.map(shop => shop.shop_name);
+                barChart.data.datasets[0].data = shopStatsTop10.map(shop => shop.total_sales);
+                barChart.update();
 
-            // Update the tables for Photographer data
-            const photographerReport = document.getElementById('shopReport');
-            photographerReport.innerHTML = photographerStatsTop10.map(photographer => `
-                <tr>
-                    <td class="px-4 py-2">${photographer.staff_id}</td>
-                    <td class="px-4 py-2">${photographer.staff_id}</td>
-                    <td class="px-4 py-2">${photographer.total_payment}</td>
-                </tr>
-            `).join('');
-        });
+                // Update the report table
+                updateShopTable();
+                updateAllShopTable();
+            });
 
-        document.getElementById('makeUpArtistBtn').addEventListener('click', function () {
-            // Update the chart for Make-up Artist data
-            barChart.data.labels = makeUpArtistStatsTop10.map(artist => artist.staff_id);
-            barChart.data.datasets[0].data = makeUpArtistStatsTop10.map(artist => artist.total_payment);
-            barChart.update();
+            document.getElementById('photographerBtn').addEventListener('click', function () {
+                // Update the chart for Photographer data
+                barChart.data.labels = photographerStatsTop10.map(photographer => photographer.staff_id);
+                barChart.data.datasets[0].data = photographerStatsTop10.map(photographer => photographer.total_payment);
+                barChart.update();
 
-            // Update the tables for Make-up Artist data
-            const makeUpArtistReport = document.getElementById('shopReport');
-            makeUpArtistReport.innerHTML = makeUpArtistStatsTop10.map(artist => `
-                <tr>
-                    <td class="px-4 py-2">${artist.staff_id}</td>
-                    <td class="px-4 py-2">${artist.staff_id}</td>
-                    <td class="px-4 py-2">${artist.total_payment}</td>
-                </tr>
-            `).join('');
-        });
+                // Update the tables for Photographer data
+                const photographerReport = document.getElementById('shopReport');
+                photographerReport.innerHTML = photographerStatsTop10.map(photographer => `
+                    <tr>
+                        <td class="px-4 py-2">${photographer.staff_id}</td>
+                        <td class="px-4 py-2">${photographer.staff_id}</td>
+                        <td class="px-4 py-2">${photographer.total_payment}</td>
+                    </tr>
+                `).join('');
+            });
 
-        document.getElementById('photographerBtn').addEventListener('click', function () {
-            // Redirect to Photographer statistics route
-            window.location.href = "{{ route('admin.statistics.photographer') }}";
-        });
+            document.getElementById('makeUpArtistBtn').addEventListener('click', function () {
+                // Update the chart for Make-up Artist data
+                barChart.data.labels = makeUpArtistStatsTop10.map(artist => artist.staff_id);
+                barChart.data.datasets[0].data = makeUpArtistStatsTop10.map(artist => artist.total_payment);
+                barChart.update();
 
-        document.getElementById('makeUpArtistBtn').addEventListener('click', function () {
-            // Redirect to Make-up Artist statistics route
-            window.location.href = "{{ route('admin.statistics.make-upartist') }}";
+                // Update the tables for Make-up Artist data
+                const makeUpArtistReport = document.getElementById('shopReport');
+                makeUpArtistReport.innerHTML = makeUpArtistStatsTop10.map(artist => `
+                    <tr>
+                        <td class="px-4 py-2">${artist.staff_id}</td>
+                        <td class="px-4 py-2">${artist.staff_id}</td>
+                        <td class="px-4 py-2">${artist.total_payment}</td>
+                    </tr>
+                `).join('');
+            });
+
+            document.getElementById('photographerBtn').addEventListener('click', function () {
+                // Redirect to Photographer statistics route
+                window.location.href = "{{ route('admin.statistics.photographer') }}";
+            });
+
+            document.getElementById('makeUpArtistBtn').addEventListener('click', function () {
+                // Redirect to Make-up Artist statistics route
+                window.location.href = "{{ route('admin.statistics.make-upartist') }}";
+            });
         });
 
 
     </script>
-
-</body>
-
-</html>
+@endsection

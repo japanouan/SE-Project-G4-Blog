@@ -10,6 +10,49 @@ use App\Models\SelectStaffDetail;
 
 class AdminController extends Controller
 {
+        /**
+     * Display the admin dashboard.
+     *
+     * @return \Illuminate\View\View
+     */
+    public function index()
+    {
+        // Get counts for dashboard statistics
+        $userCount = \App\Models\User::count();
+        $shopCount = \App\Models\Shop::count();
+        $outfitCount = \App\Models\ThaiOutfit::count();
+        $bookingCount = \App\Models\Booking::count();
+        $pendingIssuesCount = \App\Models\Issue::where('status', 'reported')->count();
+        
+        // Get recent users
+        $recentUsers = \App\Models\User::orderBy('created_at', 'desc')
+                                    ->take(5)
+                                    ->get();
+        
+        // Get recent bookings
+        $recentBookings = \App\Models\Booking::with(['orderDetails.cartItem.user'])
+                                            ->orderBy('created_at', 'desc')
+                                            ->take(5)
+                                            ->get();
+        
+        // Get pending shop approvals
+        $pendingShops = \App\Models\Shop::where('status', 'inactive')
+                                        ->orderBy('created_at', 'desc')
+                                        ->take(5)
+                                        ->get();
+        
+        return view('admin.dashboard', compact(
+            'userCount',
+            'shopCount',
+            'outfitCount',
+            'bookingCount',
+            'pendingIssuesCount',
+            'recentUsers',
+            'recentBookings',
+            'pendingShops'
+        ));
+    }
+
     //
     public function showShopStatistics(Request $request)
     {

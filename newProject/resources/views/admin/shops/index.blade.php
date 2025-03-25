@@ -1,6 +1,6 @@
 @extends('layouts.admin-layout')
 
-@section('title', 'User Management')
+@section('title', 'Shop Management')
 
 @section('content')
 <div class="container">

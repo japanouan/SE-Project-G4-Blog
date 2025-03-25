@@ -1,15 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.admin-layout')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photographer Statistics</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
+@section('title', 'Photographer Statistics')
 
-<body class="bg-gray-100">
+@section('content')
 
     <div class="container mx-auto p-6">
         <!-- Filter by Month -->
@@ -65,69 +58,70 @@
     <script>
         const photographerStatsTop10 = @json($photographerStatsTop10);
         const photographerStatsAll = @json($photographerStatsAll);
+        
 
-        const ctx = document.getElementById('barChart').getContext('2d');
-        const barChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: photographerStatsTop10.map(photographer => photographer.staff_id),
-                datasets: [{
-                    label: 'Total Earning (Baht)',
-                    data: photographerStatsTop10.map(photographer => photographer.total_payment),
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
+        document.addEventListener("DOMContentLoaded", function () {
+            const ctx = document.getElementById('barChart').getContext('2d');
+            const barChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: photographerStatsTop10.map(photographer => photographer.staff_id),
+                    datasets: [{
+                        label: 'Total Earning (Baht)',
+                        data: photographerStatsTop10.map(photographer => photographer.total_payment),
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
                     }
                 }
+            });
+
+            // Update the report table for Photographer data
+            function updatePhotographerTable() {
+                const photographerReport = document.getElementById('photographerReport');
+                photographerReport.innerHTML = photographerStatsTop10.map(photographer => `
+                    <tr>
+                        <td class="px-4 py-2">${photographer.staff_id}</td>
+                        <td class="px-4 py-2">${photographer.staff_id}</td>
+                        <td class="px-4 py-2">${photographer.total_payment}</td>
+                    </tr>
+                `).join('');
             }
-        });
 
-        // Update the report table for Photographer data
-        function updatePhotographerTable() {
-            const photographerReport = document.getElementById('photographerReport');
-            photographerReport.innerHTML = photographerStatsTop10.map(photographer => `
-                <tr>
-                    <td class="px-4 py-2">${photographer.staff_id}</td>
-                    <td class="px-4 py-2">${photographer.staff_id}</td>
-                    <td class="px-4 py-2">${photographer.total_payment}</td>
-                </tr>
-            `).join('');
-        }
+            // Update the report table for all Photographer data
+            function updateAllPhotographerTable() {
+                const allPhotographerReport = document.getElementById('allPhotographerReport');
+                allPhotographerReport.innerHTML = photographerStatsAll.map(photographer => `
+                    <tr>
+                        <td class="px-4 py-2">${photographer.staff_id}</td>
+                        <td class="px-4 py-2">${photographer.staff_id}</td>
+                        <td class="px-4 py-2">${photographer.total_payment}</td>
+                    </tr>
+                `).join('');
+            }
 
-        // Update the report table for all Photographer data
-        function updateAllPhotographerTable() {
-            const allPhotographerReport = document.getElementById('allPhotographerReport');
-            allPhotographerReport.innerHTML = photographerStatsAll.map(photographer => `
-                <tr>
-                    <td class="px-4 py-2">${photographer.staff_id}</td>
-                    <td class="px-4 py-2">${photographer.staff_id}</td>
-                    <td class="px-4 py-2">${photographer.total_payment}</td>
-                </tr>
-            `).join('');
-        }
+            // Initialize tables on load
+            updatePhotographerTable();
+            updateAllPhotographerTable();
 
-        // Initialize tables on load
-        updatePhotographerTable();
-        updateAllPhotographerTable();
+            // Switch between different charts when the button is clicked
+            document.getElementById('shopBtn').addEventListener('click', function () {
+                window.location.href = "{{ route('admin.statistics.shop') }}";
+            });
 
-        // Switch between different charts when the button is clicked
-        document.getElementById('shopBtn').addEventListener('click', function () {
-            window.location.href = "{{ route('admin.statistics.shop') }}";
-        });
-
-        document.getElementById('makeUpArtistBtn').addEventListener('click', function () {
-            // Redirect to Make-up Artist statistics route
-            window.location.href = "{{ route('admin.statistics.make-upartist') }}";
+            document.getElementById('makeUpArtistBtn').addEventListener('click', function () {
+                // Redirect to Make-up Artist statistics route
+                window.location.href = "{{ route('admin.statistics.make-upartist') }}";
+            });
         });
     </script>
 
-</body>
-
-</html>
+@endsection
