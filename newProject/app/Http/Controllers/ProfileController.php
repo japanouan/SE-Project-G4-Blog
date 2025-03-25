@@ -238,7 +238,7 @@ class ProfileController extends Controller
         $booking = Booking::with([
             'orderDetails.cartItem.thaioutfit_sizeandcolor.outfit.shop',
             'selectService',
-            'payment'
+            'payments'
         ])->findOrFail($bookingId);
 
         // เพิ่มการตรวจสอบว่ามีชุดทดแทนหรือไม่
@@ -255,8 +255,8 @@ class ProfileController extends Controller
         foreach ($booking->orderDetails as $orderDetail) {
             $isPaid = false;
             // ตรวจสอบว่า booking_cycle ของ orderDetail ตรงกับ payment.booking_cycle หรือไม่
-            if($booking->payment){
-                foreach($booking->payment as $payment){
+            if($booking->payments){
+                foreach($booking->payments as $payment){
                     if($payment->booking_cycle == $orderDetail->booking_cycle){
                         $isPaid = true;
                     }

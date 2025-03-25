@@ -10,7 +10,7 @@
                 <h2 class="text-2xl font-bold text-gray-800 flex items-center">
                     ✏️ <span class="ml-2">Edit Profile</span>
                 </h2>
-                <a href="{{ route('profile.show') }}" class="text-sm text-blue-500 hover:underline">
+                <a href="{{ route('profile.index') }}" class="text-sm text-blue-500 hover:underline">
                     ← Back to Profile
                 </a>
             </div>

@@ -31,4 +31,10 @@ class OrderDetail extends Model
     {
         return $this->belongsTo(CartItem::class, 'cart_item_id', 'cart_item_id');
     }
+
+    public function orderDetails()
+    {
+        return $this->hasMany(OrderDetail::class, 'booking_id');
+    }
+
 }

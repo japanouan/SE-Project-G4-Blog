@@ -268,6 +268,7 @@ Route::prefix('/profile/customer/address')->name('profile.customer.address.')->m
     Route::delete('/{cus_address_id}', [ProfileController::class, 'deleteAddress'])->name('delete'); // ลบ
 });
 
+Route::get('/payment', [PaymentController::class, 'index'])->name('payment.index');
 
 
 });

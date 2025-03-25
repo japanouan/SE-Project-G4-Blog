@@ -527,15 +527,15 @@
                             <div class="text-sm text-gray-900">{{ $selection->quantity }} ชุด</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            @if($selection->status == 'pending')
+                            @if($selection->status == 'Pending Selection')
                                 <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
                                     รอการตอบรับ
                                 </span>
-                            @elseif($selection->status == 'accepted')
+                            @elseif($selection->status == 'Selected')
                                 <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                                     ยอมรับแล้ว
                                 </span>
-                            @elseif($selection->status == 'rejected')
+                            @elseif($selection->status == 'Rejected')
                                 <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
                                     ปฏิเสธแล้ว
                                 </span>
