@@ -57,9 +57,10 @@
                     </h3>
                     <h6 class="text-sm font-semibold flex items-center gap-2 mt-2">
                         @if($cartItem->overent == 1)
-                            <span class="text-xs bg-yellow-400 text-white px-2 py-1 rounded-full">สั่งเพิ่ม</span>
+                            
+                        ร้าน: {{ $cartItem->thaioutfit_sizeandcolor->outfit->shop->shop_name ?? 'ไม่ระบุร้าน' }}
                         @else
-                            ร้าน: {{ $cartItem->shop_name ?? 'ไม่ระบุร้าน' }}
+                            ร้าน: {{ $cartItem->thaioutfit_sizeandcolor->outfit->shop->shop_name ?? 'ไม่ระบุร้าน' }}
                         @endif
                     </h6>
                     <p class="text-green-600 font-bold mt-2">{{ number_format($cartItem->outfit->price, 0) }}฿ /1 days</p>

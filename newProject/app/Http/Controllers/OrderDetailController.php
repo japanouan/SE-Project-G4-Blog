@@ -87,6 +87,7 @@ class OrderDetailController extends Controller
 
     public function viewAddTo(Request $request)
 {
+    $user = Auth::user();
     $cartItemIds = json_decode($request->input('cart_item_ids'), true);
 
     if (!is_array($cartItemIds) || empty($cartItemIds)) {
@@ -120,8 +121,12 @@ class OrderDetailController extends Controller
             $activePromotions[$shop_id] = $promotion;
         }
     }
+    $user->load('customerAddress.address');
+    $customerAddress = $user->customerAddress;
 
-    return view('orderdetail.viewAddTo', compact('cartItems', 'outfits', 'activePromotions'));
+    $hasAddress = $customerAddress && $customerAddress->address && !is_null($customerAddress->cus_address_id);
+
+    return view('orderdetail.viewAddTo', compact('cartItems', 'outfits', 'activePromotions','hasAddress'));
 }
 
     

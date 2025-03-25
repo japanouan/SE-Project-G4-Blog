@@ -91,6 +91,9 @@ class CartItemController extends Controller
 
 public function addToCart(Request $request)
 {
+    
+    $action = $request->input('action');
+
     if (!Auth::check()) {
         return redirect()->route('login')->with('error', 'กรุณาเข้าสู่ระบบก่อนเพิ่มลงตะกร้า');
     }
@@ -104,33 +107,40 @@ public function addToCart(Request $request)
     $sizeDetail_id = $request->input('sizeDetail_id');
     $reservation_date = $request->input('reservation_date');
 
-    // ดึงความสัมพันธ์ sizeAndColor เพื่อเช็ค stock
     $sizeAndColor = ThaiOutfitSizeAndColor::where('outfit_id', $outfit_id)
         ->where('size_id', $size_id)
         ->where('color_id', $color_id)
         ->first();
 
-    if (!$sizeAndColor) {
+    if (!$sizeAndColor && $overent == 0) {
         return redirect()->back()->with('error', 'ไม่พบข้อมูลขนาดและสีของชุด');
     }
 
-    // เช็คว่ามี item เดิมอยู่ในตะกร้าไหม โดยรวม reservation_date ในการเช็ค
     $item = CartItem::where('outfit_id', $outfit_id)
         ->where('size_id', $size_id)
         ->where('color_id', $color_id)
         ->where('userId', $user->user_id)
         ->where('overent', $overent)
         ->where('status', 'INUSE')
-        ->where('reservation_date', $reservation_date) // เพิ่มเงื่อนไขนี้
+        ->where('reservation_date', $reservation_date)
         ->first();
 
     $existingQty = $item ? $item->quantity : 0;
 
-    // ตรวจสอบจำนวนรวมไม่เกิน amount
-    if (($existingQty + $quantity) > $sizeAndColor->amount) {
-        return redirect()->back()->with('error', 'จำนวนสินค้าที่เลือกเกินจำนวนคงเหลือในสต็อก');
+    // ✅ ถ้า overent == 0 ให้คำนวณ max ที่สามารถเพิ่มได้
+    if ($overent == 0) {
+        $maxQty = $sizeAndColor->amount - $existingQty;
+
+        if ($maxQty <= 0) {
+            return redirect()->back()->with('error', 'จำนวนสินค้าที่มีอยู่ในตะกร้าครบตามสต็อกแล้ว');
+        }
+
+        if ($quantity > $maxQty) {
+            $quantity = $maxQty; // ปรับให้ไม่เกิน
+        }
     }
 
+    // ✅ เพิ่มหรือสร้างใหม่
     if ($item) {
         $item->quantity += $quantity;
         $item->save();
@@ -147,8 +157,15 @@ public function addToCart(Request $request)
         ]);
     }
 
-    return redirect()->back()->with('success', 'เพิ่มสินค้าลงตะกร้าเรียบร้อย');
+    if ($action === 'rent') {
+        return redirect()->route('cartItem.allItem')->with('success', 'ทำการเช่าเรียบร้อย');
+    }else{
+        return redirect()->back()->with('success', 'เพิ่มสินค้าลงตะกร้าเรียบร้อยแล้ว (จำนวนที่เพิ่ม: ' . $quantity . ')');
+    }
+
 }
+
+
 
 
 

@@ -77,14 +77,16 @@
 
 
                 <div class="mt-6 flex gap-4">
-                    <a href="{{ url('rental/create/' . $outfit->outfit_id) }}"
-                        class="px-6 py-2 border border-green-500 text-green-500 rounded-md hover:bg-green-500 hover:text-white transition">
-                        เช่า
-                    </a>
-                    <button type="submit"
-                        class="px-6 py-2 border border-blue-500 text-blue-500 rounded-md hover:bg-blue-500 hover:text-white transition">
-                        เพิ่มลงตะกร้า
-                    </button>
+               
+                <button type="submit" name="action" value="rent"
+                    class="px-6 py-2 border border-green-500 text-green-500 rounded-md hover:bg-green-500 hover:text-white transition">
+                    เช่า
+                </button>
+                <button type="submit" name="action" value="add_to_cart"
+                    class="px-6 py-2 border border-blue-500 text-blue-500 rounded-md hover:bg-blue-500 hover:text-white transition">
+                    เพิ่มลงตะกร้า
+                </button>
+
 
                     <button type="button"
                         id="customOrderBtn"

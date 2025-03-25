@@ -184,16 +184,26 @@
                         <div class="mb-4">
                             <label class="block text-gray-700 font-medium mb-2">ที่อยู่สำหรับบริการเสริม:</label>
                             <div class="flex gap-4">
-                                <label class="flex items-center gap-2">
-                                    <input type="radio" name="address_type" value="customer" checked onchange="toggleAddressInput()">
-                                    <span>ใช้ที่อยู่เดียวกับลูกค้า</span>
-                                </label>
-                                <label class="flex items-center gap-2">
-                                    <input type="radio" name="address_type" value="custom" onchange="toggleAddressInput()">
-                                    <span>กรอกที่อยู่ใหม่</span>
-                                </label>
+                                @if($hasAddress)
+                                    <label class="flex items-center gap-2">
+                                        <input type="radio" name="address_type" value="customer" checked onchange="toggleAddressInput()">
+                                        <span>ใช้ที่อยู่เดียวกับลูกค้า</span>
+                                    </label>
+                                    <label class="flex items-center gap-2">
+                                        <input type="radio" name="address_type" value="custom" onchange="toggleAddressInput()">
+                                        <span>กรอกที่อยู่ใหม่</span>
+                                    </label>
+                                @else
+                                    {{-- กรณีไม่มีที่อยู่ลูกค้าเลย --}}
+                                    <label class="flex items-center gap-2">
+                                        <input type="radio" name="address_type" value="custom" onchange="toggleAddressInput()">
+                                        <span>กรอกที่อยู่ใหม่</span>
+                                    </label>
+                                    <p class="text-sm text-red-500">* กรุณากรอกที่อยู่ใหม่ เนื่องจากยังไม่มีที่อยู่ลูกค้า</p>
+                                @endif
                             </div>
                         </div>
+
 
                         <!-- ฟอร์มกรอกที่อยู่ใหม่ -->
                         <div id="custom-address-form" class="bg-gray-50 p-4 rounded-lg mb-5 hidden">
