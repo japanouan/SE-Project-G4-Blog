@@ -125,4 +125,5 @@ class Booking extends Model
     {
         return $this->hasMany(SelectOutfitDetail::class, 'booking_id', 'booking_id');
     }
+
 }
