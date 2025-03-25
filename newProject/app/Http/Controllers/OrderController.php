@@ -235,7 +235,7 @@ class OrderController extends Controller
                         Payment::create([
                             'payment_method' => 'paypal',
                             'total' => $item->quantity * $item->outfit->price,
-                            'status' => 'paid',
+                            'status' => 'unpaid',
                             'booking_cycle' => '1',
                             'booking_id' => $booking->booking_id,
                         ]);
@@ -275,7 +275,7 @@ class OrderController extends Controller
             }
     
             DB::commit();
-            return redirect()->route('cartItem.allItem')->with('success', 'ทำรายการสำเร็จ');
+            return redirect()->route('payment.viewUpdate', $booking->booking_id);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('เกิดข้อผิดพลาด:', ['message' => $e->getMessage(), 'line' => $e->getLine()]);

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Models\OrderDetail;
 use App\Models\Payment;
+use Illuminate\Support\Facades\Auth;
 
 class PaymentController extends Controller
 {
@@ -82,7 +83,33 @@ class PaymentController extends Controller
     }
 
 
-    
+    public function viewUpdate($booking_id)
+{
+    $booking = Booking::with(['payments'])->where('booking_id', $booking_id)->firstOrFail();
+
+    // ✅ ต้องใช้ ->filter() หรือ ->where() บน Collection
+    $payments = $booking->payments->where('status', 'unpaid');
+
+    return view('payment.viewUpdate', compact('payments', 'booking'));
+}
+
+public function updateMethod(Request $request, $id)
+{
+    $request->validate([
+        'payment_method' => 'required|in:credit_card,paypal',
+    ]);
+
+    $payment = Payment::findOrFail($id);
+
+    $payment->payment_method = $request->payment_method;
+    $payment->status = 'paid'; // หากต้องการให้ระบบจ่ายทันที
+    $payment->save();
+
+    return redirect()->route('payment.index')->with('success', 'บันทึกการชำระเงินเรียบร้อยแล้ว');
+}
+
+
+
 
 
 
