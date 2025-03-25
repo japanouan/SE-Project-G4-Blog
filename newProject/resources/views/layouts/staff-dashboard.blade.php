@@ -364,7 +364,7 @@
             </div>
             
             <div class="menu-item {{ $currentRoute == 'issue.show' ? 'active' : '' }}">
-                <a href="{{ route('issue.show') }}">
+                <a href="{{ route($routePrefix.'.issue.index') }}">
                     <i class="fas fa-exclamation-circle mr-3"></i>
                     <span>รายงานปัญหา</span>
                 </a>

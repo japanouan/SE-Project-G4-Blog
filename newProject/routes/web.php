@@ -54,8 +54,14 @@ Route::prefix('make-upartist')->name('make-upartist.')->middleware('auth', 'is_m
     Route::get('/work-list', [StaffController::class, 'getAvailableJobs'])->name('work-list');
     Route::get('/earning', [StaffController::class, 'earning'])->name('work.earning');
 
-
     Route::post('/accept-job', [StaffController::class, 'acceptJob'])->name('accept-job');
+
+    Route::prefix('issue')->name('issue.')->group(function () {
+        Route::get('/', [IssueController::class, 'workIndex'])->name('index');
+        Route::get('/create', [IssueController::class, 'workCreate'])->name('create');
+        Route::post('/store', [IssueController::class, 'workStore'])->name('store');
+        Route::get('/{id}', [IssueController::class, 'workShow'])->name('show');
+    });
 });
 
 // photographer
@@ -67,6 +73,13 @@ Route::prefix('photographer')->name('photographer.')->middleware('auth', 'is_pho
     Route::get('/earning', [StaffController::class, 'earning'])->name('work.earning');
 
     Route::post('/accept-job', [StaffController::class, 'acceptJob'])->name('accept-job');
+    
+    Route::prefix('issue')->name('issue.')->group(function () {
+        Route::get('/', [IssueController::class, 'workIndex'])->name('index');
+        Route::get('/create', [IssueController::class, 'workCreate'])->name('create');
+        Route::post('/store', [IssueController::class, 'workStore'])->name('store');
+        Route::get('/{id}', [IssueController::class, 'workShow'])->name('show');
+    });
 });
 
 
@@ -120,7 +133,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth', 'is_admin')->group(fu
     //stat
     Route::get('/statistics/shop', [AdminController::class, 'showShopStatistics'])->name('statistics.shop');
     Route::get('/statistics/photographer', [AdminController::class, 'showPhotographerStatistics'])->name('statistics.photographer');
-    Route::get('/statistics/make-upartist', [AdminController::class, 'showMakeUpArtistStatistics'])->name('statistics.make-upartist');
+    Route::get('/statistics/make-up', [AdminController::class, 'showMakeupStatistics'])->name('statistics.make-up');
 
     //categories
     Route::resource('categories', CategoryController::class);

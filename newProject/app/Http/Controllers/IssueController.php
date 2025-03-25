@@ -203,4 +203,87 @@ class IssueController extends Controller
     
         return view('shopowner.issue.show', compact('issue'));
     }
+
+        /**
+     * Display a listing of issues for staff users.
+     *
+     * @return \Illuminate\View\View
+     */
+    public function workIndex()
+    {
+        $issues = Issue::where('user_id', Auth::id())->orderBy('created_at', 'desc')->get();
+        return view('work.issue.index', compact('issues'));
+    }
+
+    /**
+     * Show the form for creating a new issue for staff users.
+     *
+     * @return \Illuminate\View\View
+     */
+    public function workCreate()
+    {
+        return view('work.issue.report');
+    }
+
+        /**
+     * Store a newly created issue from staff users.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function workStore(Request $request)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:256',
+            'description' => 'required|string|max:1000',
+            'file' => 'nullable|file|mimes:jpg,jpeg,png,gif|max:2048',
+        ]);
+
+        $filePath = null;
+        if ($request->hasFile('file')) {
+            $filename = Str::random(40) . '.' . $request->file('file')->getClientOriginalExtension();
+            $request->file('file')->move(public_path('images/issue'), $filename);
+            $filePath = 'images/issue/' . $filename;
+        }
+
+        $issue = Issue::create([
+            'user_id' => Auth::id(),
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'status' => 'reported',
+            'file_path' => $filePath,
+        ]);
+
+        // Send notification to admin
+        $this->sendNotificationToAdmin($issue);
+        
+        // Determine the route prefix based on user type
+        $userType = Auth::user()->userType;
+        if ($userType == 'photographer') {
+            $routePrefix = 'photographer';
+        } elseif ($userType == 'make-up artist') {
+            $routePrefix = 'make-upartist';
+        } else {
+            $routePrefix = 'work'; // Fallback
+        }
+
+        return redirect()->route($routePrefix.'.issue.index')->with('success', 'ระบบได้รับการแจ้งปัญหาของคุณเรียบร้อยแล้ว');
+    }
+
+
+    /**
+     * Display the specified issue for staff users.
+     *
+     * @param  int  $id
+     * @return \Illuminate\View\View
+     */
+    public function workShow($id)
+    {
+        $issue = Issue::where('id', $id)
+                    ->where('user_id', Auth::id())
+                    ->firstOrFail();
+    
+        return view('work.issue.show', compact('issue'));
+    }
+
 }
