@@ -208,7 +208,9 @@ Route::middleware('auth')->group(function () {
     //Customer
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::get('/profile/editCus', [ProfileController::class, 'editCus'])->name('profile.editCus');
-   
+
+    Route::get('/profile/issue', [IssueController::class, 'CustomerIssue'])->name('profile.customer.issue');
+    Route::get('/profile/issue/create', [IssueController::class, 'CustomerCreate'])->name('profile.customer.create');
     Route::get('/profile/customer/orderHistory', [ProfileController::class, 'orderHistory'])->name('profile.customer.orderHistory');
     Route::get('/profile/customer/orderDetail/{bookingId}', [ProfileController::class, 'orderDetail'])->name('profile.customer.orderDetail');
 

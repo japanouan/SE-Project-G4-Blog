@@ -72,6 +72,9 @@ class IssueController extends Controller
         // ส่งการแจ้งเตือนให้ Admin
         $this->sendNotificationToAdmin($issue);
     
+        if(Auth::user()->userType == 'customer'){
+            return redirect()->route('profile.customer.issue');
+        }
         return $this->showReportStatus();
     }
     
@@ -126,6 +129,19 @@ class IssueController extends Controller
         // dd($notifications);
         
         return view('notifications.index', compact('notifications'));
+    }
+
+
+    public function CustomerIssue()
+    {
+        $notifications = auth()->user()->issue()->get();
+        // dd($notifications);
+        
+        return view('profile.customer.issue', compact('notifications'));
+    }
+    public function CustomerCreate()
+    {
+        return view('profile.customer.report_issue');
     }
 
     

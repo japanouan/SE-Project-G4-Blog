@@ -9,6 +9,7 @@ use App\Models\ThaiOutfitCategory;
 use App\Models\ThaiOutfitSize;
 use App\Models\ThaiOutfitColor;
 use App\Models\ThaiOutfitSizeAndColor;
+use App\Models\SelectOutfitDetail;
 use App\Models\Shop;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
@@ -18,8 +19,11 @@ class OutfitController extends Controller
 {
     public function index()
     {
-        $outfits = ThaiOutfit::paginate(1000);
-        return view('main', compact('outfits'));
+        $outfits = ThaiOutfit::get();
+        $hasPendingSuggestions = SelectOutfitDetail::where('customer_id', Auth::id())
+        ->where('status', 'Pending Selection')
+        ->exists();
+        return view('main', compact('outfits','hasPendingSuggestions'));
     }
 
     // SHOP OWNER METHODS
