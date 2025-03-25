@@ -57,4 +57,22 @@ class PaymentController extends Controller
 
         return redirect()->route('cartItem.allItem')->with('success', 'ชำระเงินสำเร็จแล้ว');
     }
+
+    public function index()
+    {
+        $bookings = Booking::with(['payments', 'orderDetails'])
+            ->whereBelongsTo(auth()->user())
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+
+        foreach ($bookings as $booking) {
+            $paid = $booking->payments->sum('total');
+            $booking->paid = $paid;
+            $booking->unpaid = $booking->total_price - $paid;
+        }
+
+        return view('payment.index', compact('bookings'));
+    }
+
 }
