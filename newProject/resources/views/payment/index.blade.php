@@ -46,11 +46,14 @@
                         <p class="text-sm text-gray-600">สถานะ: {{ $booking->status }}</p>
                     </div>
                     <div class="text-right">
-                        <p>ยอดรวม: ฿{{ number_format($booking->total_price, 2) }}</p>
+                        <p>ยอดรวม: ฿{{ number_format($booking->total_with_staff, 2) }}</p>
                         <p>ชำระแล้ว: ฿{{ number_format($booking->paid, 2) }}</p>
                         <p class="{{ $booking->unpaid > 0 ? 'text-red-500' : 'text-green-600' }}">
                             ค้างชำระ: ฿{{ number_format($booking->unpaid, 2) }}
                         </p>
+
+
+
                     </div>
                 </div>
                 <div class="mt-2">
