@@ -212,6 +212,6 @@
     <div class="container mx-auto p-6">
         @yield('content')
     </div>
-
+    @stack('scripts') {{-- <-- แทรกไว้ตรงนี้ --}}
 </body>
 </html>

@@ -7,15 +7,16 @@
     <div class="max-w-6xl mx-auto flex flex-col md:flex-row gap-5 px-4">
         
         {{-- Sidebar --}}
-        <div class="w-full md:w-1/4 bg-white rounded-lg shadow">
+        <div class="w-full md:w-1/4 bg-white rounded-lg shadow sticky top-5 h-fit">
             <div class="p-4 border-b border-gray-100">
                 <h3 class="text-lg font-semibold text-gray-800">Account Settings</h3>
             </div>
             <ul class="p-4 space-y-2 text-sm">
-                <li class="flex items-center py-2 px-3 bg-purple-50 text-purple-600 font-semibold rounded-md">
+            <a href="{{ route('profile.index') }}" class="flex items-center py-2 px-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-colors cursor-pointer">
                     <i class="fas fa-user mr-3 w-4 text-center"></i> Profile
-                </li>
-                <a href="{{ route('profile.customer.address') }}" class="flex items-center py-2 px-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-colors cursor-pointer">
+                </a>
+                
+                <a href="{{ route('profile.customer.address.index') }}" class="flex items-center py-2 px-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-colors cursor-pointer">
                     <i class="fas fa-map-marker-alt mr-3 w-4 text-center"></i> Address
                 </a>
                 <li class="flex items-center py-2 px-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-colors cursor-pointer">
