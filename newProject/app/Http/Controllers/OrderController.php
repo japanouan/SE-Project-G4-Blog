@@ -80,10 +80,9 @@ class OrderController extends Controller
         DB::beginTransaction();
     
         try {
-            // dd($request->all());
             Log::debug('เริ่ม store()');
     
-            // ✅ ตรวจสอบประเภทที่อยู่
+            // ✅ ตรวจสอบประเภทที่อยู่ (ไม่เปลี่ยนแปลง)
             $addressType = $request->input('address_type');
             $staffAddressId = null;
             $customerAddressId = null;
@@ -116,29 +115,25 @@ class OrderController extends Controller
                 $staffAddressId = $customerAddress->address->AddressID;
             }
     
-            // ✅ ดึง cart items พร้อม overent
+            // ✅ ดึง cart items พร้อม overent (ไม่เปลี่ยนแปลง)
             $cartItemIds = $request->cart_item_ids;
             $cartItems = CartItem::with('outfit')
                 ->select('*')
                 ->whereIn('cart_item_id', $cartItemIds)
                 ->get();
     
-            // ✅ จัดกลุ่ม CartItem ตาม shop_id และ reservation_date
+            // ✅ จัดกลุ่ม CartItem ตาม shop_id และ reservation_date (ไม่เปลี่ยนแปลง)
             $groupedItems = $cartItems->groupBy(function ($item) {
                 return $item->outfit->shop_id . '|' . $item->reservation_date;
             });
     
-            // ✅ วนลูปสร้าง Booking สำหรับแต่ละกลุ่ม (1 ร้าน 1 วัน = 1 Booking)
+            // ✅ วนลูปสร้าง Booking สำหรับแต่ละกลุ่ม
             $bookings = [];
             foreach ($groupedItems as $groupKey => $groupItems) {
-                // แยก shop_id และ reservation_date จาก key
                 [$shop_id, $reservation_date] = explode('|', $groupKey);
     
-                // ✅ แยกชุดในกลุ่มนี้
                 $normalItems = $groupItems->where('overent', 0);
                 $overentItems = $groupItems->where('overent', 1);
-    
-                // ✅ คำนวณ hasOverrented สำหรับกลุ่มนี้
                 $hasOverrented = $overentItems->isNotEmpty();
     
                 // ✅ บริการเสริมสำหรับกลุ่มนี้
@@ -148,10 +143,10 @@ class OrderController extends Controller
                     $staffTotal = (
                         (int)($services['photographer']['count'] ?? 0) +
                         (int)($services['makeup']['count'] ?? 0)
-                    ) * 2000;
+                    ) * 2000; // จำนวนคน * 2000
                 }
     
-                // ✅ โปรโมชั่น (แยกตามร้าน)
+                // ✅ โปรโมชั่น (ไม่เปลี่ยนแปลง)
                 $promotionCode = $request->input('promotion_code');
                 $promotion = null;
                 $discountAmount = 0;
@@ -169,14 +164,14 @@ class OrderController extends Controller
                     }
                 }
     
-                // ✅ ยอดรวมสินค้าสำหรับกลุ่มนี้
+                // ✅ ยอดรวมสินค้าสำหรับกลุ่มนี้ (เฉพาะรอบ 1)
                 $productTotal = $normalItems->sum(fn($item) => $item->quantity * $item->outfit->price);
                 $totalWithDiscount = max($productTotal + $staffTotal - $discountAmount, 0);
     
-                // ✅ สถานะ
+                // ✅ สถานะ (ไม่เปลี่ยนแปลง)
                 $bookingStatus = $overentItems->isNotEmpty() ? 'partial paid' : 'confirmed';
     
-                // ✅ สร้าง Booking สำหรับกลุ่มนี้
+                // ✅ สร้าง Booking
                 $booking = Booking::create([
                     'purchase_date' => now(),
                     'total_price' => $totalWithDiscount,
@@ -190,14 +185,12 @@ class OrderController extends Controller
     
                 $bookings[$groupKey] = $booking;
     
-                // ✅ บันทึก OrderDetail & Payment สำหรับกลุ่มนี้
+                // ✅ บันทึก OrderDetail & Payment
                 foreach ($groupItems as $item) {
                     $cycle = $item->overent == 1 ? 2 : 1;
     
-                    // ✅ กำหนด reservation_date จาก CartItem โดยตรง
                     $reservationDate = $item->reservation_date;
                     if ($item->overent == 1) {
-                        // ค้นหา CartItem ที่มี outfit_id, size_id, color_id เหมือนกัน และ overent == 0
                         $matchingItem = $cartItems->first(function ($cartItem) use ($item) {
                             return $cartItem->outfit_id == $item->outfit_id &&
                                    $cartItem->size_id == $item->size_id &&
@@ -205,13 +198,11 @@ class OrderController extends Controller
                                    $cartItem->overent == 0;
                         });
     
-                        // ถ้าพบ CartItem ที่ตรงเงื่อนไข ให้ใช้ reservation_date ของมัน
                         if ($matchingItem) {
                             $reservationDate = $matchingItem->reservation_date;
                         }
                     }
     
-                    // ตรวจสอบว่า reservation_date มีค่าหรือไม่
                     if (!$reservationDate) {
                         throw new \Exception("ไม่พบวันที่จองสำหรับ CartItem ID: {$item->cart_item_id}");
                     }
@@ -231,14 +222,19 @@ class OrderController extends Controller
     
                     OrderDetail::create($orderDetailData);
     
+                    // ✅ แก้ไขการสร้าง Payment
                     if ($cycle == 1 && $item->overent != 2) {
+                        // คำนวณยอดรวมสำหรับ Payment = สินค้า (รอบ 1) + บริการเสริม
+                        $paymentTotal = $productTotal + $staffTotal - $discountAmount;
+    
                         Payment::create([
                             'payment_method' => 'paypal',
-                            'total' => $item->quantity * $item->outfit->price,
+                            'total' => $paymentTotal, // ใช้ยอดรวมทั้งสินค้าและบริการ
                             'status' => 'unpaid',
                             'booking_cycle' => '1',
                             'booking_id' => $booking->booking_id,
                         ]);
+                        break; // สร้าง Payment แค่ครั้งเดียวต่อกลุ่ม
                     }
     
                     $item->status = 'REMOVED';
@@ -246,7 +242,7 @@ class OrderController extends Controller
                     $item->save();
                 }
     
-                // ✅ บันทึกบริการเสริมสำหรับกลุ่มนี้
+                // ✅ บันทึกบริการเสริม (ไม่เปลี่ยนแปลง)
                 if (!empty($services)) {
                     if (isset($services['photographer']) && $services['photographer']['count'] > 0) {
                         $datetimeString = $reservation_date . ' ' . $services['photographer']['time'] . ':00';
@@ -254,7 +250,7 @@ class OrderController extends Controller
                         SelectService::create([
                             'service_type' => 'photographer',
                             'customer_count' => $services['photographer']['count'],
-                            'reservation_date' => $datetime, // ใช้ reservation_date เดียวกับ Booking
+                            'reservation_date' => $datetime,
                             'booking_id' => $booking->booking_id,
                             'AddressID' => $staffAddressId,
                         ]);
@@ -265,8 +261,8 @@ class OrderController extends Controller
                         SelectService::create([
                             'service_type' => 'make-up artist',
                             'customer_count' => $services['makeup']['count'],
-                            'reservation_date' => $reservation_date, // ใช้ reservation_date เดียวกับ Booking
-                            'reservation_time' => $services['makeup']['time'] ?? null, // เพิ่มเวลา
+                            'reservation_date' => $reservation_date,
+                            'reservation_time' => $services['makeup']['time'] ?? null,
                             'booking_id' => $booking->booking_id,
                             'AddressID' => $staffAddressId,
                         ]);

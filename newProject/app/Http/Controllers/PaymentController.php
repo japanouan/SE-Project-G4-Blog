@@ -69,9 +69,7 @@ class PaymentController extends Controller
 
         foreach ($bookings as $booking) {
             $paid = $booking->payments->sum('total');
-
-            // ✅ คิดเฉพาะค่าชุดทั้งหมด (เฉพาะที่สถานะ booking = confirmed แล้ว)
-            $total = $booking->orderDetails->sum('total');
+            $total = $booking->total_price;
 
             $booking->total_price = $total;
             $booking->paid = $paid;

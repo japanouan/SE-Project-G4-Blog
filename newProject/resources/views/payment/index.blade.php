@@ -48,41 +48,42 @@
         @endif
 
         <!-- Bookings List -->
-        <div id="bookingsList">
+        <div id="bookingsList" class="space-y-4">
             @forelse ($bookings as $booking)
-            <div class="bg-white p-4 rounded shadow mb-4 booking-item" data-unpaid="{{ $booking->unpaid > 0 ? 'true' : 'false' }}">
+            <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 booking-item border border-gray-100" data-unpaid="{{ $booking->unpaid > 0 ? 'true' : 'false' }}">
                 <div class="flex justify-between items-start">
                     <div>
-                        <p class="font-semibold text-gray-700">
+                        <p class="font-semibold text-gray-800 text-lg">
                             Booking #{{ $booking->booking_id }}
                             <span class="text-sm text-gray-500">({{ $booking->purchase_date->format('Y-m-d') }})</span>
                         </p>
-                        <p class="text-sm text-gray-600">สถานะ: {{ $booking->status }}</p>
+                        <p class="text-sm text-gray-600 mt-1">สถานะ: <span class="font-medium">{{ $booking->status }}</span></p>
                     </div>
                     <div class="text-right">
-                        <p>ยอดรวม: ฿{{ number_format($booking->total_with_staff, 2) }}</p>
-                        <p>ชำระแล้ว: ฿{{ number_format($booking->paid, 2) }}</p>
-                        <p class="{{ $booking->unpaid > 0 ? 'text-red-500' : 'text-green-600' }}">
-                            ค้างชำระ: ฿{{ number_format($booking->unpaid, 2) }}
-                        </p>
-                        @if($booking->unpaid == 0)
-                            <span class="text-sm text-green-500">✔ ชำระครบแล้ว</span>
-                        @endif
-                        @if($booking->hasOverrented == 1 && $booking->unpaid > 0)
-                            <a href="{{ route('payment.createCycle2', $booking->booking_id) }}"
-                                class="inline-block mt-2 px-4 py-1 bg-purple-600 text-white text-sm rounded hover:bg-purple-700">
-                                ชำระเงิน (รอบ 2)
-                            </a>
+                        <p class="text-gray-700">ยอดรวม: <span class="font-semibold">฿{{ number_format($booking->total_with_staff, 2) }}</span></p>
+                        <p class="text-gray-700">ชำระแล้ว: <span class="font-semibold">฿{{ number_format($booking->paid, 2) }}</span></p>
+                        @if($booking->unpaid > 0)
+                            <p class="text-red-500">ค้างชำระ: <span class="font-semibold">฿{{ number_format($booking->unpaid, 2) }}</span></p>
+                        @else
+                            <p class="text-green-600 text-sm mt-1">✔ ชำระครบแล้ว</p>
                         @endif
                     </div>
                 </div>
-                <div class="mt-2">
+                <div class="mt-4 flex justify-end items-center gap-4">
                     <a href="{{ route('profile.customer.orderDetail', $booking->booking_id) }}"
-                        class="text-blue-500 hover:underline text-sm">ดูรายละเอียดคำสั่งซื้อ</a>
+                        class="text-blue-500 hover:text-blue-600 text-sm font-medium transition-colors">
+                        ดูรายละเอียดคำสั่งซื้อ
+                    </a>
+                    @if($booking->hasOverrented == 1 && $booking->unpaid > 0)
+                        <a href="{{ route('payment.createCycle2', $booking->booking_id) }}"
+                            class="inline-flex items-center px-4 py-1.5 bg-purple-600 text-white text-sm rounded-full hover:bg-purple-700 transition-colors shadow-sm">
+                            ชำระเงิน (รอบ 2)
+                        </a>
+                    @endif
                 </div>
             </div>
             @empty
-            <div class="bg-white p-4 rounded shadow text-gray-500">
+            <div class="bg-white p-6 rounded-xl shadow-sm text-gray-500 text-center border border-gray-100">
                 ไม่พบข้อมูลการชำระเงิน
             </div>
             @endforelse
@@ -98,12 +99,12 @@
         const bookingItems = document.querySelectorAll('.booking-item');
         let isFiltered = false;
 
-        console.log('Filter button:', filterBtn); // Debug: Check if button is found
-        console.log('Booking items:', bookingItems.length); // Debug: Check if items are found
+        console.log('Filter button:', filterBtn);
+        console.log('Booking items:', bookingItems.length);
 
         if (filterBtn) {
             filterBtn.addEventListener('click', function () {
-                console.log('Button clicked, isFiltered:', isFiltered); // Debug: Confirm click
+                console.log('Button clicked, isFiltered:', isFiltered);
                 if (!isFiltered) {
                     bookingItems.forEach(item => {
                         if (item.dataset.unpaid === 'true') {
@@ -112,13 +113,13 @@
                             item.style.display = 'none';
                         }
                     });
-                    filterBtn.childNodes[0].textContent = 'ดูทั้งหมด'; // Update text, preserve badge
+                    filterBtn.childNodes[0].textContent = 'ดูทั้งหมด';
                     isFiltered = true;
                 } else {
                     bookingItems.forEach(item => {
                         item.style.display = 'block';
                     });
-                    filterBtn.childNodes[0].textContent = 'ดูเฉพาะรายการค้างชำระ'; // Update text
+                    filterBtn.childNodes[0].textContent = 'ดูเฉพาะรายการค้างชำระ';
                     isFiltered = false;
                 }
             });
