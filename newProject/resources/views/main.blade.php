@@ -7,14 +7,30 @@
 @php
 use Illuminate\Support\Facades\Auth;
 use App\Models\SelectOutfitDetail;
+use App\Models\Booking; // Assuming Booking is your model
 
+// Existing pending suggestions logic
 $pendingSuggestionsCount = 0;
 $suggestions = SelectOutfitDetail::where('customer_id', Auth::id())
-->where('status', 'Pending Selection')
-->count();
-
+    ->where('status', 'Pending Selection')
+    ->count();
 if ($suggestions > 0) {
-$pendingSuggestionsCount++;
+    $pendingSuggestionsCount++;
+}
+
+// New pending payments logic
+$pendingPaymentsCount = 0;
+$bookings = Booking::with(['payments', 'orderDetails', 'selectService'])
+    ->whereBelongsTo(auth()->user())
+    ->orderBy('created_at', 'desc')
+    ->get();
+
+foreach ($bookings as $booking) {
+    $totalOrder = $booking->orderDetails->sum('total');
+    $totalPaid = $booking->payments->sum('total');
+    if ($totalOrder - $totalPaid > 0) {
+        $pendingPaymentsCount++;
+    }
 }
 @endphp
 
@@ -37,7 +53,6 @@ $pendingSuggestionsCount++;
         </button>
     </div>
     
-    <img src="{{ url('images/outfits/main.png') }}" alt="Main Outfit" class="w-full h-auto rounded-lg">
 
     <!-- Popup Modal (ปรับให้ดู modern) -->
     <div class="popup-overlay fixed inset-0 bg-black bg-opacity-70 z-50 opacity-0 transition-opacity duration-500 hidden"
@@ -63,6 +78,48 @@ $pendingSuggestionsCount++;
         </div>
     </div>
     @endif
+
+    <!-- New Pending Payments Notification -->
+    @if($pendingPaymentsCount > 0)
+    <div class="bg-orange-200 p-4 rounded-md mb-6 border-2">
+        <p class="text-orange-700 font-medium">คุณมี {{ $pendingPaymentsCount }} รายการที่ต้องชำระเงินเพิ่ม</p>
+        <p class="text-orange-600 text-sm mt-1">
+            กรุณาดำเนินการชำระเงินเพื่อให้คำสั่งซื้อสมบูรณ์
+        </p>
+        <button class="trigger-btn bg-orange-500 text-white px-4 py-2 rounded-md hover:scale-105 transition-transform duration-200 relative mt-2"
+            onclick="showPaymentPopup()">
+            ตรวจสอบการชำระเงิน
+            <span class="notification-badge bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center absolute -top-1 -right-1">
+                {{ $pendingPaymentsCount }}
+            </span>
+        </button>
+    </div>
+
+    <div class="popup-overlay fixed inset-0 bg-black bg-opacity-70 z-50 opacity-0 transition-opacity duration-500 hidden"
+        id="paymentPopupOverlay">
+        <div class="popup-content absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-8 rounded-xl shadow-lg w-11/12 max-w-lg text-center scale-75 transition-transform duration-500">
+            <div class="flex justify-center mb-4">
+                <div class="bg-orange-100 p-3 rounded-full">
+                    <i class="fas fa-exclamation-triangle text-orange-500 text-2xl"></i>
+                </div>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800 mb-4">แจ้งเตือนการชำระเงิน</h3>
+            <p class="mb-6 text-gray-600">คุณมี <strong class="text-orange-600">{{ $pendingPaymentsCount }}</strong> รายการที่รอการชำระเงินเพิ่ม</p>
+            <div class="flex justify-center gap-4">
+                <a href="{{ route('payment.index') }}"
+                    class="inline-flex items-center bg-green-500 text-white px-5 py-2 rounded-full hover:bg-green-600 transition-all duration-300 shadow-md hover:shadow-lg">
+                    <i class="fas fa-money-bill-wave mr-2"></i> ไปที่หน้าการชำระเงิน
+                </a>
+                <button class="inline-flex items-center bg-gray-200 text-gray-800 px-5 py-2 rounded-full hover:bg-gray-300 transition-all duration-300"
+                    onclick="hidePaymentPopup()">
+                    <i class="fas fa-times mr-2"></i> ปิด
+                </button>
+            </div>
+        </div>
+    </div>
+    @endif
+    
+    <img src="{{ url('images/outfits/main.png') }}" alt="Main Outfit" class="w-full h-auto rounded-lg">
 
     <h2 class="text-2xl font-bold mb-4">รายการชุดไทย</h2>
 
@@ -104,6 +161,30 @@ $pendingSuggestionsCount++;
 
     function hidePopup() {
         const overlay = document.getElementById('popupOverlay');
+        overlay.classList.remove('opacity-100');
+        overlay.querySelector('.popup-content').classList.remove('scale-100');
+        overlay.querySelector('.popup-content').classList.add('scale-75');
+        setTimeout(() => {
+            overlay.classList.add('hidden');
+        }, 500);
+    }
+</script>
+@endif
+
+@if($pendingPaymentsCount > 0)
+<script>
+    function showPaymentPopup() {
+        const overlay = document.getElementById('paymentPopupOverlay');
+        overlay.classList.remove('hidden');
+        setTimeout(() => {
+            overlay.classList.add('opacity-100');
+            overlay.querySelector('.popup-content').classList.remove('scale-75');
+            overlay.querySelector('.popup-content').classList.add('scale-100');
+        }, 10);
+    }
+
+    function hidePaymentPopup() {
+        const overlay = document.getElementById('paymentPopupOverlay');
         overlay.classList.remove('opacity-100');
         overlay.querySelector('.popup-content').classList.remove('scale-100');
         overlay.querySelector('.popup-content').classList.add('scale-75');
