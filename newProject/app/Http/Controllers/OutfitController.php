@@ -354,36 +354,55 @@ class OutfitController extends Controller
 
     public function AdminIndex(Request $request)
     {
-        $query = ThaiOutfit::query();
+        $query = ThaiOutfit::with('sizeAndColors.size', 'sizeAndColors.color');
 
         // ค้นหา shop_id, outfit_id หรือชื่อชุด
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
-            $query->where('Shops.shop_name', 'like', "%{$search}%")
+            $query->where(function($q) use ($search) {
+                $q->whereHas('shop', function($sq) use ($search) {
+                    $sq->where('shop_name', 'like', "%{$search}%");
+                })
                 ->orWhere('outfit_id', 'like', "%{$search}%")
                 ->orWhere('name', 'like', "%{$search}%");
+            });
         }
 
         // ดึงข้อมูลชุดทั้งหมด + ร้านค้า
         $outfits = $query->join('Shops', 'ThaiOutfits.shop_id', '=', 'Shops.shop_id')
+                 ->select('ThaiOutfits.*', 'Shops.shop_name')
                  ->paginate(10);
 
-        // dd($outfits);
+        // Add total stock attribute to each outfit
+        foreach ($outfits as $outfit) {
+            $outfit->totalStock = $outfit->sizeAndColors->sum('amount');
+        }
 
         return view('admin.outfits.outfits', compact('outfits'));
     }
 
     public function AdminEdit($id)
     {
-        $outfit = ThaiOutfit::findOrFail($id);
+        $outfit = ThaiOutfit::with('sizeAndColors.size', 'sizeAndColors.color')->findOrFail($id);
         $categories = OutfitCategory::all();
+        $sizes = ThaiOutfitSize::all();
+        $colors = ThaiOutfitColor::all();
 
         // Get current categories
         $outfitCategories = ThaiOutfitCategory::where('outfit_id', $id)
             ->pluck('category_id')
             ->toArray();
+        
+        // Get current size and color combinations
+        $sizeAndColors = ThaiOutfitSizeAndColor::where('outfit_id', $id)->get();
+        $sizeColorAmounts = [];
 
-        return view('admin.outfits.edit', compact('outfit', 'categories', 'outfitCategories'));
+        foreach ($sizeAndColors as $item) {
+            $key = $item->size_id . '_' . $item->color_id;
+            $sizeColorAmounts[$key] = $item->amount;
+        }
+        
+        return view('admin.outfits.edit', compact('outfit', 'categories', 'outfitCategories', 'sizes', 'colors', 'sizeColorAmounts'));
     }
     public function searchOutfits(Request $request)
     {
@@ -454,5 +473,121 @@ class OutfitController extends Controller
                 'line' => $e->getLine()
             ], 500);
         }
+    }
+
+    // Add this method to handle admin outfit updates with size and color data
+    public function AdminUpdate(Request $request, $id)
+    {
+        $outfit = ThaiOutfit::findOrFail($id);
+    
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'price' => 'required|numeric|min:0',
+            'depositfee' => 'required|numeric|min:0',
+            'penaltyfee' => 'required|numeric|min:0',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',        
+            'status' => 'required|in:active,inactive',
+            'categories' => 'required|array|min:1',
+            'categories.*' => 'exists:OutfitCategories,category_id',
+            'sizes' => 'required|array|min:1',
+            'sizes.*' => 'exists:Thaioutfit_Size,size_id',
+            'colors' => 'required|array|min:1',
+            'colors.*' => 'exists:Thaioutfit_Color,color_id',
+            'amount' => 'required|array',
+            'amount.*' => 'numeric|min:0'
+        ]);
+    
+        // Remove image and size/color data from validated
+        if (isset($validated['image'])) {
+            unset($validated['image']);
+        }
+    
+        unset($validated['sizes']);
+        unset($validated['colors']);
+        unset($validated['amount']);
+    
+        // Handle image upload separately
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($outfit->image && file_exists(public_path($outfit->image))) {
+                unlink(public_path($outfit->image));
+            }
+        
+            // Generate random filename
+            $filename = Str::random(40) . '.' . $request->file('image')->getClientOriginalExtension();
+        
+            // Move file to public directory
+            $request->file('image')->move(public_path('images/outfits'), $filename);
+        
+            // Update outfit with new image path
+            $outfit->image = 'images/outfits/' . $filename;
+        }
+    
+        // Update outfit with other validated data
+        $outfit->fill($validated);
+        $outfit->save();
+    
+        // Update categories
+        ThaiOutfitCategory::where('outfit_id', $id)->delete();
+        foreach ($request->categories as $categoryId) {
+            $outfitCategory = new ThaiOutfitCategory();
+            $outfitCategory->outfit_id = $id;
+            $outfitCategory->category_id = $categoryId;
+            $outfitCategory->save();
+        }
+    
+        // Get existing size and color combinations
+        $existingSizeColors = ThaiOutfitSizeAndColor::where('outfit_id', $id)->get();
+        $updatedCombinations = [];
+    
+        if (isset($request->sizes) && isset($request->colors) && isset($request->amount)) {
+            foreach ($request->sizes as $sizeId) {
+                foreach ($request->colors as $colorId) {
+                    $key = $sizeId . '_' . $colorId;
+                    if (isset($request->amount[$key]) && $request->amount[$key] > 0) {
+                        // Check if this combination already exists
+                        $existing = $existingSizeColors->first(function($item) use ($sizeId, $colorId) {
+                            return $item->size_id == $sizeId && $item->color_id == $colorId;
+                        });
+                        
+                        if ($existing) {
+                            // Update existing combination
+                            $existing->amount = $request->amount[$key];
+                            $existing->save();
+                            $updatedCombinations[] = $existing->sizeDetail_id;
+                        } else {
+                            // Create new combination
+                            $new = ThaiOutfitSizeAndColor::create([
+                                'outfit_id' => $outfit->outfit_id,
+                                'size_id' => $sizeId,
+                                'color_id' => $colorId,
+                                'amount' => $request->amount[$key]
+                            ]);
+                            $updatedCombinations[] = $new->sizeDetail_id;
+                        }
+                    }
+                }
+            }
+        }
+    
+        // Delete combinations that weren't updated, only if they're not referenced by cart items
+        foreach ($existingSizeColors as $existing) {
+            if (!in_array($existing->sizeDetail_id, $updatedCombinations)) {
+                // Check if this size/color is used in any cart items
+                $cartItemExists = \App\Models\CartItem::where('sizeDetail_id', $existing->sizeDetail_id)->exists();
+                
+                if (!$cartItemExists) {
+                    $existing->delete();
+                } else {
+                    // If it's referenced, just set amount to 0 instead of deleting
+                    $existing->amount = 0;
+                    $existing->save();
+                }
+            }
+        }
+    
+        return redirect()->route('admin.outfits.adminindex')
+            ->with('success', 'ชุดถูกอัปเดตเรียบร้อยแล้ว');
     }
 }

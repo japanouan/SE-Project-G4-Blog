@@ -21,7 +21,10 @@
                     <th class="p-3 text-left">รูปภาพ</th>
                     <th class="p-3 text-left">ชื่อชุด</th>
                     <th class="p-3 text-left">ราคา</th>
+                    <th class="p-3 text-left">มัดจำ</th>
+                    <th class="p-3 text-left">ค่าปรับ</th>
                     <th class="p-3 text-left">คงเหลือ</th>
+                    <th class="p-3 text-left">ขนาดและสี</th>
                     <th class="p-3 text-left">สถานะ</th>
                     <th class="p-3 text-left">Shop ID</th>
                     <th class="p-3 text-left">การจัดการ</th>
@@ -40,10 +43,33 @@
                     </td>
                     <td class="p-3">{{ $outfit->name }}</td>
                     <td class="p-3">{{ number_format($outfit->price, 2) }} บาท</td>
-                    <td class="p-3">{{ $outfit->stock }}</td>
+                    <td class="p-3">{{ number_format($outfit->depositfee, 2) }} บาท</td>
+                    <td class="p-3">{{ number_format($outfit->penaltyfee, 2) }} บาท</td>
+                    <td class="p-3">{{ $outfit->totalStock }}</td>
+                    <td class="p-3">
+                        <button type="button" class="text-blue-600 hover:text-blue-800" 
+                                onclick="toggleVariants('variants-{{ $outfit->outfit_id }}')">
+                            แสดงรายละเอียด <i class="fa fa-chevron-down"></i>
+                        </button>
+                        <div id="variants-{{ $outfit->outfit_id }}" class="hidden mt-2">
+                            @if(isset($outfit->sizeAndColors) && $outfit->sizeAndColors->count() > 0)
+                                <div class="text-xs p-2 bg-gray-50 rounded">
+                                    @foreach($outfit->sizeAndColors as $variant)
+                                        <div class="mb-1">
+                                            <span class="font-medium">{{ $variant->size->size }}</span> - 
+                                            <span class="font-medium">{{ $variant->color->color }}</span>: 
+                                            <span>{{ $variant->amount }} ชิ้น</span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <div class="text-xs text-gray-500">ไม่มีข้อมูลขนาดและสี</div>
+                            @endif
+                        </div>
+                    </td>
                     <td class="p-3">
                         <span class="px-2 py-1 text-sm rounded-lg {{ $outfit->status == 'active' ? 'bg-green-200 text-green-700' : 'bg-red-200 text-red-700' }}">
-                            {{ $outfit->status == 'active' ? 'พร้อมใช้งาน' : 'ไม่พร้อมใช้งาน' }}
+                        {{ $outfit->status == 'active' ? 'พร้อมใช้งาน' : 'ไม่พร้อมใช้งาน' }}
                         </span>
                     </td>
                     <td class="p-3">{{ $outfit->shop_name }}</td>
@@ -65,4 +91,15 @@
             {{ $outfits->links() }}
         </div>
     </div>
+
+    <script>
+        function toggleVariants(id) {
+            const variantsElement = document.getElementById(id);
+            if (variantsElement.classList.contains('hidden')) {
+                variantsElement.classList.remove('hidden');
+            } else {
+                variantsElement.classList.add('hidden');
+            }
+        }
+    </script>
 @endsection
