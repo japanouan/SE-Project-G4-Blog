@@ -43,7 +43,11 @@ class OrderController extends Controller
         $outfits = ThaiOutfit::with(['categories', 'sizeAndColors.size', 'sizeAndColors.color'])
                          ->whereIn('outfit_id', $outfitIds)
                          ->get();
-        
+
+        $customerAddress = CustomerAddress::with(['address'])
+                         ->where('customer_id', Auth::id())
+                         ->get();
+        dd($customerAddress);
         // ดึงโปรโมชั่นที่กำลังใช้งานได้
         $shop = null;
         $activePromotion = null;
@@ -106,14 +110,10 @@ class OrderController extends Controller
     
                 $customerAddressId = $customerAddress->cus_address_id;
             } else {
-                $user->load('customerAddress.address');
-                $customerAddress = $user->customerAddress;
-                if ($customerAddress && $customerAddress->address) {
-                    $customerAddressId = $customerAddress->cus_address_id;
-                    $staffAddressId = $customerAddress->address->AddressID;
-                } else {
-                    throw new \Exception('ไม่พบที่อยู่ลูกค้า กรุณาเพิ่มที่อยู่ก่อนทำรายการ');
-                }
+                $cus_address_id = $request->input('cus_address_id');
+                $customerAddress = CustomerAddress::with('address')->findOrFail($cus_address_id);
+                $customerAddressId = $customerAddress->cus_address_id;
+                $staffAddressId = $customerAddress->address->AddressID;
             }
     
             // ✅ ดึง cart items พร้อม overent

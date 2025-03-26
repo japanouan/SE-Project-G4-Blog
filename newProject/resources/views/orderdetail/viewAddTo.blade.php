@@ -2,7 +2,6 @@
 
 @section('content')
 <style>
-    /* เพิ่ม CSS สำหรับ hidden class ถ้ายังไม่มี */
     .hidden {
         display: none;
     }
@@ -15,39 +14,39 @@
         <!-- รายการสินค้าในตะกร้า -->
         <div class="lg:w-3/5 space-y-4">
             <h3 class="text-xl font-semibold text-gray-700 mb-4">รายการสินค้า</h3>
-            
+
             @foreach ($cartItems as $cartItem)
-                <div class="bg-white shadow-md rounded-lg p-4 flex gap-6 hover:shadow-lg transition duration-300 border-l-4 {{ $cartItem->overent == 1 ? 'border-yellow-400' : 'border-green-500' }}">
-                    <img src="{{ asset($cartItem->outfit->image) }}" class="w-28 h-28 object-cover rounded-lg border">
+            <div class="bg-white shadow-md rounded-lg p-4 flex gap-6 hover:shadow-lg transition duration-300 border-l-4 {{ $cartItem->overent == 1 ? 'border-yellow-400' : 'border-green-500' }}">
+                <img src="{{ asset($cartItem->outfit->image) }}" class="w-28 h-28 object-cover rounded-lg border">
 
-                    <div class="flex-1 flex flex-col justify-between">
-                        <div>
-                            <h4 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                                {{ $cartItem->outfit->name }}
-                                @if($cartItem->overent == 1)
-                                    <span class="text-xs bg-yellow-400 text-white px-2 py-1 rounded-full">สั่งเพิ่ม</span>
-                                @endif
-                            </h4>
-                            <div class="flex flex-wrap gap-x-4 mt-1 text-gray-600 text-sm">
-                                <p>สี: <span class="font-medium">{{ $cartItem->color->color ?? 'ไม่ระบุ' }}</span></p>
-                                <p>ขนาด: <span class="font-medium">{{ $cartItem->size->size ?? 'ไม่ระบุ' }}</span></p>
-                                <p>จำนวน: <span class="font-medium">{{ $cartItem->quantity }}</span></p>
-                                @if(isset($cartItem->sizeAndColor))
-                                    <p>คงเหลือ: <span class="font-medium">{{ $cartItem->overent == 1 ? '-' : $cartItem->sizeAndColor->amount }}</span></p>
-                                @endif
-                            </div>
-                            <span class="text-gray-600 text-sm">ร้าน:</span> 
-                            {{ $cartItem->outfit->shop->shop_name ?? 'ไม่ระบุ' }} <br>
-                            <span class="text-gray-600 text-sm">วันที่จองชุด:</span> 
-                            {{ $cartItem->reservation_date ? date('d/m/Y', strtotime($cartItem->reservation_date)) : 'ไม่ระบุ' }}
+                <div class="flex-1 flex flex-col justify-between">
+                    <div>
+                        <h4 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                            {{ $cartItem->outfit->name }}
+                            @if($cartItem->overent == 1)
+                            <span class="text-xs bg-yellow-400 text-white px-2 py-1 rounded-full">สั่งเพิ่ม</span>
+                            @endif
+                        </h4>
+                        <div class="flex flex-wrap gap-x-4 mt-1 text-gray-600 text-sm">
+                            <p>สี: <span class="font-medium">{{ $cartItem->color->color ?? 'ไม่ระบุ' }}</span></p>
+                            <p>ขนาด: <span class="font-medium">{{ $cartItem->size->size ?? 'ไม่ระบุ' }}</span></p>
+                            <p>จำนวน: <span class="font-medium">{{ $cartItem->quantity }}</span></p>
+                            @if(isset($cartItem->sizeAndColor))
+                            <p>คงเหลือ: <span class="font-medium">{{ $cartItem->overent == 1 ? '-' : $cartItem->sizeAndColor->amount }}</span></p>
+                            @endif
                         </div>
+                        <span class="text-gray-600 text-sm">ร้าน:</span>
+                        {{ $cartItem->outfit->shop->shop_name ?? 'ไม่ระบุ' }} <br>
+                        <span class="text-gray-600 text-sm">วันที่จองชุด:</span>
+                        {{ $cartItem->reservation_date ? date('d/m/Y', strtotime($cartItem->reservation_date)) : 'ไม่ระบุ' }}
+                    </div>
 
-                        <div class="flex justify-between items-end mt-2">
-                            <p class="text-green-600 font-medium">{{ number_format($cartItem->outfit->price, 2) }} ฿</p>
-                            <p class="font-bold text-lg text-gray-800">{{ number_format($cartItem->outfit->price * $cartItem->quantity, 2) }} ฿</p>
-                        </div>
+                    <div class="flex justify-between items-end mt-2">
+                        <p class="text-green-600 font-medium">{{ number_format($cartItem->outfit->price, 2) }} ฿</p>
+                        <p class="font-bold text-lg text-gray-800">{{ number_format($cartItem->outfit->price * $cartItem->quantity, 2) }} ฿</p>
                     </div>
                 </div>
+            </div>
             @endforeach
 
             <div class="bg-white p-4 rounded-lg shadow-md border-l-4 border-blue-500 mt-6">
@@ -59,76 +58,76 @@
         <div class="lg:w-2/5">
             <div class="bg-white shadow-md rounded-lg p-6 sticky top-6">
                 <h3 class="text-xl font-semibold text-gray-800 mb-6 pb-3 border-b">รายละเอียดการสั่งซื้อ</h3>
-                
+
                 @php
-                    // จัดกลุ่ม CartItem ตาม shop_id และ reservation_date
-                    $groupedItems = $cartItems->groupBy(function ($item) {
-                        return $item->outfit->shop_id . '|' . $item->reservation_date;
-                    });
+                // จัดกลุ่ม CartItem ตาม shop_id และ reservation_date
+                $groupedItems = $cartItems->groupBy(function ($item) {
+                    return $item->outfit->shop_id . '|' . $item->reservation_date;
+                });
                 @endphp
 
                 <form action="{{ route('order.store') }}" method="POST">
                     @csrf
                     @foreach ($cartItems as $item)
-                        <input type="hidden" name="cart_item_ids[]" value="{{ $item->cart_item_id }}">
+                    <input type="hidden" name="cart_item_ids[]" value="{{ $item->cart_item_id }}">
                     @endforeach
 
                     <!-- บริการเสริม -->
                     <div class="bg-gray-50 p-4 rounded-lg mb-5">
                         <h4 class="font-medium text-gray-800 mb-3">บริการเสริม</h4>
                         @foreach ($groupedItems as $groupKey => $groupItems)
-                            @php
-                                [$shopId, $reservationDate] = explode('|', $groupKey);
-                                $shopName = $groupItems->first()->outfit->shop->shop_name ?? 'ไม่ระบุ';
-                                $formattedDate = $reservationDate ? date('d/m/Y', strtotime($reservationDate)) : 'ไม่ระบุ';
-                                $groupId = "service-{$shopId}-{$reservationDate}";
-                            @endphp
+                        @php
+                        [$shopId, $reservationDate] = explode('|', $groupKey);
+                        $shopName = $groupItems->first()->outfit->shop->shop_name ?? 'ไม่ระบุ';
+                        $formattedDate = $reservationDate ? date('d/m/Y', strtotime($reservationDate)) : 'ไม่ระบุ';
+                        $groupId = "service-{$shopId}-{$reservationDate}";
+                        @endphp
 
-                            <!-- Checkbox สำหรับเลือกวันที่และร้าน -->
-                            <div class="mb-3">
-                                <label class="flex items-center gap-2">
-                                    <input type="checkbox" id="enable-{{ $groupId }}" onchange="toggleServiceInput('{{ $groupId }}')" class="w-5 h-5">
-                                    <span class="text-gray-700">บริการเสริมสำหรับร้าน: {{ $shopName }} (วันที่: {{ $formattedDate }})</span>
+                        <!-- Checkbox สำหรับเลือกวันที่และร้าน -->
+                        <div class="mb-3">
+                            <label class="flex items-center gap-2">
+                                <input type="checkbox" id="enable-{{ $groupId }}" onchange="toggleServiceInput('{{ $groupId }}')" class="w-5 h-5">
+                                <span class="text-gray-700">บริการเสริมสำหรับร้าน: {{ $shopName }} (วันที่: {{ $formattedDate }})</span>
+                            </label>
+                        </div>
+
+                        <!-- ช่องบริการเสริม (ซ่อนเริ่มต้น) -->
+                        <div id="{{ $groupId }}" class="hidden pl-6 mb-4">
+                            <!-- Photographer -->
+                            <div class="mb-4">
+                                <label class="flex justify-between text-gray-700 mb-2">
+                                    <span>จำนวนลูกค้าที่ต้องการช่างภาพ:</span>
+                                    <span class="text-sm text-gray-500">2,000 ฿/คน</span>
                                 </label>
-                            </div>
-
-                            <!-- ช่องบริการเสริม (ซ่อนเริ่มต้น) -->
-                            <div id="{{ $groupId }}" class="hidden pl-6 mb-4">
-                                <!-- Photographer -->
-                                <div class="mb-4">
-                                    <label class="flex justify-between text-gray-700 mb-2">
-                                        <span>จำนวนลูกค้าที่ต้องการช่างภาพ:</span> 
-                                        <span class="text-sm text-gray-500">2,000 ฿/คน</span>
-                                    </label>
-                                    <div class="flex border border-gray-300 rounded-lg overflow-hidden mb-2">
-                                        <button type="button" onclick="decrementCount('photographer_count_{{ $groupId }}')" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold">-</button>
-                                        <input type="number" id="photographer_count_{{ $groupId }}" name="selected_services[{{ $shopId }}][{{ $reservationDate }}][photographer][count]" min="0" value="0" class="w-full text-center p-2 focus:outline-none" onchange="toggleTimeInput('photographer_time_{{ $groupId }}', this.value)">
-                                        <button type="button" onclick="incrementCount('photographer_count_{{ $groupId }}')" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold">+</button>
-                                    </div>
-                                    <!-- ช่องเลือกเวลา -->
-                                    <div id="photographer_time_wrapper_{{ $groupId }}" >
-                                        <label class="block text-gray-700 text-sm mb-1">เลือกเวลา:</label>
-                                        <input type="time" id="photographer_time_{{ $groupId }}" name="selected_services[{{ $shopId }}][{{ $reservationDate }}][photographer][time]" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                    </div>
+                                <div class="flex border border-gray-300 rounded-lg overflow-hidden mb-2">
+                                    <button type="button" onclick="decrementCount('photographer_count_{{ $groupId }}')" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold">-</button>
+                                    <input type="number" id="photographer_count_{{ $groupId }}" name="selected_services[{{ $shopId }}][{{ $reservationDate }}][photographer][count]" min="0" value="0" class="w-full text-center p-2 focus:outline-none" onchange="toggleTimeInput('photographer_time_{{ $groupId }}', this.value)">
+                                    <button type="button" onclick="incrementCount('photographer_count_{{ $groupId }}')" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold">+</button>
                                 </div>
-                                <!-- Makeup -->
-                                <div class="mb-2">
-                                    <label class="flex justify-between text-gray-700 mb-2">
-                                        <span>จำนวนลูกค้าที่ต้องการช่างแต่งหน้า:</span>
-                                        <span class="text-sm text-gray-500">2,000 ฿/คน</span>
-                                    </label>
-                                    <div class="flex border border-gray-300 rounded-lg overflow-hidden mb-2">
-                                        <button type="button" onclick="decrementCount('makeup_count_{{ $groupId }}')" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold">-</button>
-                                        <input type="number" id="makeup_count_{{ $groupId }}" name="selected_services[{{ $shopId }}][{{ $reservationDate }}][makeup][count]" min="0" value="0" class="w-full text-center p-2 focus:outline-none" onchange="toggleTimeInput('makeup_time_{{ $groupId }}', this.value)">
-                                        <button type="button" onclick="incrementCount('makeup_count_{{ $groupId }}')" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold">+</button>
-                                    </div>
-                                    <!-- ช่องเลือกเวลา -->
-                                    <div id="makeup_time_wrapper_{{ $groupId }}">
-                                        <label class="block text-gray-700 text-sm mb-1">เลือกเวลา:</label>
-                                        <input type="time" id="makeup_time_{{ $groupId }}" name="selected_services[{{ $shopId }}][{{ $reservationDate }}][makeup][time]" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                    </div>
+                                <!-- ช่องเลือกเวลา -->
+                                <div id="photographer_time_{{ $groupId }}_wrapper" class="hidden">
+                                    <label class="block text-gray-700 text-sm mb-1">เลือกเวลา:</label>
+                                    <input type="time" id="photographer_time_{{ $groupId }}" name="selected_services[{{ $shopId }}][{{ $reservationDate }}][photographer][time]" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 </div>
                             </div>
+                            <!-- Makeup -->
+                            <div class="mb-2">
+                                <label class="flex justify-between text-gray-700 mb-2">
+                                    <span>จำนวนลูกค้าที่ต้องการช่างแต่งหน้า:</span>
+                                    <span class="text-sm text-gray-500">2,000 ฿/คน</span>
+                                </label>
+                                <div class="flex border border-gray-300 rounded-lg overflow-hidden mb-2">
+                                    <button type="button" onclick="decrementCount('makeup_count_{{ $groupId }}')" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold">-</button>
+                                    <input type="number" id="makeup_count_{{ $groupId }}" name="selected_services[{{ $shopId }}][{{ $reservationDate }}][makeup][count]" min="0" value="0" class="w-full text-center p-2 focus:outline-none" onchange="toggleTimeInput('makeup_time_{{ $groupId }}', this.value)">
+                                    <button type="button" onclick="incrementCount('makeup_count_{{ $groupId }}')" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold">+</button>
+                                </div>
+                                <!-- ช่องเลือกเวลา -->
+                                <div id="makeup_time_{{ $groupId }}_wrapper" class="hidden">
+                                    <label class="block text-gray-700 text-sm mb-1">เลือกเวลา:</label>
+                                    <input type="time" id="makeup_time_{{ $groupId }}" name="selected_services[{{ $shopId }}][{{ $reservationDate }}][makeup][time]" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+                            </div>
+                        </div>
                         @endforeach
                     </div>
 
@@ -143,22 +142,22 @@
 
                     <!-- โค้ดส่วนลดร้านค้า -->
                     @foreach ($outfits->groupBy('shop_id') as $shopId => $shopOutfits)
-                        <div class="mb-6 border p-4 rounded-lg">
-                            <h2 class="text-lg font-bold mb-2">ร้าน: {{ $shopOutfits->first()->shop->shop_name }}</h2>
+                    <div class="mb-6 border p-4 rounded-lg">
+                        <h2 class="text-lg font-bold mb-2">ร้าน: {{ $shopOutfits->first()->shop->shop_name }}</h2>
 
-                            @if (isset($activePromotions[$shopId]))
-                                @php $promo = $activePromotions[$shopId]; @endphp
-                                <div class="bg-green-100 p-3 rounded text-green-800 mb-2">
-                                    โปรโมชั่น: <strong>{{ $promo->promotion_name }}</strong><br>
-                                    ส่วนลด: {{ $promo->discount_amount }} บาท<br>
-                                    ใช้ได้ถึง: {{ $promo->end_date }}<br>
-                                    โค้ดส่วนลด: {{ $promo->promotion_code }}
-                                </div>
-                                <input type="hidden" name="promotions[{{ $shopId }}]" value="{{ $promo->promotion_id }}">
-                            @else
-                                <div class="text-gray-500">ไม่มีโปรโมชั่นสำหรับร้านนี้</div>
-                            @endif
+                        @if (isset($activePromotions[$shopId]))
+                        @php $promo = $activePromotions[$shopId]; @endphp
+                        <div class="bg-green-100 p-3 rounded text-green-800 mb-2">
+                            โปรโมชั่น: <strong>{{ $promo->promotion_name }}</strong><br>
+                            ส่วนลด: {{ $promo->discount_amount }} บาท<br>
+                            ใช้ได้ถึง: {{ $promo->end_date }}<br>
+                            โค้ดส่วนลด: {{ $promo->promotion_code }}
                         </div>
+                        <input type="hidden" name="promotions[{{ $shopId }}]" value="{{ $promo->promotion_id }}">
+                        @else
+                        <div class="text-gray-500">ไม่มีโปรโมชั่นสำหรับร้านนี้</div>
+                        @endif
+                    </div>
                     @endforeach
 
                     <!-- สรุปราคารวม -->
@@ -180,34 +179,54 @@
                             <span id="grand_total" class="font-bold text-green-600">{{ number_format($cartItems->sum(fn($i) => $i->quantity * $i->outfit->price), 2) }} ฿</span>
                         </div>
 
-                        <!-- เลือกประเภทที่อยู่บริการเสริม -->
+                        <!-- เลือกที่อยู่สำหรับการจัดส่ง -->
                         <div class="mb-4">
                             <label class="block text-gray-700 font-medium mb-2">ที่อยู่สำหรับบริการเสริม:</label>
-                            <div class="flex gap-4">
+                            <div class="flex flex-col gap-4">
                                 @if($hasAddress)
+                                <!-- ใช้ที่อยู่เดียวกับลูกค้า -->
+                                <div>
                                     <label class="flex items-center gap-2">
                                         <input type="radio" name="address_type" value="customer" checked onchange="toggleAddressInput()">
-                                        <span>ใช้ที่อยู่เดียวกับลูกค้า</span>
+                                        <span>ใช้ที่อยู่เดิม</span>
                                     </label>
-                                    <label class="flex items-center gap-2">
-                                        <input type="radio" name="address_type" value="custom" onchange="toggleAddressInput()">
-                                        <span>กรอกที่อยู่ใหม่</span>
-                                    </label>
+                                    <div class="mt-2 ml-6" id="customer-address-select">
+                                        <select name="cus_address_id" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                            @foreach($customerAddress as $address)
+                                            <option value="{{ $address->cus_address_id }}">
+                                                @if($address->address)
+                                                    {{ $address->address->HouseNumber ?? 'ไม่มีบ้านเลขที่' }}
+                                                    {{ $address->address->Street ?? 'ไม่มีถนน' }}
+                                                    {{ $address->address->Subdistrict ?? 'ไม่มีตำบล' }}
+                                                    {{ $address->address->District ?? 'ไม่มีอำเภอ' }}
+                                                    {{ $address->address->Province ?? 'ไม่มีจังหวัด' }}
+                                                    {{ $address->address->PostalCode ?? 'ไม่มีรหัสไปรษณีย์' }}
+                                                @else
+                                                    ที่อยู่ไม่สมบูรณ์ (Address ID: {{ $address->address_id ?? 'ไม่ระบุ' }})
+                                                @endif
+                                            </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <!-- กรอกที่อยู่ใหม่ -->
+                                <label class="flex items-center gap-2">
+                                    <input type="radio" name="address_type" value="custom" onchange="toggleAddressInput()">
+                                    <span>กรอกที่อยู่ใหม่</span>
+                                </label>
                                 @else
-                                    {{-- กรณีไม่มีที่อยู่ลูกค้าเลย --}}
-                                    <label class="flex items-center gap-2">
-                                        <input type="radio" name="address_type" value="custom" onchange="toggleAddressInput()">
-                                        <span>กรอกที่อยู่ใหม่</span>
-                                    </label>
-                                    <p class="text-sm text-red-500">* กรุณากรอกที่อยู่ใหม่ เนื่องจากยังไม่มีที่อยู่ลูกค้า</p>
+                                <label class="flex items-center gap-2">
+                                    <input type="radio" name="address_type" value="custom" checked onchange="toggleAddressInput()">
+                                    <span>กรอกที่อยู่ใหม่</span>
+                                </label>
+                                <p class="text-sm text-red-500">* กรุณากรอกที่อยู่ใหม่ เนื่องจากยังไม่มีที่อยู่ลูกค้า</p>
                                 @endif
                             </div>
                         </div>
 
-
                         <!-- ฟอร์มกรอกที่อยู่ใหม่ -->
                         <div id="custom-address-form" class="bg-gray-50 p-4 rounded-lg mb-5 hidden">
-                            <h4 class="font-medium text-gray-800 mb-3">ที่อยู่สำหรับบริการเสริม</h4>
+                            <h4 class="font-medium text-gray-800 mb-3">ที่อยู่สำหรับบริการ</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-gray-700 font-medium mb-1">จังหวัด</label>
@@ -246,12 +265,14 @@
                     <!-- ปุ่มสั่งซื้อ -->
                     <div class="mt-6">
                         <button type="submit" onclick="return validateForm()" class="w-full px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition font-medium flex items-center justify-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-                            ยืนยันการสั่งซื้อ 
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                            </svg>
+                            ยืนยันการสั่งซื้อ
                         </button>
                     </div>
 
-                    <!-- ✅ Hidden inputs ที่จำเป็น -->
+                    <!-- Hidden inputs ที่จำเป็น -->
                     <input type="hidden" id="total_price" name="total_price" value="0">
                     <input type="hidden" id="amount_staff" name="amount_staff" value="0">
                 </form>
@@ -267,7 +288,6 @@
         const input = document.getElementById(id);
         let value = parseInt(input.value) || 0;
         input.value = value + 1;
-        console.log(`Incremented ${id} to ${input.value}`); // ดีบัก
         toggleTimeInput(id.replace('count', 'time'), input.value);
         updateTotal();
     }
@@ -277,66 +297,32 @@
         let value = parseInt(input.value) || 0;
         if (value > 0) {
             input.value = value - 1;
-            console.log(`Decremented ${id} to ${input.value}`); // ดีบัก
             toggleTimeInput(id.replace('count', 'time'), input.value);
             updateTotal();
         }
     }
 
-    function validateForm() {
-        let isValid = true;
-        let errorMessage = '';
-
-        // ตรวจสอบทุกกลุ่มบริการเสริม
-        @foreach ($groupedItems as $groupKey => $groupItems)
-            @php
-                [$shopId, $reservationDate] = explode('|', $groupKey);
-                $groupId = "service-{$shopId}-{$reservationDate}";
-            @endphp
-            if (document.getElementById('enable-{{ $groupId }}').checked) {
-                const photographerCount = parseInt(document.getElementById('photographer_count_{{ $groupId }}').value) || 0;
-                const photographerTime = document.getElementById('photographer_time_{{ $groupId }}').value;
-                const makeupCount = parseInt(document.getElementById('makeup_count_{{ $groupId }}').value) || 0;
-                const makeupTime = document.getElementById('makeup_time_{{ $groupId }}').value;
-
-                // ตรวจสอบช่างภาพ
-                if (photographerCount > 0 && !photographerTime) {
-                    isValid = false;
-                    errorMessage += `กรุณาเลือกเวลาสำหรับช่างภาพของร้าน {{ $groupItems->first()->outfit->shop->shop_name }} (วันที่: {{ $reservationDate ? date('d/m/Y', strtotime($reservationDate)) : 'ไม่ระบุ' }})\n`;
-                }
-
-                // ตรวจสอบช่างแต่งหน้า (ถ้าต้องการตรวจสอบด้วย)
-                if (makeupCount > 0 && !makeupTime) {
-                    isValid = false;
-                    errorMessage += `กรุณาเลือกเวลาสำหรับช่างแต่งหน้าของร้าน {{ $groupItems->first()->outfit->shop->shop_name }} (วันที่: {{ $reservationDate ? date('d/m/Y', strtotime($reservationDate)) : 'ไม่ระบุ' }})\n`;
-                }
-            }
-        @endforeach
-
-        if (!isValid) {
-            alert(errorMessage);
-            return false; // ป้องกันการ submit ฟอร์ม
-        }
-        
-        return true; // อนุญาตให้ submit ฟอร์มเมื่อผ่านการตรวจสอบ
-    }
-
     function toggleServiceInput(groupId) {
         const serviceSection = document.getElementById(groupId);
         const checkbox = document.getElementById(`enable-${groupId}`);
-        serviceSection.classList.toggle('hidden', !checkbox.checked);
 
-        // ถ้า Checkbox ไม่ถูกเลือก รีเซ็ตค่า count และ time
+        if (serviceSection) {
+            serviceSection.classList.toggle('hidden', !checkbox.checked);
+            console.log(`Toggled ${groupId}, hidden: ${serviceSection.classList.contains('hidden')}`);
+        } else {
+            console.error(`Service section with ID ${groupId} not found`);
+        }
+
         if (!checkbox.checked) {
             const photographerCount = document.getElementById(`photographer_count_${groupId}`);
             const makeupCount = document.getElementById(`makeup_count_${groupId}`);
             const photographerTime = document.getElementById(`photographer_time_${groupId}`);
             const makeupTime = document.getElementById(`makeup_time_${groupId}`);
 
-            photographerCount.value = 0;
-            makeupCount.value = 0;
-            photographerTime.value = '';
-            makeupTime.value = '';
+            if (photographerCount) photographerCount.value = 0;
+            if (makeupCount) makeupCount.value = 0;
+            if (photographerTime) photographerTime.value = '';
+            if (makeupTime) makeupTime.value = '';
 
             toggleTimeInput(`photographer_time_${groupId}`, 0);
             toggleTimeInput(`makeup_time_${groupId}`, 0);
@@ -348,10 +334,10 @@
     function toggleTimeInput(timeId, count) {
         const timeWrapper = document.getElementById(`${timeId}_wrapper`);
         const countValue = parseInt(count) || 0;
-        console.log(`Toggling ${timeId}_wrapper, count: ${countValue}, should be hidden: ${countValue <= 0}`); // ดีบัก
+
         if (timeWrapper) {
             timeWrapper.classList.toggle('hidden', countValue <= 0);
-            console.log(`After toggle, ${timeId}_wrapper has hidden class: ${timeWrapper.classList.contains('hidden')}`); // ดีบัก
+            console.log(`Toggled ${timeId}_wrapper, count: ${countValue}, hidden: ${timeWrapper.classList.contains('hidden')}`);
         } else {
             console.error(`Time wrapper with ID ${timeId}_wrapper not found`);
         }
@@ -363,24 +349,22 @@
         let totalPhotographerCount = 0;
         let totalMakeupCount = 0;
 
-        // คำนวณจำนวนช่างภาพและช่างแต่งหน้าจากทุกกลุ่มที่เลือก
-        @foreach ($groupedItems as $groupKey => $groupItems)
-            @php
-                [$shopId, $reservationDate] = explode('|', $groupKey);
-                $groupId = "service-{$shopId}-{$reservationDate}";
-            @endphp
-            if (document.getElementById('enable-{{ $groupId }}').checked) {
-                const photographerCount = parseInt(document.getElementById('photographer_count_{{ $groupId }}').value) || 0;
-                const makeupCount = parseInt(document.getElementById('makeup_count_{{ $groupId }}').value) || 0;
-                totalPhotographerCount += photographerCount;
-                totalMakeupCount += makeupCount;
-            }
+        @foreach($groupedItems as $groupKey => $groupItems)
+        @php
+            [$shopId, $reservationDate] = explode('|', $groupKey);
+            $groupId = "service-{$shopId}-{$reservationDate}";
+        @endphp
+        if (document.getElementById('enable-{{ $groupId }}')?.checked) {
+            const photographerCount = parseInt(document.getElementById('photographer_count_{{ $groupId }}')?.value) || 0;
+            const makeupCount = parseInt(document.getElementById('makeup_count_{{ $groupId }}')?.value) || 0;
+            totalPhotographerCount += photographerCount;
+            totalMakeupCount += makeupCount;
+        }
         @endforeach
 
         const staffTotal = (totalPhotographerCount + totalMakeupCount) * staffPrice;
         const grandTotal = productTotal + staffTotal - currentDiscount;
 
-        // อัปเดต hidden inputs
         document.getElementById('total_price').value = grandTotal;
         document.getElementById('amount_staff').value = totalPhotographerCount + totalMakeupCount;
 
@@ -389,52 +373,77 @@
         document.getElementById('grand_total').innerText = grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2 }) + ' ฿';
     }
 
-    async function applyPromotion() {
-        const code = document.getElementById('promotion_code').value.trim();
-        if (!code) return;
+    function validateForm() {
+        let isValid = true;
+        let errorMessage = '';
+        const addressType = document.querySelector('input[name="address_type"]:checked').value;
 
-        const shopId = {{ $cartItems->first()->outfit->shop_id ?? 0 }};
+        // Validate additional services
+        @foreach($groupedItems as $groupKey => $groupItems)
+        @php
+            [$shopId, $reservationDate] = explode('|', $groupKey);
+            $groupId = "service-{$shopId}-{$reservationDate}";
+        @endphp
+        if (document.getElementById('enable-{{ $groupId }}')?.checked) {
+            const photographerCount = parseInt(document.getElementById('photographer_count_{{ $groupId }}')?.value) || 0;
+            const photographerTime = document.getElementById('photographer_time_{{ $groupId }}')?.value;
+            const makeupCount = parseInt(document.getElementById('makeup_count_{{ $groupId }}')?.value) || 0;
+            const makeupTime = document.getElementById('makeup_time_{{ $groupId }}')?.value;
 
-        try {
-            const res = await fetch('/api/check-promotion', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({
-                    code: code,
-                    shop_id: shopId
-                })
-            });
-
-            const data = await res.json();
-            if (data.valid) {
-                currentDiscount = data.discount;
-                updateTotal();
-            } else {
-                alert(data.message);
-                currentDiscount = 0;
-                updateTotal();
+            if (photographerCount > 0 && !photographerTime) {
+                isValid = false;
+                errorMessage += `กรุณาเลือกเวลาสำหรับช่างภาพของร้าน {{ $groupItems->first()->outfit->shop->shop_name }} (วันที่: {{ $reservationDate ? date('d/m/Y', strtotime($reservationDate)) : 'ไม่ระบุ' }})\n`;
             }
-        } catch (err) {
-            alert("เกิดข้อผิดพลาดในการใช้โปรโมชั่น");
-            console.error(err);
+            if (makeupCount > 0 && !makeupTime) {
+                isValid = false;
+                errorMessage += `กรุณาเลือกเวลาสำหรับช่างแต่งหน้าของร้าน {{ $groupItems->first()->outfit->shop->shop_name }} (วันที่: {{ $reservationDate ? date('d/m/Y', strtotime($reservationDate)) : 'ไม่ระบุ' }})\n`;
+            }
         }
+        @endforeach
+
+        // Validate address
+        if (addressType === 'custom') {
+            const province = document.getElementById('staff_province').value;
+            const district = document.getElementById('staff_district').value;
+            const subdistrict = document.getElementById('staff_subdistrict').value;
+            const postalCode = document.getElementById('staff_postal_code').value;
+            const detail = document.querySelector('input[name="staff_address[detail]"]').value;
+
+            if (!province || !district || !subdistrict || !postalCode || !detail) {
+                isValid = false;
+                errorMessage += 'กรุณากรอกข้อมูลที่อยู่ใหม่ให้ครบถ้วน\n';
+            }
+        }
+        // No additional validation needed for 'customer' type since cus_address_id is already required in the dropdown
+
+        if (!isValid) {
+            alert(errorMessage);
+            return false;
+        }
+        return true;
     }
 
-    // เพิ่มการเรียก toggleTimeInput สำหรับทุกกลุ่มเมื่อหน้าโหลด
-    document.addEventListener("DOMContentLoaded", () => {
-        updateTotal();
-        @foreach ($groupedItems as $groupKey => $groupItems)
-            @php
-                [$shopId, $reservationDate] = explode('|', $groupKey);
-                $groupId = "service-{$shopId}-{$reservationDate}";
-            @endphp
-            toggleTimeInput('photographer_time_{{ $groupId }}', document.getElementById('photographer_count_{{ $groupId }}').value);
-            toggleTimeInput('makeup_time_{{ $groupId }}', document.getElementById('makeup_count_{{ $groupId }}').value);
-        @endforeach
-    });
+    function toggleAddressInput() {
+        const customAddressForm = document.getElementById('custom-address-form');
+        const customerAddressSelect = document.getElementById('customer-address-select');
+        const selected = document.querySelector('input[name="address_type"]:checked').value;
+
+        if (selected === 'customer') {
+            customAddressForm.classList.add('hidden');
+            if (customerAddressSelect) customerAddressSelect.classList.remove('hidden');
+            // Disable custom address fields to prevent submission
+            document.querySelectorAll('#custom-address-form input, #custom-address-form select').forEach(el => {
+                el.disabled = true;
+            });
+        } else {
+            customAddressForm.classList.remove('hidden');
+            if (customerAddressSelect) customerAddressSelect.classList.add('hidden');
+            // Enable custom address fields
+            document.querySelectorAll('#custom-address-form input, #custom-address-form select').forEach(el => {
+                el.disabled = false;
+            });
+        }
+    }
 
     const provinceSelect = document.getElementById('staff_province');
     const districtSelect = document.getElementById('staff_district');
@@ -496,14 +505,59 @@
         postalCodeInput.value = zip || '';
     });
 
-    window.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener("DOMContentLoaded", () => {
+        updateTotal();
+        toggleAddressInput();
         loadThaiAddress();
+
+        @foreach($groupedItems as $groupKey => $groupItems)
+        @php
+            [$shopId, $reservationDate] = explode('|', $groupKey);
+            $groupId = "service-{$shopId}-{$reservationDate}";
+        @endphp
+        const checkbox = document.getElementById('enable-{{ $groupId }}');
+        if (checkbox) {
+            toggleServiceInput('{{ $groupId }}');
+            const photographerCount = document.getElementById('photographer_count_{{ $groupId }}')?.value || 0;
+            const makeupCount = document.getElementById('makeup_count_{{ $groupId }}')?.value || 0;
+            toggleTimeInput('photographer_time_{{ $groupId }}', photographerCount);
+            toggleTimeInput('makeup_time_{{ $groupId }}', makeupCount);
+        }
+        @endforeach
     });
 
-    function toggleAddressInput() {
-        const customAddressForm = document.getElementById('custom-address-form');
-        const selected = document.querySelector('input[name="address_type"]:checked').value;
-        customAddressForm.classList.toggle('hidden', selected !== 'custom');
+    async function applyPromotion() {
+        const code = document.getElementById('promotion_code').value.trim();
+        if (!code) return;
+
+        const shopId = {{ $cartItems->first()->outfit->shop_id ?? 0 }};
+
+        try {
+            const res = await fetch('/api/check-promotion', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    code: code,
+                    shop_id: shopId
+                })
+            });
+
+            const data = await res.json();
+            if (data.valid) {
+                currentDiscount = data.discount;
+                updateTotal();
+            } else {
+                alert(data.message);
+                currentDiscount = 0;
+                updateTotal();
+            }
+        } catch (err) {
+            alert("เกิดข้อผิดพลาดในการใช้โปรโมชั่น");
+            console.error(err);
+        }
     }
 </script>
 @endsection

@@ -106,6 +106,11 @@
                 <a href="{{ route('profile.customer.orderHistory') }}" class="flex items-center py-2 px-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-colors cursor-pointer">
                     <i class="fas fa-history mr-3 w-4 text-center"></i> History
                 </a>
+
+                <!-- Report Issue -->
+                <a href="{{ route('profile.customer.issue') }}" class="flex items-center py-2 px-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-colors cursor-pointer">
+                    <i class="fas fa-flag mr-3 w-4 text-center"></i> Report Issue
+                </a>
             </ul>
         </div>
 

@@ -9,6 +9,7 @@ use App\Models\ThaiOutfit;
 use App\Models\ThaiOutfitCategories;
 use App\Models\OutfitCategories;
 use App\Models\ThaiOutfitSizeAndColor;
+use App\Models\CustomerAddress;
 use App\Models\Promotion;
 use App\Models\Booking;
 use App\Models\Shop;
@@ -86,48 +87,51 @@ class OrderDetailController extends Controller
 
 
     public function viewAddTo(Request $request)
-{
-    $user = Auth::user();
-    $cartItemIds = json_decode($request->input('cart_item_ids'), true);
-
-    if (!is_array($cartItemIds) || empty($cartItemIds)) {
-        return redirect()->route('cartItem.allItem')->with('error', 'กรุณาเลือกสินค้าที่ต้องการสั่งซื้อ');
-    }
-
-    $cartItems = CartItem::with(['outfit', 'outfit.sizeAndColors.size', 'outfit.sizeAndColors.color'])
-                    ->whereIn('cart_item_id', $cartItemIds)
-                    ->orderBy('outfit_id')
-                    ->get();
-
-    $outfitIds = $cartItems->pluck('outfit_id')->unique();
-
-    $outfits = ThaiOutfit::with(['categories', 'sizeAndColors.size', 'sizeAndColors.color'])
-                    ->whereIn('outfit_id', $outfitIds)
-                    ->get();
-
-    // ✅ เก็บ promotion แยกร้าน (key => shop_id)
-    $activePromotions = [];
-
-    $shopIds = $outfits->pluck('shop_id')->unique();
-
-    foreach ($shopIds as $shop_id) {
-        $promotion = Promotion::where('shop_id', $shop_id)
-            ->where('is_active', true)
-            ->whereDate('start_date', '<=', now())
-            ->whereDate('end_date', '>=', now())
-            ->first();
-
-        if ($promotion) {
-            $activePromotions[$shop_id] = $promotion;
+    {
+        $user = Auth::user();
+        $cartItemIds = json_decode($request->input('cart_item_ids'), true);
+    
+        if (!is_array($cartItemIds) || empty($cartItemIds)) {
+            return redirect()->route('cartItem.allItem')->with('error', 'กรุณาเลือกสินค้าที่ต้องการสั่งซื้อ');
         }
+    
+        $cartItems = CartItem::with(['outfit', 'outfit.sizeAndColors.size', 'outfit.sizeAndColors.color'])
+                        ->whereIn('cart_item_id', $cartItemIds)
+                        ->orderBy('outfit_id')
+                        ->get();
+    
+        $outfitIds = $cartItems->pluck('outfit_id')->unique();
+    
+        $outfits = ThaiOutfit::with(['categories', 'sizeAndColors.size', 'sizeAndColors.color'])
+                        ->whereIn('outfit_id', $outfitIds)
+                        ->get();
+    
+        // ดึงข้อมูล CustomerAddress ทั้งหมดของลูกค้า
+        $customerAddress = CustomerAddress::with(['address'])
+                        ->where('customer_id', Auth::id())
+                        ->get();
+    
+        // ตรวจสอบว่ามีที่อยู่หรือไม่
+        $hasAddress = $customerAddress->isNotEmpty();
+    
+        // ดึง promotions
+        $activePromotions = [];
+        $shopIds = $outfits->pluck('shop_id')->unique();
+    
+        foreach ($shopIds as $shop_id) {
+            $promotion = Promotion::where('shop_id', $shop_id)
+                ->where('is_active', true)
+                ->whereDate('start_date', '<=', now())
+                ->whereDate('end_date', '>=', now())
+                ->first();
+    
+            if ($promotion) {
+                $activePromotions[$shop_id] = $promotion;
+            }
+        }
+    
+        return view('orderdetail.viewAddTo', compact('cartItems', 'outfits', 'activePromotions', 'hasAddress', 'customerAddress'));
     }
-    $user->load('customerAddress.address');
-    $customerAddress = $user->customerAddress;
-
-    $hasAddress = $customerAddress && $customerAddress->address && !is_null($customerAddress->cus_address_id);
-
-    return view('orderdetail.viewAddTo', compact('cartItems', 'outfits', 'activePromotions','hasAddress'));
-}
 
     
     public function addTo(Request $request)
