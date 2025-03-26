@@ -6,13 +6,13 @@
 <div class="container">
     <div class="flex justify-between items-center mb-8">
         <h1 class="text-3xl font-bold text-gray-800">
-            <i class="fas fa-store mr-2 text-[#8B9DF9]"></i>Shop Management
+            <i class="fas fa-store mr-2 text-[#8B9DF9]"></i>การจัดการ
         </h1>
 
         <form action="{{ route('admin.shops.acceptance') }}" method="GET">
             @csrf
             <button type="submit" class="btn btn-primary">
-                <i class="fas fa-check-circle mr-2"></i>Acceptance Queue
+                <i class="fas fa-check-circle mr-2"></i>ยอมรับร้านค้า
             </button>
         </form>
     </div>
@@ -22,8 +22,8 @@
             <div class="flex items-center">
                 <i class="fas fa-info-circle text-[#8B9DF9] text-xl mr-3"></i>
                 <div>
-                    <h2 class="text-lg font-semibold text-gray-800">Manage Shop Listings</h2>
-                    <p class="text-gray-600">View and manage all registered shops in the system. Click column headers to sort.</p>
+                    <h2 class="text-lg font-semibold text-gray-800">จัดการรายการร้านค้า</h2>
+                    <p class="text-gray-600">ดูและจัดการร้านค้าทั้งหมดที่ลงทะเบียนในระบบ คลิกที่หัวคอลัมน์เพื่อจัดเรียง.</p>
                 </div>
             </div>
         </div>
@@ -59,7 +59,7 @@
                                 <input type="hidden" name="direction" value="{{ request('orderBy') == 'shop_name' && request('direction') == 'asc' ? 'desc' : 'asc' }}">
                                 <input type="hidden" name="search" value="{{ request('search') }}">
                                 <button type="submit" class="w-full text-left">
-                                    Shop Name
+                                    ชื่อร้านค้า
                                     <i class="fas fa-{{ request('orderBy') == 'shop_name' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }}"></i>
                                 </button>
                             </form>
@@ -71,7 +71,7 @@
                                 <input type="hidden" name="direction" value="{{ request('orderBy') == 'shop_description' && request('direction') == 'asc' ? 'desc' : 'asc' }}">
                                 <input type="hidden" name="search" value="{{ request('search') }}">
                                 <button type="submit" class="w-full text-left">
-                                    Description
+                                    คำอธิบาย
                                     <i class="fas fa-{{ request('orderBy') == 'shop_description' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }}"></i>
                                 </button>
                             </form>
@@ -83,7 +83,7 @@
                                 <input type="hidden" name="direction" value="{{ request('orderBy') == 'shop_location' && request('direction') == 'asc' ? 'desc' : 'asc' }}">
                                 <input type="hidden" name="search" value="{{ request('search') }}">
                                 <button type="submit" class="w-full text-left">
-                                    Location
+                                    สถานที่
                                     <i class="fas fa-{{ request('orderBy') == 'shop_location' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }}"></i>
                                 </button>
                             </form>
@@ -95,7 +95,7 @@
                                 <input type="hidden" name="direction" value="{{ request('orderBy') == 'status' && request('direction') == 'asc' ? 'desc' : 'asc' }}">
                                 <input type="hidden" name="search" value="{{ request('search') }}">
                                 <button type="submit" class="w-full text-left">
-                                    Status
+                                    สถานะ
                                     <i class="fas fa-{{ request('orderBy') == 'status' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }}"></i>
                                 </button>
                             </form>
@@ -107,7 +107,7 @@
                                 <input type="hidden" name="direction" value="{{ request('orderBy') == 'created_at' && request('direction') == 'asc' ? 'desc' : 'asc' }}">
                                 <input type="hidden" name="search" value="{{ request('search') }}">
                                 <button type="submit" class="w-full text-left">
-                                    Created
+                                    สร้างเมื่อ
                                     <i class="fas fa-{{ request('orderBy') == 'created_at' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }}"></i>
                                 </button>
                             </form>
@@ -119,7 +119,7 @@
                                 <input type="hidden" name="direction" value="{{ request('orderBy') == 'shop_owner_id' && request('direction') == 'asc' ? 'desc' : 'asc' }}">
                                 <input type="hidden" name="search" value="{{ request('search') }}">
                                 <button type="submit" class="w-full text-left">
-                                    Owner ID
+                                ไอดีเจ้าของ
                                     <i class="fas fa-{{ request('orderBy') == 'shop_owner_id' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }}"></i>
                                 </button>
                             </form>
@@ -159,7 +159,7 @@
                                 <form action="{{ route('admin.shops.edit', $shop->shop_id) }}" method="GET">
                                     @csrf
                                     <button type="submit" class="btn btn-info">
-                                        <i class="fas fa-edit mr-1"></i> Edit
+                                        <i class="fas fa-edit mr-1"></i> แก้ไข
                                     </button>
                                 </form>
                                 <form action="{{ route('admin.shops.toggleStatus', $shop->shop_id) }}" method="POST">
@@ -171,9 +171,9 @@
                                     <input type="hidden" name="search" value="{{ request('search') }}">
                                     <button type="submit" class="btn {{ $shop->status == 'active' ? 'btn-danger' : 'btn-success' }}">
                                         @if($shop->status == 'active')
-                                        <i class="fas fa-ban mr-1"></i> Deactivate
+                                        <i class="fas fa-ban mr-1"></i> ระงับ
                                         @else
-                                        <i class="fas fa-check-circle mr-1"></i> Activate
+                                        <i class="fas fa-check-circle mr-1"></i> เปิดการทำงาน
                                         @endif
                                     </button>
                                 </form>
