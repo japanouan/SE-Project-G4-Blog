@@ -248,7 +248,6 @@
             </div>
         </div>
     </div>
-    
     <!-- Sidebar -->
     <!-- In the sidebar section of shopowner-layout.blade.php -->
 <div class="sidebar" id="sidebar">
@@ -293,18 +292,32 @@
                     <span>จัดการชุด</span>
                 </a>
             </div>
-            
-            <div class="menu-item {{ $currentRouteName == 'shopowner.categories.index' ? 'active' : '' }}">
-                <a href="{{ route('shopowner.categories.index') }}">
-                    <i class="fas fa-tags mr-3"></i>
-                    <span>จัดการหมวดหมู่</span>
-                </a>
-            </div>
-            
+         
             <div class="menu-item {{ $currentRouteName == 'shopowner.promotions.index' ? 'active' : '' }}">
                 <a href="{{ route('shopowner.promotions.index') }}">
                     <i class="fas fa-percent mr-3"></i>
                     <span>จัดการโปรโมชั่น</span>
+                </a>
+            </div>
+
+            <div class="menu-item {{ Str::startsWith($currentRouteName, 'shopowner.bookings') ? 'active' : '' }}">
+                <a href="{{ route('shopowner.bookings.index') }}">
+                    <i class="fas fa-calendar mr-3"></i>
+                    <span>การจอง</span>
+                </a>
+            </div>
+
+            <div class="menu-item {{ Str::startsWith($currentRouteName, 'shopowner.stats') ? 'active' : '' }}">
+                <a href="{{ route('shopowner.stats.index') }}">
+                    <i class="fas fa-chart-bar mr-3"></i>
+                    <span>สถิติ</span>
+                </a>
+            </div>
+
+            <div class="menu-item {{ Str::startsWith($currentRouteName, 'shopowner.issue') ? 'active' : '' }}">
+                <a href="{{ route('shopowner.issue.index') }}">
+                    <i class="fas fa-flag mr-3"></i>
+                    <span>แจ้งปัญหา</span>
                 </a>
             </div>
         @else
@@ -317,38 +330,32 @@
             
             <div class="menu-item" style="opacity: 0.5; cursor: not-allowed;">
                 <a href="#" onclick="return false;">
-                    <i class="fas fa-tags mr-3"></i>
-                    <span>จัดการหมวดหมู่ (ต้องมีร้านค้าก่อน)</span>
-                </a>
-            </div>
-            
-            <div class="menu-item" style="opacity: 0.5; cursor: not-allowed;">
-                <a href="#" onclick="return false;">
                     <i class="fas fa-percent mr-3"></i>
                     <span>จัดการโปรโมชั่น (ต้องมีร้านค้าก่อน)</span>
                 </a>
             </div>
-        @endif
-        
-        <div class="menu-item {{ Str::startsWith($currentRouteName, 'shopowner.bookings') ? 'active' : '' }}">
-            <a href="{{ route('shopowner.bookings.index') }}">
-                <i class="fas fa-calendar mr-3"></i>
-                <span>การจอง</span>
-            </a>
-        </div>
 
-        <div class="menu-item {{ Str::startsWith($currentRouteName, 'shopowner.stats') ? 'active' : '' }}">
-            <a href="{{ route('shopowner.stats.index') }}">
-                <i class="fas fa-chart-bar mr-3"></i>
-                <span>สถิติ</span>
-            </a>
-        </div>
-        <div class="menu-item {{ Str::startsWith($currentRouteName, 'shopowner.issue') ? 'active' : '' }}">
-            <a href="{{ route('shopowner.issue.index') }}">
-                <i class="fas fa-flag mr-3"></i>
-                <span>แจ้งปัญหา</span>
-            </a>
-        </div>
+            <div class="menu-item" style="opacity: 0.5; cursor: not-allowed;">
+                <a href="#" onclick="return false;">
+                    <i class="fas fa-calendar mr-3"></i>
+                    <span>การจอง (ต้องมีร้านค้าก่อน)</span>
+                </a>
+            </div>
+
+            <div class="menu-item" style="opacity: 0.5; cursor: not-allowed;">
+                <a href="#" onclick="return false;">
+                    <i class="fas fa-chart-bar mr-3"></i>
+                    <span>สถิติ (ต้องมีร้านค้าก่อน)</span>
+                </a>
+            </div>
+
+            <div class="menu-item" style="opacity: 0.5; cursor: not-allowed;">
+                <a href="#" onclick="return false;">
+                    <i class="fas fa-flag mr-3"></i>
+                    <span>แจ้งปัญหา (ต้องมีร้านค้าก่อน)</span>
+                </a>
+            </div>
+        @endif
     </div>
 </div>
 
