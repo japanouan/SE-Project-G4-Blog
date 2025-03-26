@@ -17,14 +17,42 @@ use Illuminate\Support\Facades\Storage;
 
 class OutfitController extends Controller
 {
-    public function index()
-    {
-        $outfits = ThaiOutfit::get();
-        $hasPendingSuggestions = SelectOutfitDetail::where('customer_id', Auth::id())
+    public function index(Request $request)
+{
+    $query = ThaiOutfit::query();
+    
+    if ($request->has('category')) {
+        $categoryId = $request->category;
+        
+        $outfitIds = ThaiOutfitCategory::where('category_id', $categoryId)
+                    ->pluck('outfit_id');
+        
+        $query->whereIn('outfit_id', $outfitIds);
+        
+        $selectedCategory = OutfitCategory::find($categoryId);
+    }
+    
+    // Continue with the original query logic
+    $outfits = $query->get();
+    
+    // Get the pending suggestions status (from original code)
+    $hasPendingSuggestions = SelectOutfitDetail::where('customer_id', Auth::id())
         ->where('status', 'Pending Selection')
         ->exists();
-        return view('main', compact('outfits','hasPendingSuggestions'));
+    
+    // If it's an AJAX request, return just the partial view
+    if ($request->ajax()) {
+        return view('main', compact('outfits', 'hasPendingSuggestions'))
+            ->with('selectedCategory', $selectedCategory ?? null)
+            ->render();
     }
+    
+    // Return the full view for regular requests
+    return view('main', compact('outfits', 'hasPendingSuggestions'))
+        ->with('selectedCategory', $selectedCategory ?? null);
+}
+
+
 
     // SHOP OWNER METHODS
 
@@ -101,8 +129,6 @@ class OutfitController extends Controller
     
         return view('shopowner.outfits.index', compact('outfits', 'categories', 'sizes', 'colors'));
     }
-    
-    
 
     public function create()
     {
@@ -594,4 +620,35 @@ class OutfitController extends Controller
         return redirect()->route('admin.outfits.adminindex')
             ->with('success', 'ชุดถูกอัปเดตเรียบร้อยแล้ว');
     }
+
+        /**
+ * Display outfits filtered by category.
+ *
+ * @param  int  $category
+ * @return \Illuminate\Http\Response
+ */
+public function byCategory($category)
+{
+    // Find the category
+    $categoryModel = \App\Models\OutfitCategory::findOrFail($category);
+    
+    // Get outfit IDs in this category
+    $outfitIds = \App\Models\ThaiOutfitCategory::where('category_id', $category)
+                ->pluck('outfit_id');
+    
+    // Query outfits
+    $outfits = \App\Models\ThaiOutfit::whereIn('outfit_id', $outfitIds)
+                ->where('status', 'active')
+                ->orderBy('created_at', 'desc')
+                ->paginate(12);
+    
+    // Return the view
+    return view('outfits.index', [
+        'outfits' => $outfits,
+        'categoryName' => $categoryModel->category_name
+    ]);
+}
+
+
+
 }
