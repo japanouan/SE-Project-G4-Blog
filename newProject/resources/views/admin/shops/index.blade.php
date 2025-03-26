@@ -156,27 +156,27 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $shop->shop_owner_id }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex space-x-2">
-                                <form action="{{ route('admin.shops.edit', $shop->shop_id) }}" method="GET">
-                                    @csrf
-                                    <button type="submit" class="btn btn-info">
-                                        <i class="fas fa-edit mr-1"></i> Edit
-                                    </button>
-                                </form>
-                                <form action="{{ route('admin.shops.toggleStatus', $shop->shop_id) }}" method="POST">
-                                    @csrf
-                                    @method('PATCH')
-                                    <input type="hidden" name="status" value="{{ $shop->status == 'active' ? 'inactive' : 'active' }}">
-                                    <input type="hidden" name="orderBy" value="{{ request('orderBy') }}">
-                                    <input type="hidden" name="direction" value="{{ request('direction') }}">
-                                    <input type="hidden" name="search" value="{{ request('search') }}">
-                                    <button type="submit" class="btn {{ $shop->status == 'active' ? 'btn-danger' : 'btn-success' }}">
-                                        @if($shop->status == 'active')
-                                        <i class="fas fa-ban mr-1"></i> Deactivate
-                                        @else
-                                        <i class="fas fa-check-circle mr-1"></i> Activate
-                                        @endif
-                                    </button>
-                                </form>
+                            <form action="{{ route('admin.shops.edit', $shop->shop_id) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn btn-info">
+                                    <i class="fas fa-edit mr-1"></i> Edit
+                                </button>
+                            </form>
+                            <form action="{{ route('admin.shops.toggleStatus', $shop->shop_id) }}" method="POST">
+                                @csrf
+                                <!-- Remove the @method('PATCH') line -->
+                                <input type="hidden" name="status" value="{{ $shop->status == 'active' ? 'inactive' : 'active' }}">
+                                <input type="hidden" name="orderBy" value="{{ request('orderBy') }}">
+                                <input type="hidden" name="direction" value="{{ request('direction') }}">
+                                <input type="hidden" name="search" value="{{ request('search') }}">
+                                <button type="submit" class="btn {{ $shop->status == 'active' ? 'btn-danger' : 'btn-success' }}">
+                                    @if($shop->status == 'active')
+                                    <i class="fas fa-ban mr-1"></i> Deactivate
+                                    @else
+                                    <i class="fas fa-check-circle mr-1"></i> Activate
+                                    @endif
+                                </button>
+                            </form>
                             </div>
                         </td>
                     </tr>

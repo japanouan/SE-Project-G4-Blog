@@ -81,7 +81,7 @@
         <input type="hidden" name="is_ajax" value="1">
 
         <div class="flex items-center justify-between mt-6">
-            <a href="{{ route('admin.dashboard') }}" 
+            <a href="{{ route('admin.shops.index') }}" 
                class="inline-flex items-center px-4 py-2 bg-gray-300 border border-transparent rounded-lg font-semibold text-sm text-gray-700 uppercase tracking-wide hover:bg-gray-400 active:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 transition duration-150">
                 <i class="fas fa-times mr-2"></i> Cancel
             </a>

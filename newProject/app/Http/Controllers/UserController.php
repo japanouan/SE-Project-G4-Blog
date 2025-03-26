@@ -86,7 +86,12 @@ class UserController extends Controller
         $user = User::find($user_id);
         $user->update($request->all());
 
-        return redirect()->route('admin.users.index')->with('success', 'User updated successfully!');
+        $referer = request()->headers->get('referer');
+        $query = parse_url($referer, PHP_URL_QUERY);
+        parse_str($query ?? '', $params);
+
+        return redirect()->route('admin.users.index', $params)
+                     ->with('success', 'User updated successfully');
     }
 
 

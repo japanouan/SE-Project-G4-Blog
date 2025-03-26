@@ -10,9 +10,20 @@
         </a>
     </div>
 
-    <form method="POST" action="{{ route('admin.users.update', $user->user_id) }}" id="user-edit-form">
+    <form action="{{ route('admin.users.update', $user->user_id) }}" method="POST">
         @csrf
         @method('PUT')
+        
+        <!-- Include all original search parameters -->
+        @foreach(request()->except(['_token', '_method']) as $key => $value)
+            @if(is_array($value))
+                @foreach($value as $item)
+                    <input type="hidden" name="{{ $key }}[]" value="{{ $item }}">
+                @endforeach
+            @else
+                <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+            @endif
+        @endforeach
 
         <div>
             <x-input-label for="name" :value="__('Fullname')" />
@@ -58,17 +69,13 @@
             <x-input-error :messages="$errors->get('status')" class="mt-2" />
         </div>
 
-        <input type="hidden" name="is_ajax" value="1">
-
         <div class="flex items-center justify-between mt-4">
-            <a href="{{ route('admin.dashboard') }}"
+            <a href="{{ route('admin.users.index') }}"
                class="cancel-edit inline-flex items-center px-4 py-2 bg-gray-300 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-400 active:bg-gray-500 focus:outline-none focus:border-gray-500 focus:ring ring-gray-300 disabled:opacity-25 transition ease-in-out duration-150">
                 <i class="fas fa-times mr-2"></i> Cancel
             </a>
             
-            <x-primary-button class="ms-3">
-                {{ __('Update User') }}
-            </x-primary-button>
+            <button type="submit" class="btn btn-primary">Update User</button>
         </div>
     </form>
 </x-guest-layout>

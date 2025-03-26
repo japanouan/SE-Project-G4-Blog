@@ -357,30 +357,34 @@
                             </td>
                             <td class="border border-gray-300 p-3">
                                 <div class="flex justify-center space-x-2">
-                                    <a href="{{ route('admin.users.edit', $user->user_id) }}" 
-                                       class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm flex items-center">
-                                        <i class="fas fa-edit mr-1"></i> Edit
-                                    </a>
+                                <a href="{{ route('admin.users.edit', $user->user_id) }}?{{ http_build_query(request()->except(['page'])) }}" 
+                                    class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm flex items-center whitespace-nowrap">
+                                    <i class="fas fa-edit mr-1"></i> Edit
+                                </a>
                                     <form action="{{ route('admin.users.toggleStatus', $user->user_id) }}" method="POST" class="inline-block">
                                         @csrf
                                         <input type="hidden" name="status" value="{{ $user->status == 'active' ? 'inactive' : 'active' }}">
                                         <input type="hidden" name="orderBy" value="{{ request('orderBy') }}">
                                         <input type="hidden" name="direction" value="{{ request('direction') }}">
+                                        
                                         @if(request()->has('userType'))
-                                        @foreach(request('userType') as $type)
-                                        <input type="hidden" name="userType[]" value="{{ $type }}">
-                                        @endforeach
+                                            @foreach(request('userType') as $type)
+                                                <input type="hidden" name="userType[]" value="{{ $type }}">
+                                            @endforeach
                                         @endif
+                                        
                                         @if(request()->has('status'))
-                                        @foreach(request('status') as $status)
-                                        <input type="hidden" name="status[]" value="{{ $status }}">
-                                        @endforeach
+                                            @foreach(request('status') as $status)
+                                                <input type="hidden" name="status[]" value="{{ $status }}">
+                                            @endforeach
                                         @endif
+                                        
                                         @if(request('search'))
-                                        <input type="hidden" name="search" value="{{ request('search') }}">
+                                            <input type="hidden" name="search" value="{{ request('search') }}">
                                         @endif
+                                        
                                         <button type="submit" 
-                                                class="{{ $user->status == 'active' ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600' }} text-white px-3 py-1 rounded text-sm flex items-center">
+                                                class="{{ $user->status == 'active' ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600' }} text-white px-3 py-1 rounded text-sm flex items-center whitespace-nowrap">
                                             <i class="fas fa-{{ $user->status == 'active' ? 'ban' : 'check' }} mr-1"></i>
                                             {{ $user->status == 'active' ? 'Deactivate' : 'Activate' }}
                                         </button>

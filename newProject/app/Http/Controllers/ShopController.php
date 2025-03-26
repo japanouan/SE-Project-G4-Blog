@@ -47,17 +47,29 @@ class ShopController extends Controller
             $shop->status = $request->status;
             $shop->save();
             
-            return response()->json([
-                'success' => true,
-                'message' => 'Shop status updated successfully!'
-            ]);
+            // Check if request is AJAX
+            if ($request->ajax() || $request->has('is_ajax')) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Shop status updated successfully!'
+                ]);
+            }
+            
+            // For non-AJAX requests, redirect to shops index
+            return redirect()->route('admin.shops.index')->with('success', 'Shop status updated successfully!');
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error updating shop status: ' . $e->getMessage()
-            ], 500);
+            if ($request->ajax() || $request->has('is_ajax')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error updating shop status: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            // For non-AJAX requests, redirect back with error
+            return redirect()->back()->with('error', 'Error updating shop status: ' . $e->getMessage());
         }
     }
+
 
 
     public function edit($shop_id)

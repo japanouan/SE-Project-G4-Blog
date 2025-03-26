@@ -311,7 +311,7 @@
         <div class="menu-item {{ $currentRouteName == 'admin.statistics.shop' ? 'active' : '' }}">
             <a href="{{ route('admin.statistics.shop') }}">
                 <i class="fas fa-chart-bar fa-rotate-270 mr-3"></i>
-                <span>Statics</span>
+                <span>Statistics</span>
             </a>
         </div>
     </div>
