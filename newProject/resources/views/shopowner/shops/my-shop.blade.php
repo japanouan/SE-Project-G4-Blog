@@ -37,7 +37,7 @@
                         @if($shop->address)
                             <p class="mb-2"><i class="fa fa-map-marker-alt mr-2 text-blue-500"></i><strong>ที่ตั้ง:</strong> 
                                 {{ $shop->address->HouseNumber }} 
-                                {{ $shop->address->Street ? $shop->address->Street : '' }}
+                                ถ.{{ $shop->address->Street ? $shop->address->Street : '' }}
                                 ต.{{ $shop->address->Subdistrict }} 
                                 อ.{{ $shop->address->District }} 
                                 จ.{{ $shop->address->Province }} 
@@ -65,21 +65,33 @@
                      <a href="{{ route('shopowner.outfits.index') }}" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
                           <i class="fa fa-tshirt mr-1"></i> จัดการชุด
                      </a>
-                     <a href="{{ route('shopowner.categories.index') }}" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">
-                          <i class="fa fa-tags mr-1"></i> จัดการหมวดหมู่
+                     <a href="{{ route('shopowner.bookings.index') }}" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">
+                          <i class="fa fa-calendar-check mr-1"></i> จัดการการจอง
                      </a>
                      <a href="{{ route('shopowner.promotions.index') }}" class="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600">
                           <i class="fa fa-percent mr-1"></i> จัดการโปรโมชั่น
+                     </a>
+                     <a href="{{ route('shopowner.stats.income') }}" class="px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600">
+                          <i class="fa fa-chart-bar mr-1"></i> ดูสถิติ
+                     </a>
+                     <a href="{{ route('shopowner.issue.index') }}" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
+                          <i class="fa fa-exclamation-circle mr-1"></i> แจ้งปัญหา
                      </a>
                  @elseif($shop)
                      <button disabled class="px-4 py-2 bg-gray-400 text-white rounded-md cursor-not-allowed">
                           <i class="fa fa-tshirt mr-1"></i> จัดการชุด (รอการอนุมัติร้านค้า)
                      </button>
                      <button disabled class="px-4 py-2 bg-gray-400 text-white rounded-md cursor-not-allowed">
-                          <i class="fa fa-tags mr-1"></i> จัดการหมวดหมู่ (รอการอนุมัติร้านค้า)
+                          <i class="fa fa-calendar-check mr-1"></i> จัดการการจอง (รอการอนุมัติร้านค้า)
                      </button>
                      <button disabled class="px-4 py-2 bg-gray-400 text-white rounded-md cursor-not-allowed">
                           <i class="fa fa-percent mr-1"></i> จัดการโปรโมชั่น (รอการอนุมัติร้านค้า)
+                     </button>
+                     <button disabled class="px-4 py-2 bg-gray-400 text-white rounded-md cursor-not-allowed">
+                          <i class="fa fa-chart-bar mr-1"></i> ดูสถิติ (รอการอนุมัติร้านค้า)
+                     </button>
+                     <button disabled class="px-4 py-2 bg-gray-400 text-white rounded-md cursor-not-allowed">
+                          <i class="fa fa-exclamation-circle mr-1"></i> แจ้งปัญหา (รอการอนุมัติร้านค้า)
                      </button>
                  @endif
                 </div>
