@@ -122,11 +122,11 @@
                 <!-- ข้อมูลร้านค้าและสถานะ -->
                 <div class="flex items-center justify-between mb-6">
                     <div class="flex items-center space-x-2">
-                        <i class="fas fa-store text-purple-600"></i>
+                    <i class="fas fa-file-invoice text-purple-600 ml-1"></i>
                         <div>
-                            <strong class="text-gray-700">ร้านค้า:</strong> 
+                            <strong class="text-gray-700">คำสั่งซื้อที่:</strong> 
                             <span class="text-gray-900 ml-1">
-                                {{ $booking->orderDetails->first()->cartItem->thaioutfit_sizeandcolor ? $booking->orderDetails->first()->cartItem->thaioutfit_sizeandcolor->outfit->shop->shop_name : '-' }}
+                                {{ $booking->booking_id ?? '-' }}
                             </span>
                         </div>
                     </div>
@@ -140,11 +140,20 @@
                         </span>
                     </div>
                 </div>
+                <div class="mb-6 flex items-center space-x-2">
+                    <i class="fas fa-store text-purple-600"></i>
+                    <div>
+                        <strong class="text-gray-700">ร้านค้า:</strong> 
+                        <span class="text-gray-900 ml-1">
+                            {{ $booking->orderDetails->first()->cartItem->thaioutfit_sizeandcolor ? $booking->orderDetails->first()->cartItem->thaioutfit_sizeandcolor->outfit->shop->shop_name : '-' }}
+                        </span>
+                    </div>
+                </div>
 
                 <!-- วันที่จอง -->
                 <div class="mb-6 flex items-center space-x-2">
-                    <i class="fas fa-calendar-alt text-purple-600"></i>
-                    <strong class="text-gray-700">วันที่จอง:</strong>
+                    <i class="fas fa-calendar-alt text-purple-600 ml-1"></i>
+                    <strong class="text-gray-700">วันที่สั่งซื้อ:</strong>
                     <span class="text-gray-900">{{ $booking->purchase_date }}</span>
                 </div>
 
@@ -170,7 +179,7 @@
                                     ขนาด: {{ $orderDetail->cartItem->thaioutfit_sizeandcolor ? $orderDetail->cartItem->thaioutfit_sizeandcolor->size->size : '-' }} | 
                                     สี: {{ $orderDetail->cartItem->thaioutfit_sizeandcolor ? $orderDetail->cartItem->thaioutfit_sizeandcolor->color->color : '-' }}
                                 </div>
-                                <div class="text-sm text-gray-500 mt-1">จำนวน: {{ $orderDetail->cartItem->quantity }}</div>
+                                <div class="text-sm text-gray-500 mt-1">จำนวน: {{ $orderDetail->cartItem->quantity.'  | วันที่จอง: '.$orderDetail->reservation_date }}</div>
                                 <div class="text-sm text-purple-600 font-semibold mt-1">
                                     ฿{{ $orderDetail->cartItem->thaioutfit_sizeandcolor ? number_format($orderDetail->cartItem->thaioutfit_sizeandcolor->outfit->price * $orderDetail->cartItem->quantity, 2) : '-' }}
                                 </div>
