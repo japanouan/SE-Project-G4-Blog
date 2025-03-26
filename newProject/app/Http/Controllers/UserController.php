@@ -42,6 +42,10 @@ class UserController extends Controller
             $query->whereIn('userType', $userTypes);
         }
 
+        if ($request->has('status') && is_array($request->status)) {
+            $query->whereIn('status', $request->status);
+        }
+
         // 🔄 จัดเรียงข้อมูล
         $query->orderBy($orderBy, $direction);
 
@@ -100,6 +104,19 @@ class UserController extends Controller
             $user->status = $newStatus;
             $user->save();
 
+            // Prepare redirect parameters
+    $params = $request->only(['orderBy', 'direction', 'search']);
+    
+    // Handle userType filter
+    if ($request->has('userType')) {
+        $params['userType'] = $request->userType;
+    }
+    
+    // Handle status filter - if we're activating a user, we might need to adjust the filter
+    if ($request->has('status')) {
+        $params['status'] = $request->status;
+    }
+
             // If it's an AJAX request, return JSON response
             if ($request->ajax()) {
                 return response()->json([
@@ -111,6 +128,8 @@ class UserController extends Controller
                     ]
                 ]);
             }
+
+
 
             // For non-AJAX requests, redirect back with parameters
             return redirect()->route('admin.users.index', [
