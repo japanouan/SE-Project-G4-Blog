@@ -26,7 +26,7 @@
                     <th class="p-3 text-left">คงเหลือ</th>
                     <th class="p-3 text-left">ขนาดและสี</th>
                     <th class="p-3 text-left">สถานะ</th>
-                    <th class="p-3 text-left">Shop ID</th>
+                    <th class="p-3 text-left">ชื่อร้านค้า</th>
                     <th class="p-3 text-left">การจัดการ</th>
                 </tr>
             </thead>

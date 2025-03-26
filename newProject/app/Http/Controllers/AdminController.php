@@ -114,7 +114,7 @@ class AdminController extends Controller
         ]);
     }
 
-    public function showMakeUpArtistStatistics(Request $request)
+    public function showMakeupStatistics(Request $request)
     {
         $month = $request->month ?? now()->format('Y-m');
 

@@ -347,6 +347,10 @@ class OutfitController extends Controller
         
         // Delete outfit
         $outfit->delete();
+        if(Auth::user()->userType == 'admin'){
+            return redirect()->route('admin.outfits.adminindex')
+            ->with('success', 'ชุดถูกลบเรียบร้อยแล้ว');
+        }
 
         return redirect()->route('shopowner.outfits.index')
             ->with('success', 'ชุดถูกลบเรียบร้อยแล้ว');
