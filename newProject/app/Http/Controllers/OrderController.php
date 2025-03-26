@@ -258,8 +258,7 @@ class OrderController extends Controller
                         SelectService::create([
                             'service_type' => 'make-up artist',
                             'customer_count' => $services['makeup']['count'],
-                            'reservation_date' => $reservation_date,
-                            'reservation_time' => $services['makeup']['time'] ?? null,
+                            'reservation_date' => $datetime,
                             'booking_id' => $booking->booking_id,
                             'AddressID' => $staffAddressId,
                         ]);

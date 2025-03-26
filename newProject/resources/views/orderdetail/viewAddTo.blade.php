@@ -178,7 +178,7 @@
                         <div class="flex justify-between border-t border-dashed pt-3 mt-3 text-base">
                             <span class="font-semibold">ยอดชำระทั้งสิ้น:</span>
                             <span id="grand_total" class="font-bold text-green-600">{{ number_format($cartItems->sum(fn($i) => $i->overent == 1 ? 0 : $i->quantity * $i->outfit->price), 2) }} ฿</span>
-                        </div>โร
+                        </div>
 
                         <!-- เลือกที่อยู่สำหรับการจัดส่ง -->
                         <div class="mb-4">
