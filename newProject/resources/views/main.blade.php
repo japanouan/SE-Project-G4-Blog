@@ -7,29 +7,32 @@
 @php
 use Illuminate\Support\Facades\Auth;
 use App\Models\SelectOutfitDetail;
-use App\Models\Booking; // Assuming Booking is your model
+use App\Models\Booking;
 
-// Existing pending suggestions logic
 $pendingSuggestionsCount = 0;
-$suggestions = SelectOutfitDetail::where('customer_id', Auth::id())
-    ->where('status', 'Pending Selection')
-    ->count();
-if ($suggestions > 0) {
-    $pendingSuggestionsCount++;
-}
-
-// New pending payments logic
 $pendingPaymentsCount = 0;
-$bookings = Booking::with(['payments', 'orderDetails', 'selectService'])
-    ->whereBelongsTo(auth()->user())
-    ->orderBy('created_at', 'desc')
-    ->get();
 
-foreach ($bookings as $booking) {
-    $totalOrder = $booking->orderDetails->sum('total');
-    $totalPaid = $booking->payments->sum('total');
-    if ($totalOrder - $totalPaid > 0) {
-        $pendingPaymentsCount++;
+if (Auth::check()) {
+    // Pending Suggestions
+    $suggestions = SelectOutfitDetail::where('customer_id', Auth::id())
+        ->where('status', 'Pending Selection')
+        ->count();
+    if ($suggestions > 0) {
+        $pendingSuggestionsCount++;
+    }
+
+    // Pending Payments
+    $bookings = Booking::with(['payments', 'orderDetails', 'selectService'])
+        ->whereBelongsTo(auth()->user())
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+    foreach ($bookings as $booking) {
+        $totalOrder = $booking->orderDetails ? $booking->orderDetails->sum('total') : 0; // ป้องกัน null
+        $totalPaid = $booking->payments ? $booking->payments->sum('total') : 0; // ป้องกัน null
+        if ($totalOrder - $totalPaid > 0) {
+            $pendingPaymentsCount++;
+        }
     }
 }
 @endphp
