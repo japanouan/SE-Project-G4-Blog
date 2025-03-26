@@ -291,6 +291,8 @@ Route::prefix('/profile/customer/address')->name('profile.customer.address.')->m
 Route::get('/payment', [PaymentController::class, 'index'])->name('payment.index');
 Route::get('/payments/{booking_id}', [PaymentController::class, 'viewUpdate'])->name('payment.viewUpdate');
 Route::put('/payments/{payment}', [PaymentController::class, 'updateMethod'])->name('payment.updateMethod');
+Route::get('/payments/cycle2/{booking_id}', [PaymentController::class, 'updateToCycle2'])->name('payment.createCycle2');
+Route::get('/viewpayments/cycle2/{booking_id}', [PaymentController::class, 'viewCycle2'])->name('payment.viewCycle2');
 
 
 });

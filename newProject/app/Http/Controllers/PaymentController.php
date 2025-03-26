@@ -63,44 +63,32 @@ class PaymentController extends Controller
     {
         $bookings = Booking::with(['payments', 'orderDetails', 'selectService'])
             ->whereBelongsTo(auth()->user())
-            ->where('status', 'confirmed') // ✅ เพิ่มเงื่อนไขตรงนี้
+            //->where('status', 'confirmed') // ✅ เพิ่มเงื่อนไขตรงนี้
             ->orderBy('created_at', 'desc')
             ->get();
 
-            foreach ($bookings as $booking) {
-                // คำนวณยอดรวมจาก order details (ทั้งรอบ 1 และ 2)
-                $total = $booking->orderDetails->sum('total');
-            
-                // รวมยอดจ่ายจริง เฉพาะที่ payment ถูกชำระแล้ว
-                $paid = $booking->payments->where('status', 'paid')->sum('total');
-            
-                // คำนวณยอดค้าง
-                $unpaid = max(0, $total - $paid); // กันลบแล้วติดลบ
-            
-                // สร้าง property ให้ใช้ใน Blade
-                $booking->total_with_staff = $total; // รวมค่าบริการแล้วถ้ามี
-                $booking->paid = $paid;
-                $booking->unpaid = $unpaid;
-            }
-            
+        foreach ($bookings as $booking) {
+            $paid = $booking->payments->sum('total');
+
+            // ✅ คิดเฉพาะค่าชุดทั้งหมด (เฉพาะที่สถานะ booking = confirmed แล้ว)
+            $total = $booking->orderDetails->sum('total');
+
+            $booking->total_price = $total;
+            $booking->paid = $paid;
+            $booking->unpaid = $total - $paid;
+            $booking->total_with_staff = $total;
+        }
 
         return view('payment.index', compact('bookings'));
     }
 
 
-    public function viewUpdate($booking_id, Request $request)
+    public function viewUpdate($booking_id)
 {
-    $action = $request->query('action');
-
     $booking = Booking::with(['payments'])->where('booking_id', $booking_id)->firstOrFail();
 
     // ✅ ต้องใช้ ->filter() หรือ ->where() บน Collection
-    if ($action === 'pay_remaining') {
-        $payments = $booking->payments->where('status', 'paid')->where('booking_cycle', '2');
-    }else{
-        $payments = $booking->payments->where('status', 'unpaid');
-    }
-    
+    $payments = $booking->payments->where('status', 'unpaid');
 
     return view('payment.viewUpdate', compact('payments', 'booking'));
 }
@@ -108,44 +96,66 @@ class PaymentController extends Controller
 public function updateMethod(Request $request, $id)
 {
     $request->validate([
-        'payment_method' => 'required|in:paypal,credit_card',
+        'payment_method' => 'required|in:credit_card,paypal',
     ]);
 
     $payment = Payment::findOrFail($id);
-    $booking = Booking::with(['orderDetails', 'payments'])->findOrFail($payment->booking_id);
 
-    // คำนวณยอดรวมที่ต้องจ่ายทั้งหมด
-    $totalRequired = $booking->orderDetails->sum('total');
-
-    // คำนวณยอดที่จ่ายไปแล้ว (รวมรอบก่อนหน้า)
-    $alreadyPaid = $booking->payments->where('status', 'paid')->sum('total');
-
-    // คำนวณยอดค้างที่ต้องเพิ่ม
-    $amountToAdd = max(0, $totalRequired - $alreadyPaid);
-
-    // ✅ เพิ่มยอดค้างไปใน payment ปัจจุบัน
     $payment->payment_method = $request->payment_method;
-    $payment->total += $amountToAdd; // 🔥 บวกยอดเพิ่มเข้าไป
-    $payment->status = 'paid';
+    $payment->status = 'paid'; // หากต้องการให้ระบบจ่ายทันที
     $payment->save();
 
-    // ✅ เปลี่ยน OrderDetail รอบ 2 → 1
-    OrderDetail::where('booking_id', $booking->booking_id)
-        ->where('booking_cycle', 2)
-        ->update(['booking_cycle' => 1]);
-
-    // ✅ ปิด hasOverrented
-    $booking->hasOverrented = 0;
-    $booking->save();
-
-    return redirect()->route('payment.index')->with('success', 'อัปเดตการชำระเงินสำเร็จ');
+    return redirect()->route('payment.index')->with('success', 'บันทึกการชำระเงินเรียบร้อยแล้ว');
 }
 
+public function updateToCycle2($booking_id)
+{
+    try {
+        $booking = Booking::with('orderDetails')->findOrFail($booking_id);
 
+        if ($booking->status !== 'partial paid') {
+            return back()->withErrors('Booking นี้ไม่ได้อยู่ในสถานะที่รอรอบ 2');
+        }
 
+        // ✅ คำนวณยอดรอบ 2 จาก OrderDetails
+        $totalCycle2 = $booking->orderDetails
+            ->where('booking_cycle', 2)
+            ->sum('total');
 
+        if ($totalCycle2 <= 0) {
+            return back()->withErrors('ไม่พบยอดค้างในรอบ 2');
+        }
 
+        // ✅ เพิ่ม Payment รอบที่ 2
+        Payment::create([
+            'payment_method' => null, // ยังไม่เลือกวิธี
+            'total' => $totalCycle2,
+            'status' => 'unpaid',
+            'booking_cycle' => 2,
+            'booking_id' => $booking->booking_id,
+        ]);
 
+        // ✅ เปลี่ยนสถานะ booking เป็น confirmed
+        $booking->status = 'confirmed';
+        $booking->save();
 
+        return redirect()->route('payment.viewCycle2',  $booking->booking_id)->with('success', 'เพิ่มรอบชำระเงินรอบ 2 แล้ว');
+    } catch (\Exception $e) {
+        return back()->withErrors('เกิดข้อผิดพลาด: ' . $e->getMessage());
+    }
+}
+
+public function viewCycle2($booking_id)
+{
+    $booking = Booking::with('payments')->findOrFail($booking_id);
+
+    // ดึง Payment รอบ 2 ที่ยังไม่จ่าย
+    $payment = $booking->payments
+        ->where('booking_cycle', 2)
+        ->where('status', 'unpaid')
+        ->first();
+
+    return view('payment.viewCycle2', compact('booking', 'payment'));
+}
 
 }

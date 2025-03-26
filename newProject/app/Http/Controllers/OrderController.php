@@ -191,30 +191,31 @@ class OrderController extends Controller
                 $bookings[$groupKey] = $booking;
     
                 // ✅ บันทึก OrderDetail & Payment สำหรับกลุ่มนี้
-                $createdPayment = false;
-
                 foreach ($groupItems as $item) {
                     $cycle = $item->overent == 1 ? 2 : 1;
-
+    
                     // ✅ กำหนด reservation_date จาก CartItem โดยตรง
                     $reservationDate = $item->reservation_date;
                     if ($item->overent == 1) {
+                        // ค้นหา CartItem ที่มี outfit_id, size_id, color_id เหมือนกัน และ overent == 0
                         $matchingItem = $cartItems->first(function ($cartItem) use ($item) {
                             return $cartItem->outfit_id == $item->outfit_id &&
-                                $cartItem->size_id == $item->size_id &&
-                                $cartItem->color_id == $item->color_id &&
-                                $cartItem->overent == 0;
+                                   $cartItem->size_id == $item->size_id &&
+                                   $cartItem->color_id == $item->color_id &&
+                                   $cartItem->overent == 0;
                         });
-
+    
+                        // ถ้าพบ CartItem ที่ตรงเงื่อนไข ให้ใช้ reservation_date ของมัน
                         if ($matchingItem) {
                             $reservationDate = $matchingItem->reservation_date;
                         }
                     }
-
+    
+                    // ตรวจสอบว่า reservation_date มีค่าหรือไม่
                     if (!$reservationDate) {
                         throw new \Exception("ไม่พบวันที่จองสำหรับ CartItem ID: {$item->cart_item_id}");
                     }
-
+    
                     $orderDetailData = [
                         'quantity' => $item->quantity,
                         'booking_cycle' => $cycle,
@@ -223,31 +224,28 @@ class OrderController extends Controller
                         'reservation_date' => $reservationDate,
                         'deliveryOptions' => 'default',
                     ];
-
+    
                     if ($item->overent == 0) {
                         $orderDetailData['total'] = $item->quantity * $item->outfit->price;
                     }
-
+    
                     OrderDetail::create($orderDetailData);
-
-                    // ✅ สร้าง Payment แค่รอบแรก
-                    if (!$createdPayment) {
+    
+                    if ($cycle == 1 && $item->overent != 2) {
                         Payment::create([
                             'payment_method' => 'paypal',
-                            'total' => $totalWithDiscount,
+                            'total' => $item->quantity * $item->outfit->price,
                             'status' => 'unpaid',
-                            'booking_cycle' => $hasOverrented ? 2 : 1,
+                            'booking_cycle' => '1',
                             'booking_id' => $booking->booking_id,
                         ]);
-                        $createdPayment = true;
                     }
-
+    
                     $item->status = 'REMOVED';
                     $item->purchased_at = now();
                     $item->save();
                 }
-
-                
+    
                 // ✅ บันทึกบริการเสริมสำหรับกลุ่มนี้
                 if (!empty($services)) {
                     if (isset($services['photographer']) && $services['photographer']['count'] > 0) {
