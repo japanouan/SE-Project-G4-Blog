@@ -44,7 +44,8 @@
                             <form action="{{ route('admin.shops.index') }}" method="GET">
                                 @csrf
                                 <input type="hidden" name="orderBy" value="shop_id">
-                                <input type="hidden" name="direction" value="{{ request('direction') == 'asc' ? 'desc' : 'asc' }}">
+                                <input type="hidden" name="direction" value="{{ request('orderBy') == 'shop_id' && request('direction') == 'asc' ? 'desc' : 'asc' }}">
+                                <input type="hidden" name="search" value="{{ request('search') }}">
                                 <button type="submit" class="w-full text-left">
                                     ID
                                     <i class="fas fa-{{ request('orderBy') == 'shop_id' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }}"></i>
@@ -55,7 +56,8 @@
                             <form action="{{ route('admin.shops.index') }}" method="GET">
                                 @csrf
                                 <input type="hidden" name="orderBy" value="shop_name">
-                                <input type="hidden" name="direction" value="{{ request('direction') == 'asc' ? 'desc' : 'asc' }}">
+                                <input type="hidden" name="direction" value="{{ request('orderBy') == 'shop_name' && request('direction') == 'asc' ? 'desc' : 'asc' }}">
+                                <input type="hidden" name="search" value="{{ request('search') }}">
                                 <button type="submit" class="w-full text-left">
                                     Shop Name
                                     <i class="fas fa-{{ request('orderBy') == 'shop_name' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }}"></i>
@@ -66,7 +68,8 @@
                             <form action="{{ route('admin.shops.index') }}" method="GET">
                                 @csrf
                                 <input type="hidden" name="orderBy" value="shop_description">
-                                <input type="hidden" name="direction" value="{{ request('direction') == 'asc' ? 'desc' : 'asc' }}">
+                                <input type="hidden" name="direction" value="{{ request('orderBy') == 'shop_description' && request('direction') == 'asc' ? 'desc' : 'asc' }}">
+                                <input type="hidden" name="search" value="{{ request('search') }}">
                                 <button type="submit" class="w-full text-left">
                                     Description
                                     <i class="fas fa-{{ request('orderBy') == 'shop_description' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }}"></i>
@@ -77,7 +80,8 @@
                             <form action="{{ route('admin.shops.index') }}" method="GET">
                                 @csrf
                                 <input type="hidden" name="orderBy" value="shop_location">
-                                <input type="hidden" name="direction" value="{{ request('direction') == 'asc' ? 'desc' : 'asc' }}">
+                                <input type="hidden" name="direction" value="{{ request('orderBy') == 'shop_location' && request('direction') == 'asc' ? 'desc' : 'asc' }}">
+                                <input type="hidden" name="search" value="{{ request('search') }}">
                                 <button type="submit" class="w-full text-left">
                                     Location
                                     <i class="fas fa-{{ request('orderBy') == 'shop_location' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }}"></i>
@@ -88,7 +92,8 @@
                             <form action="{{ route('admin.shops.index') }}" method="GET">
                                 @csrf
                                 <input type="hidden" name="orderBy" value="status">
-                                <input type="hidden" name="direction" value="{{ request('direction') == 'asc' ? 'desc' : 'asc' }}">
+                                <input type="hidden" name="direction" value="{{ request('orderBy') == 'status' && request('direction') == 'asc' ? 'desc' : 'asc' }}">
+                                <input type="hidden" name="search" value="{{ request('search') }}">
                                 <button type="submit" class="w-full text-left">
                                     Status
                                     <i class="fas fa-{{ request('orderBy') == 'status' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }}"></i>
@@ -99,7 +104,8 @@
                             <form action="{{ route('admin.shops.index') }}" method="GET">
                                 @csrf
                                 <input type="hidden" name="orderBy" value="created_at">
-                                <input type="hidden" name="direction" value="{{ request('direction') == 'asc' ? 'desc' : 'asc' }}">
+                                <input type="hidden" name="direction" value="{{ request('orderBy') == 'created_at' && request('direction') == 'asc' ? 'desc' : 'asc' }}">
+                                <input type="hidden" name="search" value="{{ request('search') }}">
                                 <button type="submit" class="w-full text-left">
                                     Created
                                     <i class="fas fa-{{ request('orderBy') == 'created_at' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }}"></i>
@@ -110,7 +116,8 @@
                             <form action="{{ route('admin.shops.index') }}" method="GET">
                                 @csrf
                                 <input type="hidden" name="orderBy" value="shop_owner_id">
-                                <input type="hidden" name="direction" value="{{ request('direction') == 'asc' ? 'desc' : 'asc' }}">
+                                <input type="hidden" name="direction" value="{{ request('orderBy') == 'shop_owner_id' && request('direction') == 'asc' ? 'desc' : 'asc' }}">
+                                <input type="hidden" name="search" value="{{ request('search') }}">
                                 <button type="submit" class="w-full text-left">
                                     Owner ID
                                     <i class="fas fa-{{ request('orderBy') == 'shop_owner_id' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }}"></i>
@@ -124,7 +131,7 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @foreach ($shops as $shop)
-                    <tr class="table-row" data-shop-id="{{ $shop->shop_id }}">
+                    <tr class="table-row">
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $shop->shop_id }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 font-medium">{{ $shop->shop_name }}</td>
                         <td class="px-6 py-4 text-sm text-gray-500">
@@ -149,7 +156,7 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $shop->shop_owner_id }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex space-x-2">
-                                <form action="{{ route('admin.shops.edit', $shop->shop_id) }}" method="POST">
+                                <form action="{{ route('admin.shops.edit', $shop->shop_id) }}" method="GET">
                                     @csrf
                                     <button type="submit" class="btn btn-info">
                                         <i class="fas fa-edit mr-1"></i> Edit
@@ -157,10 +164,11 @@
                                 </form>
                                 <form action="{{ route('admin.shops.toggleStatus', $shop->shop_id) }}" method="POST">
                                     @csrf
+                                    @method('PATCH')
                                     <input type="hidden" name="status" value="{{ $shop->status == 'active' ? 'inactive' : 'active' }}">
                                     <input type="hidden" name="orderBy" value="{{ request('orderBy') }}">
                                     <input type="hidden" name="direction" value="{{ request('direction') }}">
-
+                                    <input type="hidden" name="search" value="{{ request('search') }}">
                                     <button type="submit" class="btn {{ $shop->status == 'active' ? 'btn-danger' : 'btn-success' }}">
                                         @if($shop->status == 'active')
                                         <i class="fas fa-ban mr-1"></i> Deactivate
@@ -191,22 +199,22 @@
     }
 
     .status-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    white-space: nowrap;
-}
-.status-active {
-    background-color: #d1fae5;
-    color: #065f46;
-}
-.status-inactive {
-    background-color: #fee2e2;
-    color: #b91c1c;
-}
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    .status-active {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+    .status-inactive {
+        background-color: #fee2e2;
+        color: #b91c1c;
+    }
 
     .btn {
         padding: 0.5rem 1rem;
@@ -292,158 +300,4 @@
         text-overflow: ellipsis;
     }
 </style>
-
-<script>
-// This script will be automatically included in the dashboard when loaded
-// We need to enhance the dashboard.blade.php to handle shops
-$(document).ready(function() {
-    // This ensures the shop-specific script is loaded once
-    if (window.shopScriptsLoaded) return;
-    window.shopScriptsLoaded = true;
-    
-    // Handle status toggle
-    $(document).on('submit', 'form[action*="toggleStatus"]', function(e) {
-        // Check if this is a shop toggle (for dashboard shared scripts)
-        if (!$(this).closest('tr').data('shop-id')) return;
-        
-        e.preventDefault();
-        
-        var $form = $(this);
-        var shopId = $form.closest('tr').data('shop-id');
-        var newStatus = $form.find('input[name="status"]').val();
-        
-        // Show loading state
-        $form.find('button').prop('disabled', true).css('opacity', '0.7');
-        
-        $.ajax({
-            url: $form.attr('action'),
-            type: 'POST',
-            data: $form.serialize(),
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            success: function(response) {
-                if (response.success) {
-                    // Find the shop row
-                    var $shopRow = $('tr[data-shop-id="' + shopId + '"]');
-                    
-                    if ($shopRow.length) {
-                        // Update the status badge
-                        var $statusCell = $shopRow.find('td:has(.status-badge)');
-                        
-                        if (newStatus === 'active') {
-                            $statusCell.html('<span class="status-badge status-active">active</span>');
-                            // Update button to be a deactivate button
-                            $form.find('input[name="status"]').val('inactive');
-                            $form.find('button')
-                                .removeClass('btn-success')
-                                .addClass('btn-danger')
-                                .html('<i class="fas fa-ban mr-1"></i> Deactivate');
-                        } else {
-                            $statusCell.html('<span class="status-badge status-inactive">inactive</span>');
-                            // Update button to be an activate button
-                            $form.find('input[name="status"]').val('active');
-                            $form.find('button')
-                                .removeClass('btn-danger')
-                                .addClass('btn-success')
-                                .html('<i class="fas fa-check-circle mr-1"></i> Activate');
-                        }
-                        
-                        // Re-enable the button
-                        $form.find('button').prop('disabled', false).css('opacity', '1');
-                    } else {
-                        console.log("Shop row not found, ID:", shopId);
-                        $form.find('button').prop('disabled', false).css('opacity', '1');
-                    }
-                } else {
-                    alert("Failed to update shop status.");
-                    $form.find('button').prop('disabled', false).css('opacity', '1');
-                }
-            },
-            error: function(xhr) {
-                console.error("Error toggling status:", xhr.responseText);
-                $form.find('button').prop('disabled', false).css('opacity', '1');
-                alert("Failed to update shop status. Please try again.");
-            }
-        });
-    });
-    
-    // Handle sort button clicks using event delegation
-    $(document).on('click', '.header-cell button', function(e) {
-        e.preventDefault();
-        
-        var form = $(this).closest('form');
-        var orderBy = form.find('input[name="orderBy"]').val();
-        var direction = form.find('input[name="direction"]').val();
-        var search = $('input[name="search"]').val();
-        
-        $.ajax({
-            url: "{{ route('admin.shops.index') }}",
-            type: 'GET',
-            data: {
-                orderBy: orderBy,
-                direction: direction,
-                search: search
-            },
-            beforeSend: function() {
-                $('#shops-content').css('opacity', '0.5');
-            },
-            success: function(response) {
-                $('#shops-content').html(response).css('opacity', '1');
-                
-                // Update URL without reloading
-                var queryParams = $.param({
-                    orderBy: orderBy,
-                    direction: direction,
-                    search: search
-                });
-                var newUrl = window.location.pathname + '?' + queryParams;
-                history.pushState(null, '', newUrl);
-            },
-            error: function(xhr) {
-                console.error('Error sorting:', xhr.responseText);
-                $('#shops-content').css('opacity', '1');
-                alert('An error occurred while sorting the data.');
-            }
-        });
-    });
-    
-    // Handle search form submission
-    $(document).on('submit', 'form[action="{{ route("admin.shops.index") }}"]', function(e) {
-        // Only if this is the search form (not a sort form)
-        if (!$(this).find('input[name="search"]').length) return;
-        
-        e.preventDefault();
-        
-        var $form = $(this);
-        var search = $form.find('input[name="search"]').val();
-        
-        $.ajax({
-            url: $form.attr('action'),
-            type: 'GET',
-            data: {
-                search: search,
-                orderBy: $('input[name="orderBy"]:first').val(),
-                direction: $('input[name="direction"]:first').val()
-            },
-            beforeSend: function() {
-                $('#shops-content').css('opacity', '0.5');
-            },
-            success: function(response) {
-                $('#shops-content').html(response).css('opacity', '1');
-                
-                // Update URL
-                var queryParams = 'search=' + encodeURIComponent(search);
-                var newUrl = window.location.pathname + '?' + queryParams;
-                history.pushState(null, '', newUrl);
-            },
-            error: function(xhr) {
-                console.error('Error searching:', xhr.responseText);
-                $('#shops-content').css('opacity', '1');
-                alert('An error occurred while searching.');
-            }
-        });
-    });
-});
-</script>
 @endsection
