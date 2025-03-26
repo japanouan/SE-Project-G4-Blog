@@ -164,9 +164,10 @@ class OrderController extends Controller
                     }
                 }
     
-                // ✅ ยอดรวมสินค้าสำหรับกลุ่มนี้ (เฉพาะรอบ 1)
-                $productTotal = $normalItems->sum(fn($item) => $item->quantity * $item->outfit->price);
-                $totalWithDiscount = max($productTotal + $staffTotal - $discountAmount, 0);
+                // ✅ ยอดรวมสินค้าสำหรับกลุ่มนี้ (เฉพาะรอบ 1 สำหรับ Payment)
+                $productTotalNormal = $normalItems->sum(fn($item) => $item->quantity * $item->outfit->price);
+                $productTotalOverent = $overentItems->sum(fn($item) => $item->quantity * $item->outfit->price);
+                $totalWithDiscount = max($productTotalNormal + $staffTotal - $discountAmount, 0);
     
                 // ✅ สถานะ (ไม่เปลี่ยนแปลง)
                 $bookingStatus = $overentItems->isNotEmpty() ? 'partial paid' : 'confirmed';
@@ -185,7 +186,7 @@ class OrderController extends Controller
     
                 $bookings[$groupKey] = $booking;
     
-                // ✅ บันทึก OrderDetail & Payment
+                // ✅ บันทึก OrderDetail
                 foreach ($groupItems as $item) {
                     $cycle = $item->overent == 1 ? 2 : 1;
     
@@ -214,32 +215,28 @@ class OrderController extends Controller
                         'cart_item_id' => $item->cart_item_id,
                         'reservation_date' => $reservationDate,
                         'deliveryOptions' => 'default',
+                        'total' => $item->overent == 1 ? null : $item->quantity * $item->outfit->price, // ถ้า overent == 1 ให้ total = 0
                     ];
     
-                    if ($item->overent == 0) {
-                        $orderDetailData['total'] = $item->quantity * $item->outfit->price;
-                    }
-    
                     OrderDetail::create($orderDetailData);
-    
-                    // ✅ แก้ไขการสร้าง Payment
-                    if ($cycle == 1 && $item->overent != 2) {
-                        // คำนวณยอดรวมสำหรับ Payment = สินค้า (รอบ 1) + บริการเสริม
-                        $paymentTotal = $productTotal + $staffTotal - $discountAmount;
-    
-                        Payment::create([
-                            'payment_method' => 'paypal',
-                            'total' => $paymentTotal, // ใช้ยอดรวมทั้งสินค้าและบริการ
-                            'status' => 'unpaid',
-                            'booking_cycle' => '1',
-                            'booking_id' => $booking->booking_id,
-                        ]);
-                        break; // สร้าง Payment แค่ครั้งเดียวต่อกลุ่ม
-                    }
     
                     $item->status = 'REMOVED';
                     $item->purchased_at = now();
                     $item->save();
+                }
+    
+                // ✅ สร้าง Payment เฉพาะสำหรับรอบ 1 (overent == 0) เท่านั้น
+                if ($normalItems->isNotEmpty()) {
+                    $paymentTotal = $productTotalNormal + $staffTotal - $discountAmount;
+                    if ($paymentTotal > 0) {
+                        Payment::create([
+                            'payment_method' => 'paypal',
+                            'total' => $paymentTotal,
+                            'status' => 'unpaid',
+                            'booking_cycle' => '1',
+                            'booking_id' => $booking->booking_id,
+                        ]);
+                    }
                 }
     
                 // ✅ บันทึกบริการเสริม (ไม่เปลี่ยนแปลง)
@@ -261,8 +258,7 @@ class OrderController extends Controller
                         SelectService::create([
                             'service_type' => 'make-up artist',
                             'customer_count' => $services['makeup']['count'],
-                            'reservation_date' => $reservation_date,
-                            'reservation_time' => $services['makeup']['time'] ?? null,
+                            'reservation_date' => $datetime,
                             'booking_id' => $booking->booking_id,
                             'AddressID' => $staffAddressId,
                         ]);

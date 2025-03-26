@@ -62,7 +62,7 @@
                 @php
                 // จัดกลุ่ม CartItem ตาม shop_id และ reservation_date
                 $groupedItems = $cartItems->groupBy(function ($item) {
-                    return $item->outfit->shop_id . '|' . $item->reservation_date;
+                return $item->outfit->shop_id . '|' . $item->reservation_date;
                 });
                 @endphp
 
@@ -160,11 +160,12 @@
                     </div>
                     @endforeach
 
+
                     <!-- สรุปราคารวม -->
                     <div class="border-t pt-4 mt-4 space-y-2 text-sm text-gray-700">
                         <div class="flex justify-between">
                             <span>ราคาสินค้ารวม:</span>
-                            <span id="product_total">{{ number_format($cartItems->sum(fn($i) => $i->quantity * $i->outfit->price), 2) }} ฿</span>
+                            <span id="product_total">{{ number_format($cartItems->sum(fn($i) => $i->overent == 1 ? 0 : $i->quantity * $i->outfit->price), 2) }} ฿</span>
                         </div>
                         <div class="flex justify-between">
                             <span>ค่าบริการช่างภาพและช่างแต่งหน้า:</span>
@@ -176,7 +177,7 @@
                         </div>
                         <div class="flex justify-between border-t border-dashed pt-3 mt-3 text-base">
                             <span class="font-semibold">ยอดชำระทั้งสิ้น:</span>
-                            <span id="grand_total" class="font-bold text-green-600">{{ number_format($cartItems->sum(fn($i) => $i->quantity * $i->outfit->price), 2) }} ฿</span>
+                            <span id="grand_total" class="font-bold text-green-600">{{ number_format($cartItems->sum(fn($i) => $i->overent == 1 ? 0 : $i->quantity * $i->outfit->price), 2) }} ฿</span>
                         </div>
 
                         <!-- เลือกที่อยู่สำหรับการจัดส่ง -->
@@ -195,14 +196,14 @@
                                             @foreach($customerAddress as $address)
                                             <option value="{{ $address->cus_address_id }}">
                                                 @if($address->address)
-                                                    {{ $address->address->HouseNumber ?? 'ไม่มีบ้านเลขที่' }}
-                                                    {{ $address->address->Street ?? 'ไม่มีถนน' }}
-                                                    {{ $address->address->Subdistrict ?? 'ไม่มีตำบล' }}
-                                                    {{ $address->address->District ?? 'ไม่มีอำเภอ' }}
-                                                    {{ $address->address->Province ?? 'ไม่มีจังหวัด' }}
-                                                    {{ $address->address->PostalCode ?? 'ไม่มีรหัสไปรษณีย์' }}
+                                                {{ $address->address->HouseNumber ?? 'ไม่มีบ้านเลขที่' }}
+                                                {{ $address->address->Street ?? 'ไม่มีถนน' }}
+                                                {{ $address->address->Subdistrict ?? 'ไม่มีตำบล' }}
+                                                {{ $address->address->District ?? 'ไม่มีอำเภอ' }}
+                                                {{ $address->address->Province ?? 'ไม่มีจังหวัด' }}
+                                                {{ $address->address->PostalCode ?? 'ไม่มีรหัสไปรษณีย์' }}
                                                 @else
-                                                    ที่อยู่ไม่สมบูรณ์ (Address ID: {{ $address->address_id ?? 'ไม่ระบุ' }})
+                                                ที่อยู่ไม่สมบูรณ์ (Address ID: {{ $address->address_id ?? 'ไม่ระบุ' }})
                                                 @endif
                                             </option>
                                             @endforeach
@@ -344,7 +345,7 @@
     }
 
     function updateTotal() {
-        const productTotal = {{ $cartItems->sum(fn($i) => $i->quantity * $i->outfit->price) }};
+        const productTotal = {{ $cartItems->sum(fn($i) => $i->overent == 1 ? 0 : $i->quantity * $i->outfit->price) }};
         const staffPrice = 2000;
         let totalPhotographerCount = 0;
         let totalMakeupCount = 0;
@@ -382,7 +383,7 @@
         @foreach($groupedItems as $groupKey => $groupItems)
         @php
             [$shopId, $reservationDate] = explode('|', $groupKey);
-            $groupId = "service-{$shopId}-{$reservationDate}";
+        $groupId = "service-{$shopId}-{$reservationDate}";
         @endphp
         if (document.getElementById('enable-{{ $groupId }}')?.checked) {
             const photographerCount = parseInt(document.getElementById('photographer_count_{{ $groupId }}')?.value) || 0;
@@ -513,7 +514,7 @@
         @foreach($groupedItems as $groupKey => $groupItems)
         @php
             [$shopId, $reservationDate] = explode('|', $groupKey);
-            $groupId = "service-{$shopId}-{$reservationDate}";
+        $groupId = "service-{$shopId}-{$reservationDate}";
         @endphp
         const checkbox = document.getElementById('enable-{{ $groupId }}');
         if (checkbox) {
