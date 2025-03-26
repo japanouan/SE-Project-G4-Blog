@@ -1,19 +1,31 @@
+@php
+// Check if we just toggled a user's status
+$justToggled = request('just_toggled') == 1;
+$toggledUserId = request('toggled_user_id');
+
+// If we just toggled, get the user that was toggled
+$toggledUser = null;
+if ($justToggled && $toggledUserId) {
+    $toggledUser = \App\Models\User::find($toggledUserId);
+}
+@endphp
+
 @extends('layouts.admin-layout')
 
-@section('title', 'User Management')
+@section('title', 'จัดการผู้ใช้งาน')
 
 @section('content')
     <div class="page-container">
         <div class="page-header flex justify-between items-center mb-6">
             <h1 class="text-3xl font-bold text-gray-800">
                 <i class="fas fa-users mr-2 text-[#8B9DF9]"></i>
-                User Management
+                จัดการผู้ใช้งาน
             </h1>
 
             <form action="{{ route('admin.users.acceptance') }}" method="GET">
                 @csrf
                 <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-check-circle mr-2"></i>Acceptance Queue
+                    <i class="fas fa-check-circle mr-2"></i>รายการอนุมัติ
                 </button>
             </form>
         </div>
@@ -21,7 +33,7 @@
         <div class="card mt-8">
             <div class="card-header flex items-center">
                 <i class="fas fa-filter mr-2 text-[#8B9DF9]"></i>
-                <h2 class="card-title text-gray-800 font-semibold">Filter Users</h2>
+                <h2 class="card-title text-gray-800 font-semibold">กรองผู้ใช้งาน</h2>
             </div>
 
             <div class="card-body">
@@ -31,7 +43,7 @@
                     <input type="hidden" name="search" value="{{ request('search') }}">
 
                     <div class="mb-4">
-                        <h3 class="text-sm font-medium text-gray-700 mb-2 pl-2">Filter by Role:</h3>
+                        <h3 class="text-sm font-medium text-gray-700 mb-2 pl-2">กรองตามบทบาท:</h3>
                         <div class="filters-container">
                             <label class="filter-chip {{ is_array(request('userType')) && in_array('admin', request('userType')) ? 'active' : '' }}" 
                                 style="{{ is_array(request('userType')) && in_array('admin', request('userType')) ? 'background-color: #c084fc;' : '' }}">
@@ -61,23 +73,6 @@
                                 style="{{ is_array(request('userType')) && in_array('make-up artist', request('userType')) ? 'background-color: #f9a8d4;' : '' }}">
                                 <input type="checkbox" name="userType[]" value="make-up artist" class="filter-checkbox" {{ is_array(request('userType')) && in_array('make-up artist', request('userType')) ? 'checked' : '' }}>
                                 <i class="fas fa-paint-brush"></i> Make-up Artist
-                            </label>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h3 class="text-sm font-medium text-gray-700 mb-2 pl-2">Filter by Status:</h3>
-                        <div class="filters-container">
-                            <label class="filter-chip {{ is_array(request('status')) && in_array('active', request('status')) ? 'active' : '' }}"
-                                style="{{ is_array(request('status')) && in_array('active', request('status')) ? 'background-color: #86efac;' : '' }}">
-                                <input type="checkbox" name="status[]" value="active" class="filter-checkbox" {{ is_array(request('status')) && in_array('active', request('status')) ? 'checked' : '' }}>
-                                <i class="fas fa-check-circle"></i> Active
-                            </label>
-
-                            <label class="filter-chip {{ is_array(request('status')) && in_array('inactive', request('status')) ? 'active' : '' }}"
-                                style="{{ is_array(request('status')) && in_array('inactive', request('status')) ? 'background-color: #fca5a5;' : '' }}">
-                                <input type="checkbox" name="status[]" value="inactive" class="filter-checkbox" {{ is_array(request('status')) && in_array('inactive', request('status')) ? 'checked' : '' }}>
-                                <i class="fas fa-times-circle"></i> Inactive
                             </label>
                         </div>
                     </div>
@@ -359,40 +354,157 @@
                                 <div class="flex justify-center space-x-2">
                                 <a href="{{ route('admin.users.edit', $user->user_id) }}?{{ http_build_query(request()->except(['page'])) }}" 
                                     class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm flex items-center whitespace-nowrap">
-                                    <i class="fas fa-edit mr-1"></i> Edit
+                                    <i class="fas fa-edit mr-1"></i> แก้ไข
                                 </a>
-                                    <form action="{{ route('admin.users.toggleStatus', $user->user_id) }}" method="POST" class="inline-block">
-                                        @csrf
-                                        <input type="hidden" name="status" value="{{ $user->status == 'active' ? 'inactive' : 'active' }}">
-                                        <input type="hidden" name="orderBy" value="{{ request('orderBy') }}">
-                                        <input type="hidden" name="direction" value="{{ request('direction') }}">
-                                        
-                                        @if(request()->has('userType'))
-                                            @foreach(request('userType') as $type)
-                                                <input type="hidden" name="userType[]" value="{{ $type }}">
-                                            @endforeach
-                                        @endif
-                                        
-                                        @if(request()->has('status'))
-                                            @foreach(request('status') as $status)
-                                                <input type="hidden" name="status[]" value="{{ $status }}">
-                                            @endforeach
-                                        @endif
-                                        
-                                        @if(request('search'))
-                                            <input type="hidden" name="search" value="{{ request('search') }}">
-                                        @endif
-                                        
-                                        <button type="submit" 
-                                                class="{{ $user->status == 'active' ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600' }} text-white px-3 py-1 rounded text-sm flex items-center whitespace-nowrap">
-                                            <i class="fas fa-{{ $user->status == 'active' ? 'ban' : 'check' }} mr-1"></i>
-                                            {{ $user->status == 'active' ? 'Deactivate' : 'Activate' }}
-                                        </button>
-                                    </form>
+                                <form action="{{ route('admin.users.toggleStatus', $user->user_id) }}" method="POST" class="inline-block">
+        @csrf
+        <input type="hidden" name="status" value="{{ $user->status == 'active' ? 'inactive' : 'active' }}">
+        <input type="hidden" name="orderBy" value="{{ request('orderBy') }}">
+        <input type="hidden" name="direction" value="{{ request('direction') }}">
+        
+        <!-- Add these two new hidden fields -->
+        <input type="hidden" name="just_toggled" value="1">
+        <input type="hidden" name="toggled_user_id" value="{{ $user->user_id }}">
+        
+        @if(request()->has('userType'))
+            @foreach(request('userType') as $type)
+                <input type="hidden" name="userType[]" value="{{ $type }}">
+            @endforeach
+        @endif
+        
+        @if(request()->has('status'))
+            @foreach(request('status') as $status)
+                <input type="hidden" name="status[]" value="{{ $status }}">
+            @endforeach
+        @endif
+        
+        @if(request('search'))
+            <input type="hidden" name="search" value="{{ request('search') }}">
+        @endif
+        
+        <button type="submit" 
+                class="{{ $user->status == 'active' ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600' }} text-white px-3 py-1 rounded text-sm flex items-center whitespace-nowrap">
+            <i class="fas fa-{{ $user->status == 'active' ? 'ban' : 'check' }} mr-1"></i>
+            {{ $user->status == 'active' ? 'ปิดใช้งาน' : 'เปิดใช้งาน' }}
+        </button>
+    </form>
                                 </div>
                             </td>
                         </tr>
                         @endforeach
+
+                        @if($justToggled && $toggledUser && !$users->contains('user_id', $toggledUser->user_id))
+<tr class="hover:bg-gray-50 bg-yellow-50">
+    <td class="border border-gray-300 p-3">{{ $toggledUser->user_id }}</td>
+    <td class="border border-gray-300 p-3">
+        <div class="user-info flex items-center">
+            <div class="user-avatar h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+                @if($toggledUser->profilePicture)
+                <img src="{{ asset($toggledUser->profilePicture) }}" alt="รูปโปรไฟล์" class="h-10 w-10 rounded-full object-cover">
+                @else
+                <span class="text-gray-700 font-bold">{{ strtoupper(substr($toggledUser->name, 0, 1)) }}</span>
+                @endif
+            </div>
+            <div>
+                <div class="font-medium">{{ $toggledUser->name }}</div>
+            </div>
+        </div>
+    </td>
+    <td class="border border-gray-300 p-3">
+        <div class="flex items-center">
+            <i class="fas fa-envelope text-gray-400 mr-2"></i>
+            <span class="text-sm">{{ $toggledUser->email }}</span>
+        </div>
+    </td>
+    <td class="border border-gray-300 p-3">
+        <div class="flex items-center">
+            <i class="fas fa-phone text-gray-400 mr-2"></i>
+            <span class="text-sm">{{ $toggledUser->phone }}</span>
+        </div>
+    </td>
+    <td class="border border-gray-300 p-3">{{ $toggledUser->username }}</td>
+    <td class="border border-gray-300 p-3">
+        @php
+        $roleClass = '';
+        $roleIcon = 'user';
+
+        switch($toggledUser->userType) {
+        case 'admin':
+        $roleClass = 'bg-purple-100 text-purple-800';
+        $roleIcon = 'user-shield';
+        break;
+        case 'customer':
+        $roleClass = 'bg-blue-100 text-blue-800';
+        $roleIcon = 'user';
+        break;
+        case 'shop owner':
+        $roleClass = 'bg-green-100 text-green-800';
+        $roleIcon = 'store';
+        break;
+        case 'photographer':
+        $roleClass = 'bg-yellow-100 text-yellow-800';
+        $roleIcon = 'camera';
+        break;
+        case 'make-up artist':
+        $roleClass = 'bg-pink-100 text-pink-800';
+        $roleIcon = 'paint-brush';
+        break;
+        }
+        @endphp
+
+        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium {{ $roleClass }}">
+            <i class="fas fa-{{ $roleIcon }} mr-1"></i>
+            {{ $toggledUser->userType }}
+        </span>
+    </td>
+    <td class="border border-gray-300 p-3">
+        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium {{ $toggledUser->status == 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+            <i class="fas fa-{{ $toggledUser->status == 'active' ? 'check-circle' : 'times-circle' }} mr-1"></i>
+            {{ $toggledUser->status }}
+        </span>
+    </td>
+    <td class="border border-gray-300 p-3">
+        <div class="flex justify-center space-x-2">
+        <a href="{{ route('admin.users.edit', $toggledUser->user_id) }}?{{ http_build_query(request()->except(['page', 'just_toggled', 'toggled_user_id'])) }}" 
+            class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm flex items-center whitespace-nowrap">
+            <i class="fas fa-edit mr-1"></i> แก้ไข
+        </a>
+            <form action="{{ route('admin.users.toggleStatus', $toggledUser->user_id) }}" method="POST" class="inline-block">
+                @csrf
+                <input type="hidden" name="status" value="{{ $toggledUser->status == 'active' ? 'inactive' : 'active' }}">
+                <input type="hidden" name="orderBy" value="{{ request('orderBy') }}">
+                <input type="hidden" name="direction" value="{{ request('direction') }}">
+                
+                <input type="hidden" name="just_toggled" value="1">
+                <input type="hidden" name="toggled_user_id" value="{{ $toggledUser->user_id }}">
+                
+                @if(request()->has('userType'))
+                    @foreach(request('userType') as $type)
+                        <input type="hidden" name="userType[]" value="{{ $type }}">
+                    @endforeach
+                @endif
+                
+                @if(request()->has('status'))
+                    @foreach(request('status') as $status)
+                        <input type="hidden" name="status[]" value="{{ $status }}">
+                    @endforeach
+                @endif
+                
+                @if(request('search'))
+                    <input type="hidden" name="search" value="{{ request('search') }}">
+                @endif
+                
+                <button type="submit" 
+                        class="{{ $toggledUser->status == 'active' ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600' }} text-white px-3 py-1 rounded text-sm flex items-center whitespace-nowrap">
+                    <i class="fas fa-{{ $toggledUser->status == 'active' ? 'ban' : 'check' }} mr-1"></i>
+                    {{ $toggledUser->status == 'active' ? 'ปิดใช้งาน' : 'เปิดใช้งาน' }}
+                </button>
+            </form>
+        </div>
+    </td>
+</tr>
+@endif
+
                     </tbody>
                 </table>
             </div>
