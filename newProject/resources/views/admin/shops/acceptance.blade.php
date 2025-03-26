@@ -1,17 +1,17 @@
 @extends('layouts.admin-layout')
 
-@section('title', 'Booking')
+@section('title', 'Shop Acceptance')
 
 @section('content')
 
-        <div class="container mx-auto p-6 ">
-            <h1 class="text-3xl font-bold text-gray-800 mb-6 justify-self-center">Acceptance</h1>
-            <div class="py-12">
-                <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                        <div class="p-6 text-gray-900">
-                            <table class="min-w-full bg-white rounded-lg overflow-hidden" id="usersTable">
-                                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+<div class="container mx-auto p-6">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6 justify-self-center">Acceptance</h1>
+        <div class="py-12">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-gray-900">
+                        <table class="min-w-full bg-white rounded-lg overflow-hidden w-full table-auto" id="usersTable">
+                            <thead class="bg-gray-200">
                                     <tr>
                                         <th style="padding: 10px;">shop id</th>
                                         <th style="padding: 10px;">shop name</th>
@@ -19,6 +19,7 @@
                                         <th style="padding: 10px;">shop_location</th>
                                         <th style="padding: 10px;">shop_owner_id</th>
                                         <th style="padding: 10px;">status</th>
+                                        <th style="padding: 10px;">actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -34,7 +35,7 @@
                                             <form action="{{ route('admin.shops.updateStatus', $s->shop_id) }}" method="POST" style="display:inline;">
                                                 @csrf
                                                 <input type="hidden" name="status" value="{{'active'}}">
-                                                <button type="submit" class="text-white bg-blue-500 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+                                                <button type="submit" class="text-white bg-blue-500 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 acceptButton">
                                                     {{ 'Accept' }}
                                                 </button>
                                             </form>
