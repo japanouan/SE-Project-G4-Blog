@@ -384,7 +384,7 @@ class OutfitController extends Controller
 
     public function AdminIndex(Request $request)
     {
-        $query = ThaiOutfit::with('sizeAndColors.size', 'sizeAndColors.color');
+        $query = ThaiOutfit::with('sizeAndColors.size', 'sizeAndColors.color','shop');
 
         // ค้นหา shop_id, outfit_id หรือชื่อชุด
         if ($request->has('search') && $request->search != '') {
@@ -398,17 +398,62 @@ class OutfitController extends Controller
             });
         }
 
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+    
+        // Filter by category
+        if ($request->filled('categories')) {
+            $categories = array_filter($request->categories, function($value) {
+                return $value !== null && $value !== '';
+            });
+            
+            if (!empty($categories)) {
+                $query->whereHas('categories', function($q) use ($categories) {
+                    $q->whereIn('OutfitCategories.category_id', $categories);
+                });
+            }
+        }
+    
+        // Filter by size
+        if ($request->filled('sizes')) {
+            $sizes = array_filter($request->sizes, function($value) {
+                return $value !== null && $value !== '';
+            });
+            
+            if (!empty($sizes)) {
+                $query->whereHas('sizeAndColors', function($q) use ($sizes) {
+                    $q->whereIn('size_id', $sizes);
+                });
+            }
+        }
+    
+        // Filter by color
+        if ($request->filled('colors')) {
+            $colors = array_filter($request->colors, function($value) {
+                return $value !== null && $value !== '';
+            });
+            
+            if (!empty($colors)) {
+                $query->whereHas('sizeAndColors', function($q) use ($colors) {
+                    $q->whereIn('color_id', $colors);
+                });
+            }
+        }
+
         // ดึงข้อมูลชุดทั้งหมด + ร้านค้า
-        $outfits = $query->join('Shops', 'ThaiOutfits.shop_id', '=', 'Shops.shop_id')
-                 ->select('ThaiOutfits.*', 'Shops.shop_name')
-                 ->paginate(10);
+        $outfits = $query->paginate(10);
+        $categories = OutfitCategory::all();
+        $sizes = ThaiOutfitSize::all();
+        $colors = ThaiOutfitColor::all();
 
         // Add total stock attribute to each outfit
         foreach ($outfits as $outfit) {
             $outfit->totalStock = $outfit->sizeAndColors->sum('amount');
         }
 
-        return view('admin.outfits.outfits', compact('outfits'));
+        return view('admin.outfits.outfits', compact('outfits', 'categories', 'sizes', 'colors'));
     }
 
     public function AdminEdit($id)
