@@ -58,6 +58,16 @@
             display: inline-block;
         }
         
+        .dropdown::after {
+            content: '';
+            position: absolute;
+            height: 20px;
+            width: 100%;
+            bottom: -20px;
+            left: 0;
+            z-index: 1; /* Ensure it's above other elements */
+        }
+        
         .dropdown-content {
             display: none;
             position: absolute;
@@ -66,7 +76,7 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             z-index: 1;
             border-radius: 0.5rem;
-            margin-top: 0.75rem;
+            margin-top: 20px; /* Increase this value to match the ::after height */
             opacity: 0;
             transform: translateY(10px);
             transition: opacity 0.3s, transform 0.3s;
@@ -173,17 +183,18 @@
             const dropdownContent = dropdown.querySelector('.dropdown-content');
             let timeoutId;
             
-            // Show dropdown on hover
+            // Show dropdown on hover with a single unified approach
             dropdown.addEventListener('mouseenter', () => {
                 clearTimeout(timeoutId);
                 dropdownContent.style.display = 'block';
-                setTimeout(() => {
+                // Small delay to ensure CSS transition works
+                requestAnimationFrame(() => {
                     dropdownContent.style.opacity = '1';
                     dropdownContent.style.transform = 'translateY(0)';
-                }, 10);
+                });
             });
             
-            // Add delay before hiding dropdown
+            // Hide dropdown when mouse leaves the entire dropdown component
             dropdown.addEventListener('mouseleave', () => {
                 timeoutId = setTimeout(() => {
                     dropdownContent.style.opacity = '0';
@@ -191,22 +202,7 @@
                     setTimeout(() => {
                         dropdownContent.style.display = 'none';
                     }, 300);
-                }, 200); // 200ms delay before hiding
-            });
-            
-            // Keep dropdown open when hovering over content
-            dropdownContent.addEventListener('mouseenter', () => {
-                clearTimeout(timeoutId);
-            });
-            
-            dropdownContent.addEventListener('mouseleave', () => {
-                timeoutId = setTimeout(() => {
-                    dropdownContent.style.opacity = '0';
-                    dropdownContent.style.transform = 'translateY(10px)';
-                    setTimeout(() => {
-                        dropdownContent.style.display = 'none';
-                    }, 300);
-                }, 200);
+                }, 100); // Reduced delay for better responsiveness
             });
         });
     });
