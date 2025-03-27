@@ -7,11 +7,16 @@
             <i class="fas fa-calendar-alt card-header-icon"></i>
             <h2 class="card-title">ตารางงานของคุณ</h2>
         </div>
-        <div>
-            @php
-                $routePrefix = str_replace(' ', '', Auth::user()->userType);
-            @endphp
-            <a href="{{ route($routePrefix.'.work-list') }}" 
+        <div class="flex items-center space-x-4">
+            <!-- Filter Dropdown -->
+            <form method="GET" action="{{ route(str_replace(' ', '', Auth::user()->userType).'.dashboard') }}" class="flex items-center">
+                <select name="status" class="border p-2 rounded-md" onchange="this.form.submit()">
+                    <option value="all" {{ request('status', 'all') == 'all' ? 'selected' : '' }}>ทั้งหมด</option>
+                    <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>เสร็จแล้ว</option>
+                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>ยังไม่เสร็จ</option>
+                </select>
+            </form>
+            <a href="{{ route(str_replace(' ', '', Auth::user()->userType).'.work-list') }}" 
                class="btn btn-primary">
                 <i class="fas fa-clipboard-list"></i> ไปหน้ารับงาน
             </a>
@@ -28,7 +33,7 @@
             <a href="{{ route(str_replace(' ', '', $work->selectService->service_type) . '.work.details', ['id' => encrypt($work->select_staff_detail_id)]) }}" class="block">
                 <div class="job-card relative">
                     <!-- Completion indicator -->
-                    @if($work->service_info)
+                    @if($work->finished_time)
                     <div class="absolute top-0 right-0 mt-2 mr-2">
                         <span class="bg-green-500 text-white rounded-full p-1 flex items-center justify-center" 
                               title="Job completed">
@@ -57,7 +62,7 @@
                     
                     <!-- Status indicator at the bottom -->
                     <div class="mt-3 pt-2 border-t border-gray-200">
-                        @if($work->service_info)
+                        @if($work->finished_time)
                             <span class="text-green-600 text-sm font-medium flex items-center">
                                 <i class="fas fa-check-circle mr-1"></i> Completed
                             </span>
