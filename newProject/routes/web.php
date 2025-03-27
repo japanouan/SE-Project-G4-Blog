@@ -138,7 +138,8 @@ Route::prefix('admin')->name('admin.')->middleware('auth', 'is_admin')->group(fu
     //categories
     Route::resource('categories', CategoryController::class);
 
-
+    Route::post('/admin/shops/{shop_id}/{status}', [ShopController::class, 'updateStatusAjax'])->name('admin.shops.updateStatusAjax');
+    Route::post('/admin/users/{user_id}/{status}', [UserController::class, 'updateStatusAjax'])->name('admin.users.updateStatusAjax');
 });
 
 

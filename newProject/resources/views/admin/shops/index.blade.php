@@ -11,8 +11,16 @@
 
         <form action="{{ route('admin.shops.acceptance') }}" method="GET">
             @csrf
-            <button type="submit" class="btn btn-primary">
+            <button type="submit" class="btn btn-primary relative">
                 <i class="fas fa-check-circle mr-2"></i>รายการรออนุมัติ
+                @php
+                    $pendingShopsCount = \App\Models\Shop::where('status', 'pending')->count();
+                @endphp
+                @if($pendingShopsCount > 0)
+                    <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                        {{ $pendingShopsCount }}
+                    </span>
+                @endif
             </button>
         </form>
     </div>
@@ -40,94 +48,95 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="header-cell">
+                        <th class="header-cell text-center">
                             <form action="{{ route('admin.shops.index') }}" method="GET">
                                 @csrf
                                 <input type="hidden" name="orderBy" value="shop_id">
                                 <input type="hidden" name="direction" value="{{ request('orderBy') == 'shop_id' && request('direction') == 'asc' ? 'desc' : 'asc' }}">
                                 <input type="hidden" name="search" value="{{ request('search') }}">
-                                <button type="submit" class="w-full text-left">
+                                <button type="submit" class="w-full flex justify-center items-center">
                                     รหัสร้าน
-                                    <i class="fas fa-{{ request('orderBy') == 'shop_id' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }}"></i>
+                                    <i class="fas fa-{{ request('orderBy') == 'shop_id' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }} ml-1"></i>
                                 </button>
                             </form>
                         </th>
-                        <th class="header-cell">
+                        <th class="header-cell text-center">
                             <form action="{{ route('admin.shops.index') }}" method="GET">
                                 @csrf
                                 <input type="hidden" name="orderBy" value="shop_name">
                                 <input type="hidden" name="direction" value="{{ request('orderBy') == 'shop_name' && request('direction') == 'asc' ? 'desc' : 'asc' }}">
                                 <input type="hidden" name="search" value="{{ request('search') }}">
-                                <button type="submit" class="w-full text-left">
+                                <button type="submit" class="w-full flex justify-center items-center">
                                     ชื่อร้าน
-                                    <i class="fas fa-{{ request('orderBy') == 'shop_name' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }}"></i>
+                                    <i class="fas fa-{{ request('orderBy') == 'shop_name' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }} ml-1"></i>
                                 </button>
                             </form>
                         </th>
-                        <th class="header-cell">
+                        <th class="header-cell text-center">
                             <form action="{{ route('admin.shops.index') }}" method="GET">
                                 @csrf
                                 <input type="hidden" name="orderBy" value="shop_description">
                                 <input type="hidden" name="direction" value="{{ request('orderBy') == 'shop_description' && request('direction') == 'asc' ? 'desc' : 'asc' }}">
                                 <input type="hidden" name="search" value="{{ request('search') }}">
-                                <button type="submit" class="w-full text-left">
+                                <button type="submit" class="w-full flex justify-center items-center">
                                     รายละเอียด
-                                    <i class="fas fa-{{ request('orderBy') == 'shop_description' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }}"></i>
+                                    <i class="fas fa-{{ request('orderBy') == 'shop_description' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }} ml-1"></i>
                                 </button>
                             </form>
                         </th>
-                        <th class="header-cell">
+                        <th class="header-cell text-center">
                             <form action="{{ route('admin.shops.index') }}" method="GET">
                                 @csrf
                                 <input type="hidden" name="orderBy" value="shop_location">
                                 <input type="hidden" name="direction" value="{{ request('orderBy') == 'shop_location' && request('direction') == 'asc' ? 'desc' : 'asc' }}">
                                 <input type="hidden" name="search" value="{{ request('search') }}">
-                                <button type="submit" class="w-full text-left">
+                                <button type="submit" class="w-full flex justify-center items-center">
                                     ที่ตั้ง
-                                    <i class="fas fa-{{ request('orderBy') == 'shop_location' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }}"></i>
+                                    <i class="fas fa-{{ request('orderBy') == 'shop_location' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }} ml-1"></i>
                                 </button>
                             </form>
                         </th>
-                        <th class="header-cell">
+                        <th class="header-cell text-center">
                             <form action="{{ route('admin.shops.index') }}" method="GET">
                                 @csrf
                                 <input type="hidden" name="orderBy" value="status">
                                 <input type="hidden" name="direction" value="{{ request('orderBy') == 'status' && request('direction') == 'asc' ? 'desc' : 'asc' }}">
                                 <input type="hidden" name="search" value="{{ request('search') }}">
-                                <button type="submit" class="w-full text-left">
+                                <button type="submit" class="w-full flex justify-center items-center">
                                     สถานะ
-                                    <i class="fas fa-{{ request('orderBy') == 'status' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }}"></i>
+                                    <i class="fas fa-{{ request('orderBy') == 'status' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }} ml-1"></i>
                                 </button>
                             </form>
                         </th>
-                        <th class="header-cell">
+                        <th class="header-cell text-center">
                             <form action="{{ route('admin.shops.index') }}" method="GET">
                                 @csrf
                                 <input type="hidden" name="orderBy" value="created_at">
                                 <input type="hidden" name="direction" value="{{ request('orderBy') == 'created_at' && request('direction') == 'asc' ? 'desc' : 'asc' }}">
                                 <input type="hidden" name="search" value="{{ request('search') }}">
-                                <button type="submit" class="w-full text-left">
+                                <button type="submit" class="w-full flex justify-center items-center">
                                     วันที่สร้าง
-                                    <i class="fas fa-{{ request('orderBy') == 'created_at' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }}"></i>
+                                    <i class="fas fa-{{ request('orderBy') == 'created_at' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }} ml-1"></i>
                                 </button>
                             </form>
                         </th>
-                        <th class="header-cell">
+                        <th class="header-cell text-center">
                             <form action="{{ route('admin.shops.index') }}" method="GET">
                                 @csrf
                                 <input type="hidden" name="orderBy" value="shop_owner_id">
                                 <input type="hidden" name="direction" value="{{ request('orderBy') == 'shop_owner_id' && request('direction') == 'asc' ? 'desc' : 'asc' }}">
                                 <input type="hidden" name="search" value="{{ request('search') }}">
-                                <button type="submit" class="w-full text-left">
+                                <button type="submit" class="w-full flex justify-center items-center">
                                     รหัสเจ้าของ
-                                    <i class="fas fa-{{ request('orderBy') == 'shop_owner_id' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }}"></i>
+                                    <i class="fas fa-{{ request('orderBy') == 'shop_owner_id' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }} ml-1"></i>
                                 </button>
                             </form>
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                             การจัดการ
                         </th>
                     </tr>
+                </thead>                    </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @foreach ($shops as $shop)

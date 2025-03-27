@@ -23,11 +23,20 @@ if ($justToggled && $toggledUserId) {
             </h1>
 
             <form action="{{ route('admin.users.acceptance') }}" method="GET">
-                @csrf
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-check-circle mr-2"></i>รายการรออนุมัติ
-                </button>
-            </form>
+    @csrf
+    <button type="submit" class="btn btn-primary relative">
+        <i class="fas fa-check-circle mr-2"></i>รายการรออนุมัติ
+        @php
+            $pendingUsersCount = \App\Models\User::where('status', 'pending')->count();
+        @endphp
+        @if($pendingUsersCount > 0)
+            <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                {{ $pendingUsersCount }}
+            </span>
+        @endif
+    </button>
+</form>
+
         </div>
 
         <div class="card mt-8">

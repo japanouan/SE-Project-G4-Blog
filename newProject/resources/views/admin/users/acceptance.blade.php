@@ -3,52 +3,61 @@
 @section('title', 'User Acceptance')
 
 @section('content')
-
     <div class="container mx-auto p-6">
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold text-gray-800">Acceptance</h1>
+            <h1 class="text-3xl font-bold text-gray-800">รายการรออนุมัติ</h1>
             <a href="{{ route('admin.users.index') }}" class="btn btn-primary">
-                <i class="fas fa-arrow-left mr-2"></i>Back to Users
+                <i class="fas fa-arrow-left mr-2"></i>กลับไปที่รายการผู้ใช้
             </a>
         </div>
         
-        <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="py-6">
+            <div class="w-full mx-auto">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
-                        <table class="min-w-full bg-white rounded-lg overflow-hidden" id="usersTable">
+                        <table class="w-full bg-white rounded-lg" id="usersTable">
                             <thead class="bg-gray-200">
                                 <tr>
-                                    <th style="padding: 10px;">ID</th>
-                                    <th style="padding: 10px;">Fullname</th>
-                                    <th style="padding: 10px;">Email</th>
-                                    <th style="padding: 10px;">Phone</th>
-                                    <th style="padding: 10px;">Username</th>
-                                    <th style="padding: 10px;">Role</th>
-                                    <th style="padding: 10px;">Status</th>
-                                    <th style="padding: 10px;">Identify</th>
-                                    <th style="padding: 10px;">Actions</th>
+                                    <th class="p-2 text-center text-xs font-medium text-gray-700 uppercase">ID</th>
+                                    <th class="p-2 text-center text-xs font-medium text-gray-700 uppercase">Name</th>
+                                    <th class="p-2 text-center text-xs font-medium text-gray-700 uppercase">Email</th>
+                                    <th class="p-2 text-center text-xs font-medium text-gray-700 uppercase">Phone</th>
+                                    <th class="p-2 text-center text-xs font-medium text-gray-700 uppercase">Username</th>
+                                    <th class="p-2 text-center text-xs font-medium text-gray-700 uppercase">Role</th>
+                                    <th class="p-2 text-center text-xs font-medium text-gray-700 uppercase">Status</th>
+                                    <th class="p-2 text-center text-xs font-medium text-gray-700 uppercase">Document</th>
+                                    <th class="p-2 text-center text-xs font-medium text-gray-700 uppercase">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($users as $user)
-                                <tr id="userRow-{{ $user->user_id }}" class="border-b">
-                                    <td style="padding: 10px;">{{ $user->user_id }}</td>
-                                    <td style="padding: 10px;">{{ $user->name }}</td>
-                                    <td style="padding: 10px;">{{ $user->email }}</td>
-                                    <td style="padding: 10px;">{{ $user->phone }}</td>
-                                    <td style="padding: 10px;">{{ $user->username }}</td>
-                                    <td style="padding: 10px;">{{ $user->userType }}</td>
-                                    <td style="padding: 10px;" id="status-{{ $user->user_id }}">{{ $user->status }}</td>
-                                    <td style="padding: 10px; text-align: center;">
+                                <tr id="userRow-{{ $user->user_id }}" class="border-b hover:bg-gray-50">
+                                    <td class="p-2 text-center text-sm">{{ $user->user_id }}</td>
+                                    <td class="p-2 text-center text-sm">{{ $user->name }}</td>
+                                    <td class="p-2 text-center text-sm">
+                                        <span class="truncate block max-w-[150px] mx-auto" title="{{ $user->email }}">
+                                            {{ $user->email }}
+                                        </span>
+                                    </td>
+                                    <td class="p-2 text-center text-sm">{{ $user->phone }}</td>
+                                    <td class="p-2 text-center text-sm">{{ $user->username }}</td>
+                                    <td class="p-2 text-center text-sm">{{ $user->userType }}</td>
+                                    <td class="p-2 text-center text-sm" id="status-{{ $user->user_id }}">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                            {{ $user->status }}
+                                        </span>
+                                    </td>
+                                    <td class="p-2 text-center text-sm">
                                         <a href="{{ asset($user->identity_path) }}" target="_blank" 
-                                        class="text-blue-500 underline">
-                                            View Document
+                                        class="text-blue-500 underline hover:text-blue-700">
+                                            View
                                         </a>
                                     </td>
-                                    <td class="flex justify-center p-2 ">
-                                        <button class="text-white bg-blue-500 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 acceptButton" data-user-id="{{ $user->user_id }}">Accept</button>
-                                        <button class="focus:outline-none text-white bg-red-500  hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900 declineButton" data-user-id="{{ $user->user_id }}">Decline</button>
+                                    <td class="p-2 text-center text-sm">
+                                        <div class="flex justify-center space-x-1">
+                                            <button class="text-white bg-blue-500 hover:bg-blue-600 text-xs px-2 py-1 rounded acceptButton" data-user-id="{{ $user->user_id }}">อนุมัติ</button>
+                                            <button class="text-white bg-red-500 hover:bg-red-600 text-xs px-2 py-1 rounded declineButton" data-user-id="{{ $user->user_id }}">ปฏิเสธ</button>
+                                        </div>
                                     </td>
                                 </tr>
                                 @endforeach
