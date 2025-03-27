@@ -19,7 +19,7 @@ class OutfitController extends Controller
 {
     public function index(Request $request)
 {
-    $query = ThaiOutfit::query();
+    $query = ThaiOutfit::query()->where('status','active');
     
     if ($request->has('category')) {
         $categoryId = $request->category;
