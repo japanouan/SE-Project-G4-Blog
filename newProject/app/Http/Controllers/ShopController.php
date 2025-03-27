@@ -20,13 +20,14 @@ class ShopController extends Controller
         $direction = $request->input('direction') ?: 'asc';
 
 
-        $query = Shop::with('user');
+        $query = Shop::with('user','address');
         // dd($orderBy);
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
             $query->where('shop_id', 'like', "%{$search}%")
                 ->orWhere('shop_name', 'like', "%{$search}%");
         }
+        
 
         // จัดเรียงตาม orderBy และ direction
         $query->orderBy($orderBy, $direction);
@@ -74,36 +75,93 @@ class ShopController extends Controller
 
     public function edit($shop_id)
     {
-        $shop = Shop::findOrFail($shop_id);
-
+        $shop = Shop::with('address')->findOrFail($shop_id);
         return view('admin.shops.edit', compact('shop'));
     }
 
+
     public function update(Request $request, $id)
     {
-    $shop = Shop::findOrFail($id);
+        \Log::info('Shop update request data:', $request->all());
+        
+        $shop = Shop::with('address')->findOrFail($id);
     
-    $validated = $request->validate([
-        'shop_name' => 'required|string|max:255',
-        'shop_description' => 'required|string',
-        'shop_location' => 'required|string|max:255',
-        'rental_terms' => 'required|string',
-        'status' => 'required|string|in:active,inactive',
-    ]);
+        $validated = $request->validate([
+            'shop_name' => 'required|string|max:255',
+            'shop_description' => 'required|string',
+            'rental_terms' => 'required|string',
+            'houseNumber' => 'required|string',
+            'province' => 'required|string',
+            'district' => 'required|string',
+            'subdistrict' => 'required|string',
+            'postalCode' => 'required|string',
+        ]);
     
-    $shop->fill($validated);
-    $shop->save();
+        DB::beginTransaction();
     
-    if (Auth::user()->userType == 'admin'){
-        // Normal redirect for non-AJAX requests
-        return redirect()->route('admin.shops.index')->with('success', 'Shop updated successfully');
+        try {
+            // อัปเดตข้อมูล shop
+            $shop->shop_name = $request->shop_name;
+            $shop->shop_description = $request->shop_description;
+            $shop->rental_terms = $request->rental_terms;
+    
+            // จัดการ address
+            if ($shop->address) {
+                \Log::info('Updating existing address:', ['AddressID' => $shop->address->AddressID]);
+                $address = $shop->address;
+                $address->HouseNumber = $request->houseNumber;
+                $address->Street = $request->street ?? '';
+                $address->Subdistrict = $request->subdistrict;
+                $address->District = $request->district;
+                $address->Province = $request->province;
+                $address->PostalCode = $request->postalCode;
+                $address->save();
+            } else {
+                \Log::info('Creating new address for shop update');
+                $address = new Address();
+                $address->HouseNumber = $request->houseNumber;
+                $address->Street = $request->street ?? '';
+                $address->Subdistrict = $request->subdistrict;
+                $address->District = $request->district;
+                $address->Province = $request->province;
+                $address->PostalCode = $request->postalCode;
+                $address->save();
+                
+                $shop->AddressID = $address->AddressID;
+            }
+    
+            $shop->save();
+            
+            DB::commit();
+            \Log::info('Shop and address updated successfully');
+    
+            // การ redirect ตามประเภทผู้ใช้
+            if (Auth::user()->userType == 'admin') {
+                if ($request->ajax() || $request->has('is_ajax')) {
+                    return response()->json(['success' => true, 'message' => 'Shop updated successfully']);
+                }
+                return redirect()->route('admin.shops.index')->with('success', 'Shop updated successfully');
+            }
+    
+            // สำหรับผู้ใช้ทั่วไป (ไม่ใช่ admin)
+            if ($request->ajax() || $request->has('is_ajax')) {
+                return response()->json(['success' => true, 'message' => 'ข้อมูลร้านค้าอัปเดตเรียบร้อยแล้ว']);
+            }
+            return redirect()->route('dashboard')->with('success', 'ข้อมูลร้านค้าอัปเดตเรียบร้อยแล้ว');
+    
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error updating shop:', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            
+            if ($request->ajax() || $request->has('is_ajax')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'เกิดข้อผิดพลาด: ' . $e->getMessage()
+                ], 500);
+            }
+            return back()->with('error', 'เกิดข้อผิดพลาด: ' . $e->getMessage())->withInput();
+        }
     }
-    // Check if request is AJAX
-    if ($request->ajax() || $request->has('is_ajax')) {
-        return response()->json(['success' => true, 'message' => 'Shop updated successfully']);
-    }
-    return redirect()->route('dashboard')->with('success', 'Shop updated successfully');
-}
 
 
 
