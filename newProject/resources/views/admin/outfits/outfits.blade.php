@@ -27,7 +27,7 @@
             <!-- Search Bar -->
             <div class="mb-4">
                 <div class="flex">
-                    <input type="text" name="search" placeholder="ค้นหาตามชื่อชุด..." value="{{ request('search') }}"
+                    <input type="text" name="search" placeholder="ค้นหาตามชื่อชุด ชื่อร้าน และรหัสชุด..." value="{{ request('search') }}"
                         class="w-full rounded-l-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                     <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-r-md hover:bg-blue-700">
                         <i class="fa fa-search"></i>
