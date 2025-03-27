@@ -10,7 +10,13 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        $categories = OutfitCategory::orderBy('category_name')->paginate(10);
+        // เพิ่มการนับจำนวนชุดในแต่ละหมวดหมู่
+        $categories = OutfitCategory::select('OutfitCategories.*')
+            ->leftJoin('ThaiOutfitCategories', 'OutfitCategories.category_id', '=', 'ThaiOutfitCategories.category_id')
+            ->groupBy('OutfitCategories.category_id')
+            ->selectRaw('COUNT(ThaiOutfitCategories.outfit_id) as outfits_count')
+            ->orderBy('category_name')
+            ->paginate(10);
         
         // Determine which view to use based on user type
         if (Auth::user()->userType == 'admin') {
