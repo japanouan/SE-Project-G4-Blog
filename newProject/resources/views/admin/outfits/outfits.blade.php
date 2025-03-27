@@ -266,6 +266,7 @@
 </div>
 
 <script>
+    // Toggle variants function
     function toggleVariants(id) {
         const variantsElement = document.getElementById(id);
         
@@ -284,7 +285,7 @@
             const rect = variantsElement.getBoundingClientRect();
             const viewportWidth = window.innerWidth;
             
-            // เลื่อนกล่องมาทางซ้ายเล็กน้อย (เพิ่มบรรทัดนี้)
+            // เลื่อนกล่องมาทางซ้ายเล็กน้อย
             variantsElement.style.left = '-150px';
             
             // ถ้าล้นทางขวาของหน้าจอ ให้แสดงทางซ้ายแทน
@@ -294,7 +295,6 @@
             }
         }
     }
-
 
     // เพิ่ม event listener เพื่อปิดรายละเอียดเมื่อคลิกที่อื่น
     document.addEventListener('click', function(event) {
@@ -308,7 +308,19 @@
         }
     });
 
+    // Toggle advanced filters
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggleFiltersBtn = document.getElementById('toggle-filters');
+        const advancedFilters = document.getElementById('advanced-filters');
+        
+        if (toggleFiltersBtn && advancedFilters) {
+            toggleFiltersBtn.addEventListener('click', function() {
+                advancedFilters.classList.toggle('hidden');
+            });
+        }
+    });
 </script>
+
 
 <style>
     .table-container {
