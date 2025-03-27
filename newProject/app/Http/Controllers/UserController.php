@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\File; // นำเข้า File Helper
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+
 
 
 class UserController extends Controller
@@ -100,6 +102,17 @@ class UserController extends Controller
     public function toggleStatus(Request $request, $id)
     {
         try {
+            // ตรวจสอบว่าผู้ใช้ที่จะ toggle เป็น admin ที่กำลังใช้งานอยู่หรือไม่
+            if (Auth::user()->userType == 'admin' && Auth::user()->user_id == $id) {
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'แบนตัวเองหาเรื่องแท้ ๆ'
+                    ], 403);
+                }
+                return back()->with('error', 'แบนตัวเองหาเรื่องแท้ ๆ');
+            }
+
             $user = User::findOrFail($id);
             $newStatus = $request->input('status');
 
@@ -111,17 +124,17 @@ class UserController extends Controller
             $user->save();
 
             // Prepare redirect parameters
-    $params = $request->only(['orderBy', 'direction', 'search']);
-    
-    // Handle userType filter
-    if ($request->has('userType')) {
-        $params['userType'] = $request->userType;
-    }
-    
-    // Handle status filter - if we're activating a user, we might need to adjust the filter
-    if ($request->has('status')) {
-        $params['status'] = $request->status;
-    }
+            $params = $request->only(['orderBy', 'direction', 'search']);
+            
+            // Handle userType filter
+            if ($request->has('userType')) {
+                $params['userType'] = $request->userType;
+            }
+            
+            // Handle status filter - if we're activating a user, we might need to adjust the filter
+            if ($request->has('status')) {
+                $params['status'] = $request->status;
+            }
 
             // If it's an AJAX request, return JSON response
             if ($request->ajax()) {
@@ -135,13 +148,13 @@ class UserController extends Controller
                 ]);
             }
 
-
-
             // For non-AJAX requests, redirect back with parameters
             return redirect()->route('admin.users.index', [
                 'orderBy' => $request->input('orderBy'),
                 'direction' => $request->input('direction'),
-                'userType' => $request->input('userType')
+                'userType' => $request->input('userType'),
+                'just_toggled' => 1,
+                'toggled_user_id' => $id
             ])->with('success', 'User status updated successfully');
         } catch (\Exception $e) {
             if ($request->ajax()) {
@@ -154,9 +167,6 @@ class UserController extends Controller
             return back()->withErrors(['error' => 'Failed to update user status: ' . $e->getMessage()]);
         }
     }
-
-
-
 
     // accept form
     public function acceptance()

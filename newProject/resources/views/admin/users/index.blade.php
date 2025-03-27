@@ -36,8 +36,23 @@ if ($justToggled && $toggledUserId) {
                     @endif
                 </button>
             </form>
-
         </div>
+
+        @if(session('error'))
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded shadow-md">
+            <div class="flex items-center">
+                <div class="py-1">
+                    <svg class="h-6 w-6 text-red-500 mr-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <p class="font-bold">ข้อผิดพลาด</p>
+                    <p class="text-sm">{{ session('error') }}</p>
+                </div>
+            </div>
+        </div>
+        @endif
 
         <div class="card mt-8">
             <div class="card-header flex items-center">
@@ -474,41 +489,57 @@ if ($justToggled && $toggledUserId) {
     </td>
     <td class="border border-gray-300 p-3">
         <div class="flex justify-center space-x-2">
-        <a href="{{ route('admin.users.edit', $toggledUser->user_id) }}?{{ http_build_query(request()->except(['page', 'just_toggled', 'toggled_user_id'])) }}" 
-            class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm flex items-center whitespace-nowrap">
-            <i class="fas fa-edit mr-1"></i> แก้ไข
-        </a>
-            <form action="{{ route('admin.users.toggleStatus', $toggledUser->user_id) }}" method="POST" class="inline-block">
-                @csrf
-                <input type="hidden" name="status" value="{{ $toggledUser->status == 'active' ? 'inactive' : 'active' }}">
-                <input type="hidden" name="orderBy" value="{{ request('orderBy') }}">
-                <input type="hidden" name="direction" value="{{ request('direction') }}">
-                
-                <input type="hidden" name="just_toggled" value="1">
-                <input type="hidden" name="toggled_user_id" value="{{ $toggledUser->user_id }}">
-                
-                @if(request()->has('userType'))
-                    @foreach(request('userType') as $type)
-                        <input type="hidden" name="userType[]" value="{{ $type }}">
-                    @endforeach
-                @endif
-                
-                @if(request()->has('status'))
-                    @foreach(request('status') as $status)
-                        <input type="hidden" name="status[]" value="{{ $status }}">
-                    @endforeach
-                @endif
-                
-                @if(request('search'))
-                    <input type="hidden" name="search" value="{{ request('search') }}">
-                @endif
-                
-                <button type="submit" 
-                        class="{{ $toggledUser->status == 'active' ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600' }} text-white px-3 py-1 rounded text-sm flex items-center whitespace-nowrap">
-                    <i class="fas fa-{{ $toggledUser->status == 'active' ? 'ban' : 'check' }} mr-1"></i>
-                    {{ $toggledUser->status == 'active' ? 'ปิดใช้งาน' : 'เปิดใช้งาน' }}
-                </button>
-            </form>
+            <a href="{{ route('admin.users.edit', $user->user_id) }}?{{ http_build_query(request()->except(['page'])) }}" 
+                class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs flex items-center whitespace-nowrap">
+                <i class="fas fa-edit mr-1"></i> แก้ไข
+            </a>
+            
+            @if(!(Auth::user()->userType == 'admin' && Auth::user()->user_id == $user->user_id))
+                <!-- ถ้าไม่ใช่ admin ที่กำลังดูตัวเอง จึงแสดงปุ่ม toggle status -->
+                <form action="{{ route('admin.users.toggleStatus', $user->user_id) }}" method="POST" class="inline-block">
+                    @csrf
+                    <input type="hidden" name="status" value="{{ $user->status == 'active' ? 'inactive' : 'active' }}">
+                    <input type="hidden" name="orderBy" value="{{ request('orderBy') }}">
+                    <input type="hidden" name="direction" value="{{ request('direction') }}">
+                    
+                    <input type="hidden" name="just_toggled" value="1">
+                    <input type="hidden" name="toggled_user_id" value="{{ $user->user_id }}">
+                    
+                    @if(request()->has('userType'))
+                        @foreach(request('userType') as $type)
+                            <input type="hidden" name="userType[]" value="{{ $type }}">
+                        @endforeach
+                    @endif
+                    
+                    @if(request()->has('status'))
+                        @foreach(request('status') as $status)
+                            <input type="hidden" name="status[]" value="{{ $status }}">
+                        @endforeach
+                    @endif
+                    
+                    @if(request('search'))
+                        <input type="hidden" name="search" value="{{ request('search') }}">
+                    @endif
+                    
+                    <button type="submit" 
+                            class="{{ $user->status == 'active' ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600' }} text-white px-2 py-1 rounded text-xs flex items-center whitespace-nowrap">
+                        <i class="fas fa-{{ $user->status == 'active' ? 'ban' : 'check' }} mr-1"></i>
+                        {{ $user->status == 'active' ? 'ปิด' : 'เปิด' }}
+                    </button>
+                </form>
+            @else
+                <!-- ถ้าเป็น admin ที่กำลังดูตัวเอง แสดงปุ่มที่มี tooltip -->
+                <div class="relative group">
+                    <button 
+                        class="bg-gray-400 text-white px-2 py-1 rounded text-xs flex items-center whitespace-nowrap cursor-not-allowed"
+                        onclick="showBanSelfMessage()">
+                        <i class="fas fa-ban mr-1"></i> ปิดใช้งาน
+                    </button>
+                    <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-black text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                        แบนตัวเองหาเรื่องแท้ ๆ
+                    </div>
+                </div>
+            @endif
         </div>
     </td>
 </tr>
@@ -619,6 +650,24 @@ if ($justToggled && $toggledUserId) {
             margin-right: 0.5rem;
         }
     </style>
+
+<script>
+        function showBanSelfMessage() {
+            // สร้าง toast notification
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg z-50 animate-bounce';
+            toast.innerHTML = '<i class="fas fa-exclamation-triangle mr-2"></i> แบนตัวเองหาเรื่องแท้ ๆ';
+            document.body.appendChild(toast);
+            
+            // ลบ toast หลังจาก 3 วินาที
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 500);
+            }, 3000);
+        }
+    </script>
 
     <script>
 // JavaScript for real-time filtering
