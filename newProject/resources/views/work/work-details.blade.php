@@ -63,7 +63,7 @@
                 @endif
             </p>
             <p class="mb-2"><strong>Appointment Time:</strong>
-                {{ \Carbon\Carbon::parse($work->selectService->reservation_date)->format('H:i') }}
+            {{ \Carbon\Carbon::parse($work->selectService->reservation_date)->setTimezone('Asia/Bangkok')->format('H:i') }}
             </p>
             @if($work->selectService->booking->user)
             <p class="mb-2"><strong>Customer Name:</strong>
@@ -86,7 +86,7 @@
             </div>
 
             <!-- ปุ่ม Finish Job -->
-            <button id="finish-job-btn" class="btn btn-success mt-4 {{ $work->service_info ? 'hidden' : '' }}">
+            <button id="finish-job-btn" class="btn btn-success mt-4" disabled>
                 <i class="fas fa-check-circle"></i> Ending work
             </button>
         </div>
@@ -99,21 +99,29 @@
         let appointmentTime = new Date("{{ \Carbon\Carbon::parse($work->selectService->reservation_date)->toIso8601String() }}");
         let serviceInfo = "{{ e($work->service_info) }}";
         let textarea = document.getElementById('service_info');
-
         let finishJobBtn = document.getElementById('finish-job-btn');
 
-        if (currentTime >= appointmentTime && serviceInfo == null) {
-            finishJobBtn.classList.remove('hidden');
-        }
-        textarea.value = serviceInfo;
-        if (serviceInfo != null && serviceInfo.trim() != '') {
-            textarea.setAttribute('readonly', true); // ทำให้ไม่สามารถแก้ไขค่าใน textarea ได้
+        // ตรวจสอบเงื่อนไขสำหรับการแสดงปุ่ม
+        if (serviceInfo && serviceInfo.trim() !== '') {
+            // ถ้ามี service_info แปลว่างานเสร็จแล้ว ปิดปุ่มและทำให้ textarea เป็น readonly
+            finishJobBtn.classList.add('hidden');
+            textarea.setAttribute('readonly', true);
+        } else if (currentTime < appointmentTime) {
+            // ถ้ายังไม่ถึงเวลา appointment ปุ่มจะถูก disable
+            finishJobBtn.disabled = true;
+        } else {
+            // ถ้าเลยเวลา appointment และยังไม่มี service_info ปุ่มจะใช้งานได้
+            finishJobBtn.disabled = false;
         }
 
+        // ตั้งค่าเริ่มต้นให้ textarea
+        textarea.value = serviceInfo || '';
+
+        // Event listener สำหรับปุ่ม Finish Job
         finishJobBtn.addEventListener('click', function() {
-            let serviceInfo = document.getElementById('service_info').value;
+            let serviceInfoValue = textarea.value;
 
-            if (!serviceInfo.trim()) {
+            if (!serviceInfoValue.trim()) {
                 alert("Please fill in the Service Information before finishing the job.");
                 return;
             }
@@ -125,7 +133,7 @@
                         'X-CSRF-TOKEN': document.querySelector('meta[name=\"csrf-token\"]').content
                     },
                     body: JSON.stringify({
-                        service_info: serviceInfo
+                        service_info: serviceInfoValue
                     })
                 }).then(response => response.json())
                 .then(data => {
@@ -134,7 +142,7 @@
                         finishJobBtn.classList.add('hidden');
                         textarea.setAttribute('readonly', true);
                         
-                        // Add completion indicator after successful submission
+                        // อัปเดต status indicator เป็น Completed
                         const statusIndicator = document.querySelector('.absolute.top-4.right-4');
                         if (statusIndicator) {
                             statusIndicator.innerHTML = `
