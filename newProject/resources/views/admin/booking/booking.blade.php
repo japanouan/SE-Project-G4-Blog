@@ -10,14 +10,44 @@
             <i class="fas fa-calendar-check mr-2 text-[#8B9DF9]"></i>จัดการการจอง
         </h1>
         <div class="mb-6">
-            <form method="GET" action="{{ route('admin.booking.index') }}" class="flex gap-2">
-                <input type="text" name="search" placeholder="ค้นหา Booking ID, User Name,Shop Name"
-                    value="{{ request('search') }}"
-                    class="w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
-                <button type="submit"
-                    class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">
-                    ค้นหา
-                </button>
+            <form method="GET" action="{{ route('admin.booking.index') }}" class="space-y-4">
+                <!-- ช่องค้นหา -->
+                <div class="flex gap-2">
+                    <input type="text" name="search" placeholder="ค้นหา Booking ID, User Name, Shop Name"
+                        value="{{ request('search') }}"
+                        class="w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                    <button type="submit"
+                        class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">
+                        ค้นหา
+                    </button>
+                </div>
+                
+                <!-- ตัวกรองสถานะ -->
+                <div class="bg-white p-4 rounded-lg shadow-sm">
+                    <h3 class="font-medium text-gray-700 mb-2">กรองตามสถานะ:</h3>
+                    <div class="flex flex-wrap gap-2">
+                        <a href="{{ route('admin.booking.index') }}" 
+                           class="px-3 py-1 rounded-full text-sm {{ !request('status') ? 'bg-indigo-100 text-indigo-800 font-medium' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
+                           ทั้งหมด
+                        </a>
+                        <a href="{{ route('admin.booking.index', ['status' => 'pending', 'search' => request('search')]) }}" 
+                           class="px-3 py-1 rounded-full text-sm {{ request('status') == 'pending' ? 'bg-yellow-100 text-yellow-800 font-medium' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
+                           รอดำเนินการ
+                        </a>
+                        <a href="{{ route('admin.booking.index', ['status' => 'partial paid', 'search' => request('search')]) }}" 
+                           class="px-3 py-1 rounded-full text-sm {{ request('status') == 'partial paid' ? 'bg-blue-100 text-blue-800 font-medium' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
+                           ชำระบางส่วน
+                        </a>
+                        <a href="{{ route('admin.booking.index', ['status' => 'confirmed', 'search' => request('search')]) }}" 
+                           class="px-3 py-1 rounded-full text-sm {{ request('status') == 'confirmed' ? 'bg-green-100 text-green-800 font-medium' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
+                           ยืนยันแล้ว
+                        </a>
+                        <a href="{{ route('admin.booking.index', ['status' => 'cancelled', 'search' => request('search')]) }}" 
+                           class="px-3 py-1 rounded-full text-sm {{ request('status') == 'cancelled' ? 'bg-red-100 text-red-800 font-medium' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
+                           ยกเลิกแล้ว
+                        </a>
+                    </div>
+                </div>
             </form>
         </div>
         @foreach ($bookings as $booking)

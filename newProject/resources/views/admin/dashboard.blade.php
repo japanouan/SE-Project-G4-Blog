@@ -146,7 +146,7 @@
                     <h3 class="text-lg font-semibold mb-4">สถานะการจอง</h3>
                     <div class="grid grid-cols-3 gap-2 bg-gray-100 p-4 rounded-lg">
                         <div class="text-center">
-                            <div class="text-xl font-bold text-yellow-600">{{ \App\Models\Booking::where('status', 'pending')->count() }}</div>
+                            <div class="text-xl font-bold text-yellow-600">{{ \App\Models\Booking::whereIn('status', ['pending', 'partial paid'])->count() }}</div>
                             <div class="text-xs text-gray-600">รอดำเนินการ</div>
                         </div>
                         <div class="text-center">

@@ -161,6 +161,7 @@ class BookingController extends Controller
             'orderDetails.cartItem.user'
         ]);
     
+        // กรองตามคำค้นหา (ใช้โค้ดเดิม)
         if ($request->filled('search')) {
             $search = $request->search;
     
@@ -180,10 +181,16 @@ class BookingController extends Controller
             });
         }
     
+        // กรองตามสถานะ (เพิ่มใหม่)
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+    
         $bookings = $query->orderBy('booking_id', 'desc')->get();
     
         return view('admin.booking.booking', [
             'bookings' => $bookings,
+            'selectedStatus' => $request->status,
         ]);
     }
     
