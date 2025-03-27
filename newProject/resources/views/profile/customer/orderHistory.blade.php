@@ -20,6 +20,26 @@
             $pendingSuggestionsCount++;
         }
     }
+    
+    // Get today's date
+    $today = \Carbon\Carbon::now()->format('Y-m-d');
+    
+    // Array to store order details that need to be returned
+    $returnOrderIds = [];
+    
+    // Check each booking for items that need to be returned
+    foreach ($bookings as $booking) {
+        foreach ($booking->orderDetails as $orderDetail) {
+            if ($orderDetail->reservation_date && $orderDetail->total !== null) {
+                // Add 1 day to reservation_date for return date
+                $returnDate = \Carbon\Carbon::parse($orderDetail->reservation_date)->addDay()->format('Y-m-d');
+                if ($returnDate <= $today) {
+                    $returnOrderIds[] = $booking->booking_id;
+                    break; // One match is enough to highlight the booking
+                }
+            }
+        }
+    }
 @endphp
 
 <div class="container mx-auto my-5 flex flex-col md:flex-row gap-5 min-h-screen">
@@ -92,6 +112,33 @@
             </div>
         @endif
         
+        <!-- Return alerts notification -->
+        @if(count($returnOrderIds) > 0)
+            <div id="return-notification" class="bg-red-50 border-l-4 border-red-400 p-4 mb-5 rounded-md shadow-md">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-circle text-red-500 text-xl mr-3"></i>
+                        <div>
+                            <p class="text-red-700 font-medium">
+                                คุณมี {{ count($returnOrderIds) }} รายการที่ต้องคืนชุดแล้ว
+                            </p>
+                            <p class="text-red-600 text-sm mt-1">
+                                กรุณาคืนชุดโดยเร็วที่สุด เพื่อหลีกเลี่ยงค่าปรับเพิ่มเติม
+                            </p>
+                        </div>
+                    </div>
+                    <div>
+                        <button id="show-all-returns" class="text-purple-600 hover:text-purple-800 mr-2 hidden">
+                            แสดงทั้งหมด
+                        </button>
+                        <button id="filter-returns" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm transition-colors">
+                            แสดงเฉพาะรายการที่ต้องคืนชุด
+                        </button>
+                    </div>
+                </div>
+            </div>
+        @endif
+        
         <div id="orders-container" class="space-y-4">
             @forelse ($bookings as $booking)
                 @php
@@ -110,12 +157,21 @@
                     $showNotification = $hasPendingSuggestions;
                 @endphp
                 
-                <div class="order-item relative {{ $showNotification ? 'has-suggestions' : '' }}">
+                <div class="order-item relative {{ $showNotification ? 'has-suggestions' : '' }} {{ in_array($booking->booking_id, $returnOrderIds) ? 'return-alert' : '' }}">
                     <!-- Notification badge for orders with pending suggestions -->
                     @if($showNotification)
                         <div class="absolute -top-2 -right-2 z-10">
                             <div class="bg-yellow-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg animate-pulse">
                                 ชุดทดแทนใหม่
+                            </div>
+                        </div>
+                    @endif
+                    
+                    <!-- Add return alert badge -->
+                    @if(in_array($booking->booking_id, $returnOrderIds))
+                        <div class="absolute -top-2 {{ $showNotification ? '-left-2' : '-right-2' }} z-10">
+                            <div class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg animate-pulse">
+                                ต้องคืนชุดแล้ว!
                             </div>
                         </div>
                     @endif
@@ -208,18 +264,32 @@
     </div>
 </div>
 
+<style>
+    .order-item.return-alert {
+        border: 2px solid #f56565 !important; /* Red border */
+        box-shadow: 0 0 15px rgba(245, 101, 101, 0.4) !important;
+    }
+    
+    .order-item.return-alert:hover {
+        box-shadow: 0 0 20px rgba(245, 101, 101, 0.6) !important;
+    }
+</style>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const filterSuggestionsBtn = document.getElementById('filter-suggestions');
         const showAllOrdersBtn = document.getElementById('show-all-orders');
+        const filterReturnsBtn = document.getElementById('filter-returns');
+        const showAllReturnsBtn = document.getElementById('show-all-returns');
         const ordersContainer = document.getElementById('orders-container');
         const orderItems = document.querySelectorAll('.order-item');
         
-        // ตรวจสอบว่ามีรายการที่มีชุดทดแทนหรือไม่
+        // Check if we have items with suggestions/return alerts
         const hasSuggestionItems = document.querySelectorAll('.order-item.has-suggestions').length > 0;
+        const hasReturnItems = document.querySelectorAll('.order-item.return-alert').length > 0;
         
         // Function to filter orders and show only those with suggestions
-        function filterOrders() {
+        function filterSuggestions() {
             let hasVisibleOrders = false;
             
             orderItems.forEach(order => {
@@ -235,6 +305,10 @@
             if (filterSuggestionsBtn) filterSuggestionsBtn.classList.add('hidden');
             if (showAllOrdersBtn) showAllOrdersBtn.classList.remove('hidden');
             
+            // Reset other filter button states
+            if (filterReturnsBtn) filterReturnsBtn.classList.remove('hidden');
+            if (showAllReturnsBtn) showAllReturnsBtn.classList.add('hidden');
+            
             // Add a message if no suggestions are found after filtering
             const noSuggestionsMsg = document.querySelector('.no-suggestions-msg');
             if (!hasVisibleOrders) {
@@ -244,9 +318,47 @@
                     msgElement.textContent = 'ไม่มีรายการที่มีชุดทดแทนใหม่รอการตอบรับ';
                     ordersContainer.appendChild(msgElement);
                 }
-                
-                // Auto-show all orders if there are no suggestions (after 2 seconds)
-                setTimeout(showAllOrders, 2000);
+            } else {
+                if (noSuggestionsMsg) {
+                    noSuggestionsMsg.remove();
+                }
+            }
+        }
+        
+        // Function to filter orders and show only those that need to be returned
+        function filterReturns() {
+            let hasVisibleOrders = false;
+            
+            orderItems.forEach(order => {
+                if (order.classList.contains('return-alert')) {
+                    order.style.display = 'block';
+                    hasVisibleOrders = true;
+                } else {
+                    order.style.display = 'none';
+                }
+            });
+            
+            // Update button visibility
+            if (filterReturnsBtn) filterReturnsBtn.classList.add('hidden');
+            if (showAllReturnsBtn) showAllReturnsBtn.classList.remove('hidden');
+            
+            // Reset other filter button states
+            if (filterSuggestionsBtn) filterSuggestionsBtn.classList.remove('hidden');
+            if (showAllOrdersBtn) showAllOrdersBtn.classList.add('hidden');
+            
+            // Add a message if no returns are found after filtering
+            const noReturnsMsg = document.querySelector('.no-returns-msg');
+            if (!hasVisibleOrders) {
+                if (!noReturnsMsg) {
+                    const msgElement = document.createElement('p');
+                    msgElement.className = 'text-gray-500 text-center py-5 no-returns-msg';
+                    msgElement.textContent = 'ไม่มีรายการที่ต้องคืนชุด';
+                    ordersContainer.appendChild(msgElement);
+                }
+            } else {
+                if (noReturnsMsg) {
+                    noReturnsMsg.remove();
+                }
             }
         }
         
@@ -256,29 +368,48 @@
                 order.style.display = 'block';
             });
             
-            // Update button visibility
+            // Update all button visibility
             if (filterSuggestionsBtn) filterSuggestionsBtn.classList.remove('hidden');
             if (showAllOrdersBtn) showAllOrdersBtn.classList.add('hidden');
+            if (filterReturnsBtn) filterReturnsBtn.classList.remove('hidden');
+            if (showAllReturnsBtn) showAllReturnsBtn.classList.add('hidden');
             
-            // Remove no suggestions message if it exists
+            // Remove all filter messages
             const noSuggestionsMsg = document.querySelector('.no-suggestions-msg');
             if (noSuggestionsMsg) {
                 noSuggestionsMsg.remove();
+            }
+            
+            const noReturnsMsg = document.querySelector('.no-returns-msg');
+            if (noReturnsMsg) {
+                noReturnsMsg.remove();
             }
         }
         
         // Add event listeners to buttons
         if (filterSuggestionsBtn) {
-            filterSuggestionsBtn.addEventListener('click', filterOrders);
+            filterSuggestionsBtn.addEventListener('click', filterSuggestions);
         }
         
         if (showAllOrdersBtn) {
             showAllOrdersBtn.addEventListener('click', showAllOrders);
         }
         
-        // ซ่อนปุ่มกรองถ้าไม่มีรายการที่มีชุดทดแทน
+        if (filterReturnsBtn) {
+            filterReturnsBtn.addEventListener('click', filterReturns);
+        }
+        
+        if (showAllReturnsBtn) {
+            showAllReturnsBtn.addEventListener('click', showAllOrders);
+        }
+        
+        // Hide filter buttons if no items in that category
         if (!hasSuggestionItems && filterSuggestionsBtn) {
             filterSuggestionsBtn.classList.add('hidden');
+        }
+        
+        if (!hasReturnItems && filterReturnsBtn) {
+            filterReturnsBtn.classList.add('hidden');
         }
     });
 </script>

@@ -35,6 +35,39 @@ if (Auth::check()) {
         }
     }
 }
+
+// Return Date Alerts
+$returnAlerts = 0;
+$returnItems = [];
+
+if (Auth::check()) {
+    // Get all confirmed bookings
+    $confirmedBookings = Booking::where('user_id', Auth::id())
+                         ->whereIn('status', ['confirmed', 'partial paid'])
+                         ->get();
+    
+    foreach ($confirmedBookings as $booking) {
+        // Check each order detail for items that need to be returned soon
+        foreach ($booking->orderDetails as $orderDetail) {
+            if ($orderDetail->total !== null && $orderDetail->reservation_date) {
+                // Add 1 day to reservation_date since it's the rental start date
+                $returnDate = \Carbon\Carbon::parse($orderDetail->reservation_date)->addDay();
+                
+                // If return date is today or in the past 
+                if ($returnDate->isToday() || $returnDate->isPast()) {
+                    $returnAlerts++;
+                    $returnItems[] = [
+                        'booking_id' => $booking->booking_id,
+                        'orderDetail_id' => $orderDetail->orderDetail_id,
+                        'outfit_name' => $orderDetail->cartItem->outfit->name ?? 'ชุดไทย',
+                        'reservation_date' => $returnDate->format('Y-m-d'), // Show the actual return date
+                        'penalty_fee' => $orderDetail->cartItem->outfit->penaltyfee ?? 0
+                    ];
+                }
+            }
+        }
+    }
+}
 @endphp
 
 
@@ -122,6 +155,56 @@ if (Auth::check()) {
     </div>
     @endif
     
+    <!-- Return Date Alert -->
+    @if($returnAlerts > 0)
+    <div class="bg-red-200 p-4 rounded-md mb-6 border-2">
+        <p class="text-red-700 font-medium">คุณมี {{ $returnAlerts }} รายการที่ต้องคืนชุดวันนี้!</p>
+        <p class="text-red-600 text-sm mt-1">
+            กรุณาคืนชุดภายในวันนี้ มิเช่นนั้นจะเสียค่าปรับตามที่ร้านค้ากำหนด
+        </p>
+        <button class="trigger-btn bg-red-500 text-white px-4 py-2 rounded-md hover:scale-105 transition-transform duration-200 relative mt-2"
+            onclick="showReturnPopup()">
+            ดูรายการที่ต้องคืน
+            <span class="notification-badge bg-white text-red-500 rounded-full w-5 h-5 text-xs flex items-center justify-center absolute -top-1 -right-1 font-bold">
+                {{ $returnAlerts }}
+            </span>
+        </button>
+    </div>
+
+    <div class="popup-overlay fixed inset-0 bg-black bg-opacity-70 z-50 opacity-0 transition-opacity duration-500 hidden"
+        id="returnPopupOverlay">
+        <div class="popup-content absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-8 rounded-xl shadow-lg w-11/12 max-w-lg text-center scale-75 transition-transform duration-500">
+            <div class="flex justify-center mb-4">
+                <div class="bg-red-100 p-3 rounded-full">
+                    <i class="fas fa-exclamation-circle text-red-500 text-2xl"></i>
+                </div>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800 mb-4">แจ้งเตือนคืนชุด</h3>
+            <div class="mb-6 text-left max-h-60 overflow-y-auto">
+                <p class="text-gray-600 mb-3">คุณมี <strong class="text-red-600">{{ $returnAlerts }}</strong> รายการที่ต้องคืนชุดวันนี้:</p>
+                
+                @foreach($returnItems as $item)
+                <div class="border-b border-gray-200 py-2 mb-2">
+                    <p class="font-semibold">{{ $item['outfit_name'] }}</p>
+                    <p class="text-sm text-gray-600">วันที่ต้องคืน: {{ $item['reservation_date'] }}</p>
+                    <p class="text-sm text-red-600">ค่าปรับ: {{ number_format($item['penalty_fee'], 2) }} บาท/วัน/ชุด</p>
+                </div>
+                @endforeach
+            </div>
+            <div class="flex justify-center gap-4">
+                <a href="{{ route('profile.customer.orderHistory') }}"
+                    class="inline-flex items-center bg-red-500 text-white px-5 py-2 rounded-full hover:bg-red-600 transition-all duration-300 shadow-md hover:shadow-lg">
+                    <i class="fas fa-history mr-2"></i> ไปที่ประวัติคำสั่งซื้อ
+                </a>
+                <button class="inline-flex items-center bg-gray-200 text-gray-800 px-5 py-2 rounded-full hover:bg-gray-300 transition-all duration-300"
+                    onclick="hideReturnPopup()">
+                    <i class="fas fa-times mr-2"></i> ปิด
+                </button>
+            </div>
+        </div>
+    </div>
+    @endif
+    
     <img src="{{ url('images/outfits/main.png') }}" alt="Main Outfit" class="w-full h-auto rounded-lg">
 
     <h2 class="text-2xl font-bold mb-4">รายการชุดไทย</h2>
@@ -188,6 +271,30 @@ if (Auth::check()) {
 
     function hidePaymentPopup() {
         const overlay = document.getElementById('paymentPopupOverlay');
+        overlay.classList.remove('opacity-100');
+        overlay.querySelector('.popup-content').classList.remove('scale-100');
+        overlay.querySelector('.popup-content').classList.add('scale-75');
+        setTimeout(() => {
+            overlay.classList.add('hidden');
+        }, 500);
+    }
+</script>
+@endif
+
+@if($returnAlerts > 0)
+<script>
+    function showReturnPopup() {
+        const overlay = document.getElementById('returnPopupOverlay');
+        overlay.classList.remove('hidden');
+        setTimeout(() => {
+            overlay.classList.add('opacity-100');
+            overlay.querySelector('.popup-content').classList.remove('scale-75');
+            overlay.querySelector('.popup-content').classList.add('scale-100');
+        }, 10);
+    }
+
+    function hideReturnPopup() {
+        const overlay = document.getElementById('returnPopupOverlay');
         overlay.classList.remove('opacity-100');
         overlay.querySelector('.popup-content').classList.remove('scale-100');
         overlay.querySelector('.popup-content').classList.add('scale-75');
