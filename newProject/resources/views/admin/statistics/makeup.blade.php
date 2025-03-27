@@ -64,7 +64,7 @@
             const barChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: makeUpArtistStatsTop10.map(artist => artist.staff_id),
+                    labels: makeUpArtistStatsTop10.map(artist => artist.name),
                     datasets: [{
                         label: 'Total Earning (Baht)',
                         data: makeUpArtistStatsTop10.map(artist => artist.total_payment),

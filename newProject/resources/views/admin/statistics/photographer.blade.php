@@ -65,7 +65,7 @@
             const barChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: photographerStatsTop10.map(photographer => photographer.staff_id),
+                    labels: photographerStatsTop10.map(photographer => photographer.name),
                     datasets: [{
                         label: 'Total Earning (Baht)',
                         data: photographerStatsTop10.map(photographer => photographer.total_payment),
