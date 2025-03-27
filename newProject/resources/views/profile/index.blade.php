@@ -70,8 +70,6 @@
                 <div class="px-6 mt-4 border-b">
                     <ul class="flex text-sm font-semibold text-gray-600">
                         <li class="mr-6 pb-2 px-1 border-b-2 border-purple-600 text-purple-600">Personal Information</li>
-                        <li class="mr-6 pb-2 px-1 hover:text-purple-600 cursor-pointer">Security</li>
-                        <li class="mr-6 pb-2 px-1 hover:text-purple-600 cursor-pointer">Preferences</li>
                     </ul>
                 </div>
 
