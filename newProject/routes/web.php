@@ -256,6 +256,9 @@ Route::prefix('orderdetail')->name('orderdetail.')->group(function(){
 
 });
 
+// In web.php
+Route::get('/outfits/category/{category}', [OutfitController::class, 'byCategory'])->name('outfits.category');
+
 //search
 Route::prefix('outfits')->name('outfits.')->group(function(){
     Route::get('/search', [OutfitController::class, 'searchOutfits'])->name('search');

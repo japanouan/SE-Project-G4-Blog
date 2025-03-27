@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <!-- Google Fonts - Jomhuria and Montserrat -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jomhuria&family=Montserrat:wght@400;500;600&display=swap">
-    
     <style>
         body {
             font-family: 'Montserrat', sans-serif;
@@ -74,10 +73,21 @@
             overflow: hidden;
         }
         
+        /* Add a small gap to prevent the menu from closing when moving cursor */
         .dropdown:hover .dropdown-content {
             display: block;
             opacity: 1;
             transform: translateY(0);
+        }
+        
+        /* Add this to create a hidden area between the dropdown trigger and content */
+        .dropdown::after {
+            content: '';
+            position: absolute;
+            height: 20px;
+            width: 100%;
+            bottom: -20px;
+            left: 0;
         }
         
         .dropdown-item {
@@ -153,6 +163,54 @@
         }
     </style>
 </head>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get all dropdown elements
+        const dropdowns = document.querySelectorAll('.dropdown');
+        
+        dropdowns.forEach(dropdown => {
+            const dropdownContent = dropdown.querySelector('.dropdown-content');
+            let timeoutId;
+            
+            // Show dropdown on hover
+            dropdown.addEventListener('mouseenter', () => {
+                clearTimeout(timeoutId);
+                dropdownContent.style.display = 'block';
+                setTimeout(() => {
+                    dropdownContent.style.opacity = '1';
+                    dropdownContent.style.transform = 'translateY(0)';
+                }, 10);
+            });
+            
+            // Add delay before hiding dropdown
+            dropdown.addEventListener('mouseleave', () => {
+                timeoutId = setTimeout(() => {
+                    dropdownContent.style.opacity = '0';
+                    dropdownContent.style.transform = 'translateY(10px)';
+                    setTimeout(() => {
+                        dropdownContent.style.display = 'none';
+                    }, 300);
+                }, 200); // 200ms delay before hiding
+            });
+            
+            // Keep dropdown open when hovering over content
+            dropdownContent.addEventListener('mouseenter', () => {
+                clearTimeout(timeoutId);
+            });
+            
+            dropdownContent.addEventListener('mouseleave', () => {
+                timeoutId = setTimeout(() => {
+                    dropdownContent.style.opacity = '0';
+                    dropdownContent.style.transform = 'translateY(10px)';
+                    setTimeout(() => {
+                        dropdownContent.style.display = 'none';
+                    }, 300);
+                }, 200);
+            });
+        });
+    });
+</script>
 <body class="bg-gray-100">
 
     <!-- Navbar -->
@@ -166,15 +224,17 @@
                     <a href="#" class="nav-link flex items-center">
                         Products <i class="fas fa-chevron-down ml-2 text-xs opacity-70"></i>
                     </a>
-                    <div class="dropdown-content">
-                        <!-- Static category items for layout demonstration -->
-                        <a href="#" class="dropdown-item">All Products</a>
-                        <a href="#" class="dropdown-item">Traditional Thai</a>
-                        <a href="#" class="dropdown-item">Modern Thai</a>
-                        <a href="#" class="dropdown-item">Royal Thai</a>
-                        <a href="#" class="dropdown-item">Northern Thai</a>
-                        <a href="#" class="dropdown-item">Southern Thai</a>
-                    </div>
+                    <!-- Replace line 173 and surrounding context with this -->
+                <div class="dropdown-content">
+                    <a href="#" class="dropdown-item" data-category="all">All Products</a>
+                    
+                    @foreach($categories ?? [] as $category)
+                        <a href="#" class="dropdown-item" data-category="{{ $category->category_id }}">
+                            {{ $category->category_name }}
+                        </a>
+                    @endforeach
+                </div>
+
                 </div>
             </nav>
         </div>
@@ -213,5 +273,66 @@
         @yield('content')
     </div>
     @stack('scripts') {{-- <-- แทรกไว้ตรงนี้ --}}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Dropdown behavior code (keep your existing code)
+        
+        // Add category filtering functionality
+        const categoryLinks = document.querySelectorAll('.dropdown-item[data-category]');
+        const contentContainer = document.querySelector('.container'); // Adjust this selector to match your main content container
+        
+        categoryLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const categoryId = this.getAttribute('data-category');
+                let url = '{{ route("outfits.index") }}';
+                
+                // Add category parameter if not "all"
+                if (categoryId !== 'all') {
+                    url += '?category=' + categoryId;
+                }
+                
+                // Show loading indicator
+                const loadingIndicator = document.createElement('div');
+                loadingIndicator.className = 'text-center py-12';
+                loadingIndicator.innerHTML = '<div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>';
+                
+                contentContainer.innerHTML = '';
+                contentContainer.appendChild(loadingIndicator);
+                
+                // Fetch filtered results
+                fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.text())
+                .then(html => {
+                    // Create a temporary element to parse the HTML
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = html;
+                    
+                    // Extract just the content we need (adjust the selector as needed)
+                    const newContent = tempDiv.querySelector('.container');
+                    if (newContent) {
+                        contentContainer.innerHTML = newContent.innerHTML;
+                    } else {
+                        contentContainer.innerHTML = html;
+                    }
+                    
+                    // Update active category styling
+                    categoryLinks.forEach(item => item.classList.remove('font-bold', 'text-indigo-600', 'border-l-indigo-500'));
+                    this.classList.add('font-bold', 'text-indigo-600', 'border-l-indigo-500');
+                })
+                .catch(error => {
+                    console.error('Error fetching filtered results:', error);
+                    contentContainer.innerHTML = '<div class="text-center text-red-500 p-4">Error loading products. Please try again.</div>';
+                });
+            });
+        });
+    });
+</script>
+
 </body>
 </html>
