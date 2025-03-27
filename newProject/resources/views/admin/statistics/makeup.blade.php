@@ -5,6 +5,9 @@
 @section('content')
 
     <div class="container mx-auto p-6">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">
+            <i class="fas fa-paint-brush mr-2 text-[#8B9DF9]"></i>สถิติช่างแต่งหน้า
+        </h1>
         <!-- Filter by Month -->
         <form method="GET" action="{{ route('admin.statistics.make-upartist') }}" class="flex gap-4 mb-6">
             <input type="month" name="month" value="{{ $month }}" class="px-4 py-2 border rounded-md">
@@ -28,7 +31,7 @@
             <h3 class="text-xl font-semibold mb-4">Top 10 Make-up Artists</h3>
             <table class="min-w-full bg-white shadow-md rounded-md">
                 <thead>
-                    <tr>
+                    <tr class="bg-gray-200">
                         <th class="px-4 py-2">Staff ID</th>
                         <th class="px-4 py-2">Staff Name</th>
                         <th class="px-4 py-2">Total Earning</th>
@@ -42,7 +45,7 @@
             <h3 class="text-xl font-semibold mt-6 mb-4">All Make-up Artists Report</h3>
             <table class="min-w-full bg-white shadow-md rounded-md">
                 <thead>
-                    <tr>
+                    <tr class="bg-gray-200">
                         <th class="px-4 py-2">Staff ID</th>
                         <th class="px-4 py-2">Staff Name</th>
                         <th class="px-4 py-2">Total Earning</th>
@@ -88,9 +91,9 @@
                 const makeUpArtistReport = document.getElementById('makeUpArtistReport');
                 makeUpArtistReport.innerHTML = makeUpArtistStatsTop10.map(artist => `
                     <tr>
-                        <td class="px-4 py-2">${artist.staff_id}</td>
-                        <td class="px-4 py-2">${artist.name}</td>
-                        <td class="px-4 py-2">${artist.total_payment}</td>
+                        <td class="px-4 py-2 text-center">${artist.staff_id}</td>
+                        <td class="px-4 py-2 text-center">${artist.name}</td>
+                        <td class="px-4 py-2 text-center">${artist.total_payment}</td>
                     </tr>
                 `).join('');
             }
@@ -100,9 +103,9 @@
                 const allMakeUpArtistReport = document.getElementById('allMakeUpArtistReport');
                 allMakeUpArtistReport.innerHTML = makeUpArtistStatsAll.map(artist => `
                     <tr>
-                        <td class="px-4 py-2">${artist.staff_id}</td>
-                        <td class="px-4 py-2">${artist.name}</td>
-                        <td class="px-4 py-2">${artist.total_payment}</td>
+                        <td class="px-4 py-2 text-center">${artist.staff_id}</td>
+                        <td class="px-4 py-2 text-center">${artist.name}</td>
+                        <td class="px-4 py-2 text-center">${artist.total_payment}</td>
                     </tr>
                 `).join('');
             }

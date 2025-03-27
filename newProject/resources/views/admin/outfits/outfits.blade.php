@@ -5,7 +5,9 @@
 @section('content')
 <div class="container mx-auto">
     <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold">จัดการชุด</h2>
+        <h1 class="text-3xl font-bold text-gray-800">
+            <i class="fas fa-tshirt mr-2 text-[#8B9DF9]"></i>จัดการชุด
+        </h1>
     </div>
 
     @if(session('success'))

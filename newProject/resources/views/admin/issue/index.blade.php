@@ -4,7 +4,9 @@
 
 @section('content')
     <div class="container mx-auto p-6">
-        <h2 class="text-center text-3xl font-bold mb-6">Notifications</h2>
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">
+            <i class="fas fa-exclamation-circle mr-2 text-[#8B9DF9]"></i>ปัญหาที่รายงาน
+    </h1>
 
         @if ($notifications->isEmpty())
             <div class="text-center bg-yellow-100 text-yellow-800 p-4 rounded-lg">

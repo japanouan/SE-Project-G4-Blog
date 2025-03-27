@@ -5,6 +5,11 @@
 @section('content')
 
     <div class="container mx-auto p-6">
+
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">
+        <i class="fas fa-store mr-2 text-[#8B9DF9]"></i>สถิติร้านค้า
+    </h1>
+
         <!-- Filter by Month -->
         <form method="GET" action="{{ route('admin.statistics.shop') }}" class="flex gap-4 mb-6">
             <input type="month" name="month" value="{{ $month }}" class="px-4 py-2 border rounded-md">
@@ -28,7 +33,7 @@
             <h3 class="text-xl font-semibold mb-4">Top 10 Shops</h3>
             <table class="min-w-full bg-white shadow-md rounded-md">
                 <thead>
-                    <tr>
+                    <tr class="bg-gray-200">
                         <th class="px-4 py-2">Shop ID</th>
                         <th class="px-4 py-2">Shop Name</th>
                         <th class="px-4 py-2">Total Sales</th>
@@ -42,7 +47,7 @@
             <h3 class="text-xl font-semibold mt-6 mb-4">All Shops Report</h3>
             <table class="min-w-full bg-white shadow-md rounded-md">
                 <thead>
-                    <tr>
+                    <tr class="bg-gray-200">
                         <th class="px-4 py-2">Shop ID</th>
                         <th class="px-4 py-2">Shop Name</th>
                         <th class="px-4 py-2">Total Sales</th>
@@ -91,9 +96,9 @@
                 const shopReport = document.getElementById('shopReport');
                 shopReport.innerHTML = shopStatsTop10.map(shop => `
                     <tr>
-                        <td class="px-4 py-2">${shop.shop_id}</td>
-                        <td class="px-4 py-2">${shop.shop_name}</td>
-                        <td class="px-4 py-2">${shop.total_sales}</td>
+                        <td class="px-4 py-2 text-center">${shop.shop_id}</td>
+                        <td class="px-4 py-2 text-center">${shop.shop_name}</td>
+                        <td class="px-4 py-2 text-center">${shop.total_sales}</td>
                     </tr>
                 `).join('');
             }
@@ -103,9 +108,9 @@
                 const allShopReport = document.getElementById('allShopReport');
                 allShopReport.innerHTML = shopStatsAll.map(shop => `
                     <tr>
-                        <td class="px-4 py-2">${shop.shop_id}</td>
-                        <td class="px-4 py-2">${shop.shop_name}</td>
-                        <td class="px-4 py-2">${shop.total_sales}</td>
+                        <td class="px-4 py-2 text-center">${shop.shop_id}</td>
+                        <td class="px-4 py-2 text-center">${shop.shop_name}</td>
+                        <td class="px-4 py-2 text-center">${shop.total_sales}</td>
                     </tr>
                 `).join('');
             }

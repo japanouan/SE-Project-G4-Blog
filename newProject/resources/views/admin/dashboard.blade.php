@@ -5,9 +5,8 @@
 @section('content')
 <div class="page-container">
     <div class="page-header">
-        <h1 class="page-title">
-            <i class="fas fa-tachometer-alt"></i>
-            แดชบอร์ด
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">
+            <i class="fas fa-tachometer-alt mr-2 text-[#8B9DF9]"></i>แดชบอร์ด
         </h1>
     </div>
 

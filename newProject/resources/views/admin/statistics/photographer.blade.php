@@ -5,6 +5,10 @@
 @section('content')
 
     <div class="container mx-auto p-6">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">
+            <i class="fas fa-camera mr-2 text-[#8B9DF9]"></i>สถิติช่างภาพ
+        </h1>
+
         <!-- Filter by Month -->
         <form method="GET" action="{{ route('admin.statistics.photographer') }}" class="flex gap-4 mb-6">
             <input type="month" name="month" value="{{ $month }}" class="px-4 py-2 border rounded-md">
@@ -28,7 +32,7 @@
             <h3 class="text-xl font-semibold mb-4">Top 10 Photographers</h3>
             <table class="min-w-full bg-white shadow-md rounded-md">
                 <thead>
-                    <tr>
+                    <tr class="bg-gray-200">
                         <th class="px-4 py-2">Staff ID</th>
                         <th class="px-4 py-2">Staff Name</th>
                         <th class="px-4 py-2">Total Earning</th>
@@ -42,7 +46,7 @@
             <h3 class="text-xl font-semibold mt-6 mb-4">All Photographer Report</h3>
             <table class="min-w-full bg-white shadow-md rounded-md">
                 <thead>
-                    <tr>
+                    <tr class="bg-gray-200">
                         <th class="px-4 py-2">Staff ID</th>
                         <th class="px-4 py-2">Staff Name</th>
                         <th class="px-4 py-2">Total Earning</th>
@@ -89,9 +93,9 @@
                 const photographerReport = document.getElementById('photographerReport');
                 photographerReport.innerHTML = photographerStatsTop10.map(photographer => `
                     <tr>
-                        <td class="px-4 py-2">${photographer.staff_id}</td>
-                        <td class="px-4 py-2">${photographer.name}</td>
-                        <td class="px-4 py-2">${photographer.total_payment}</td>
+                        <td class="px-4 py-2 text-center">${photographer.staff_id}</td>
+                        <td class="px-4 py-2 text-center">${photographer.name}</td>
+                        <td class="px-4 py-2 text-center">${photographer.total_payment}</td>
                     </tr>
                 `).join('');
             }
@@ -101,9 +105,9 @@
                 const allPhotographerReport = document.getElementById('allPhotographerReport');
                 allPhotographerReport.innerHTML = photographerStatsAll.map(photographer => `
                     <tr>
-                        <td class="px-4 py-2">${photographer.staff_id}</td>
-                        <td class="px-4 py-2">${photographer.name}</td>
-                        <td class="px-4 py-2">${photographer.total_payment}</td>
+                        <td class="px-4 py-2 text-center">${photographer.staff_id}</td>
+                        <td class="px-4 py-2 text-center">${photographer.name}</td>
+                        <td class="px-4 py-2 text-center">${photographer.total_payment}</td>
                     </tr>
                 `).join('');
             }
