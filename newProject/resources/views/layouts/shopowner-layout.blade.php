@@ -314,12 +314,6 @@
                 </a>
             </div>
 
-            <div class="menu-item {{ Str::startsWith($currentRouteName, 'shopowner.issue') ? 'active' : '' }}">
-                <a href="{{ route('shopowner.issue.index') }}">
-                    <i class="fas fa-flag mr-3"></i>
-                    <span>แจ้งปัญหา</span>
-                </a>
-            </div>
         @else
             <div class="menu-item" style="opacity: 0.5; cursor: not-allowed;">
                 <a href="#" onclick="return false;">
@@ -349,13 +343,13 @@
                 </a>
             </div>
 
-            <div class="menu-item" style="opacity: 0.5; cursor: not-allowed;">
-                <a href="#" onclick="return false;">
+        @endif
+        <div class="menu-item {{ Str::startsWith($currentRouteName, 'shopowner.issue') ? 'active' : '' }}">
+                <a href="{{ route('shopowner.issue.index') }}">
                     <i class="fas fa-flag mr-3"></i>
-                    <span>แจ้งปัญหา (ต้องมีร้านค้าก่อน)</span>
+                    <span>แจ้งปัญหา</span>
                 </a>
             </div>
-        @endif
     </div>
 </div>
 

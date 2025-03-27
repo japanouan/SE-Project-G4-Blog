@@ -90,9 +90,9 @@
                      <button disabled class="px-4 py-2 bg-gray-400 text-white rounded-md cursor-not-allowed">
                           <i class="fa fa-chart-bar mr-1"></i> ดูสถิติ (รอการอนุมัติร้านค้า)
                      </button>
-                     <button disabled class="px-4 py-2 bg-gray-400 text-white rounded-md cursor-not-allowed">
-                          <i class="fa fa-exclamation-circle mr-1"></i> แจ้งปัญหา (รอการอนุมัติร้านค้า)
-                     </button>
+                     <a href="{{ route('shopowner.issue.index') }}" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
+                          <i class="fa fa-exclamation-circle mr-1"></i> แจ้งปัญหา
+                     </a>
                  @endif
                 </div>
             </div>
