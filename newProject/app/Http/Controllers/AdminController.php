@@ -89,23 +89,25 @@ class AdminController extends Controller
 
         // Photographer: ข้อมูลทั้งหมดสำหรับ TOP 10
         $photographerStatsTop10 = SelectService::where('service_type', 'photographer')
-            ->where('reservation_date', 'LIKE', "%$month%")
-            ->join('SelectStaffDetails', 'SelectServices.select_service_id', '=', 'SelectStaffDetails.select_service_id')
-            ->where('SelectStaffDetails.finished_time', '<=', now())
-            ->selectRaw('SelectStaffDetails.staff_id, SUM(SelectStaffDetails.earning) as total_payment')
-            ->groupBy('SelectStaffDetails.staff_id')
-            ->orderByDesc('total_payment')
-            ->take(10)
-            ->get();
+        ->where('reservation_date', 'LIKE', "%$month%")
+        ->join('SelectStaffDetails', 'SelectServices.select_service_id', '=', 'SelectStaffDetails.select_service_id')
+        ->join('Users', 'SelectStaffDetails.staff_id', '=', 'Users.user_id') // Join กับ Users
+        ->where('SelectStaffDetails.finished_time', '<=', now())
+        ->selectRaw('SelectStaffDetails.staff_id, SUM(SelectStaffDetails.earning) as total_payment, Users.name') // เพิ่ม Users.name
+        ->groupBy('SelectStaffDetails.staff_id', 'Users.name') // Group by ทั้ง staff_id และ name
+        ->orderByDesc('total_payment')
+        ->take(10)
+        ->get();
 
         // Photographer: ข้อมูลทั้งหมด
         $photographerStatsAll = SelectService::where('service_type', 'photographer')
-            ->where('reservation_date', 'LIKE', "%$month%")
-            ->join('SelectStaffDetails', 'SelectServices.select_service_id', '=', 'SelectStaffDetails.select_service_id')
-            ->where('SelectStaffDetails.finished_time', '<=', now())
-            ->selectRaw('SelectStaffDetails.staff_id, SUM(SelectStaffDetails.earning) as total_payment')
-            ->groupBy('SelectStaffDetails.staff_id')
-            ->get();
+        ->where('reservation_date', 'LIKE', "%$month%")
+        ->join('SelectStaffDetails', 'SelectServices.select_service_id', '=', 'SelectStaffDetails.select_service_id')
+        ->join('Users', 'SelectStaffDetails.staff_id', '=', 'Users.user_id') // Join กับ Users
+        ->where('SelectStaffDetails.finished_time', '<=', now())
+        ->selectRaw('SelectStaffDetails.staff_id, SUM(SelectStaffDetails.earning) as total_payment, Users.name') // เพิ่ม Users.name
+        ->groupBy('SelectStaffDetails.staff_id', 'Users.name') // Group by ทั้ง staff_id และ name
+        ->get();
 
         return view('admin.statistics.photographer', [
             'photographerStatsTop10' => $photographerStatsTop10,
@@ -120,23 +122,25 @@ class AdminController extends Controller
 
         // Make-up Artist: ข้อมูลทั้งหมดสำหรับ TOP 10
         $makeUpArtistStatsTop10 = SelectService::where('service_type', 'make-up artist')
-            ->where('reservation_date', 'LIKE', "%$month%")
-            ->join('SelectStaffDetails', 'SelectServices.select_service_id', '=', 'SelectStaffDetails.select_service_id')
-            ->where('SelectStaffDetails.finished_time', '<=', now())
-            ->selectRaw('SelectStaffDetails.staff_id, SUM(SelectStaffDetails.earning) as total_payment')
-            ->groupBy('SelectStaffDetails.staff_id')
-            ->orderByDesc('total_payment')
-            ->take(10)
-            ->get();
+        ->where('reservation_date', 'LIKE', "%$month%")
+        ->join('SelectStaffDetails', 'SelectServices.select_service_id', '=', 'SelectStaffDetails.select_service_id')
+        ->join('Users', 'SelectStaffDetails.staff_id', '=', 'Users.user_id') // Join กับ Users
+        ->where('SelectStaffDetails.finished_time', '<=', now())
+        ->selectRaw('SelectStaffDetails.staff_id, SUM(SelectStaffDetails.earning) as total_payment, Users.name') // เพิ่ม Users.name
+        ->groupBy('SelectStaffDetails.staff_id', 'Users.name') // Group by ทั้ง staff_id และ name
+        ->orderByDesc('total_payment')
+        ->take(10)
+        ->get();
 
         // Make-up Artist: ข้อมูลทั้งหมด
         $makeUpArtistStatsAll = SelectService::where('service_type', 'make-up artist')
-            ->where('reservation_date', 'LIKE', "%$month%")
-            ->join('SelectStaffDetails', 'SelectServices.select_service_id', '=', 'SelectStaffDetails.select_service_id')
-            ->where('SelectStaffDetails.finished_time', '<=', now())
-            ->selectRaw('SelectStaffDetails.staff_id, SUM(SelectStaffDetails.earning) as total_payment')
-            ->groupBy('SelectStaffDetails.staff_id')
-            ->get();
+        ->where('reservation_date', 'LIKE', "%$month%")
+        ->join('SelectStaffDetails', 'SelectServices.select_service_id', '=', 'SelectStaffDetails.select_service_id')
+        ->join('Users', 'SelectStaffDetails.staff_id', '=', 'Users.user_id') // Join กับ Users
+        ->where('SelectStaffDetails.finished_time', '<=', now())
+        ->selectRaw('SelectStaffDetails.staff_id, SUM(SelectStaffDetails.earning) as total_payment, Users.name') // เพิ่ม Users.name
+        ->groupBy('SelectStaffDetails.staff_id', 'Users.name') // Group by ทั้ง staff_id และ name
+        ->get();
 
         return view('admin.statistics.makeup', [
             'makeUpArtistStatsTop10' => $makeUpArtistStatsTop10,
