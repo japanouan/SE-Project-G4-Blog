@@ -90,7 +90,7 @@
                 photographerReport.innerHTML = photographerStatsTop10.map(photographer => `
                     <tr>
                         <td class="px-4 py-2">${photographer.staff_id}</td>
-                        <td class="px-4 py-2">${photographer.staff_id}</td>
+                        <td class="px-4 py-2">${photographer.name}</td>
                         <td class="px-4 py-2">${photographer.total_payment}</td>
                     </tr>
                 `).join('');
@@ -102,7 +102,7 @@
                 allPhotographerReport.innerHTML = photographerStatsAll.map(photographer => `
                     <tr>
                         <td class="px-4 py-2">${photographer.staff_id}</td>
-                        <td class="px-4 py-2">${photographer.staff_id}</td>
+                        <td class="px-4 py-2">${photographer.name}</td>
                         <td class="px-4 py-2">${photographer.total_payment}</td>
                     </tr>
                 `).join('');

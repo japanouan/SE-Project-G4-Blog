@@ -89,7 +89,7 @@
                 makeUpArtistReport.innerHTML = makeUpArtistStatsTop10.map(artist => `
                     <tr>
                         <td class="px-4 py-2">${artist.staff_id}</td>
-                        <td class="px-4 py-2">${artist.staff_id}</td>
+                        <td class="px-4 py-2">${artist.name}</td>
                         <td class="px-4 py-2">${artist.total_payment}</td>
                     </tr>
                 `).join('');
@@ -101,7 +101,7 @@
                 allMakeUpArtistReport.innerHTML = makeUpArtistStatsAll.map(artist => `
                     <tr>
                         <td class="px-4 py-2">${artist.staff_id}</td>
-                        <td class="px-4 py-2">${artist.staff_id}</td>
+                        <td class="px-4 py-2">${artist.name}</td>
                         <td class="px-4 py-2">${artist.total_payment}</td>
                     </tr>
                 `).join('');
