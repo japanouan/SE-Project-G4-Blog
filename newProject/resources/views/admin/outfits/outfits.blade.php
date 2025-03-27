@@ -171,11 +171,11 @@
                             <div class="text-sm text-gray-900">{{ $outfit->sizeAndColors->sum('amount') }}</div>
                         </td>
                         <td class="p-3 relative">
-                            <button type="button" class="text-blue-600 hover:text-blue-800 relative" 
-                                    id="btn-{{ $outfit->outfit_id }}"
-                                    onclick="toggleVariants('variants-{{ $outfit->outfit_id }}', 'btn-{{ $outfit->outfit_id }}')">
-                                แสดงรายละเอียด <i class="fa fa-chevron-down"></i>
-                            </button>
+                        <button type="button" class="text-blue-600 hover:text-blue-800 relative" 
+                                id="btn-{{ $outfit->outfit_id }}"
+                                onclick="toggleVariants('variants-{{ $outfit->outfit_id }}', 'btn-{{ $outfit->outfit_id }}')">
+                            แสดงรายละเอียด <i class="fa fa-chevron-down"></i>
+                        </button>
                             <div id="variants-{{ $outfit->outfit_id }}" class="hidden fixed z-50 bg-white rounded-lg shadow-lg border p-4" style="min-width: 500px; max-width: 800px;">
                                 <div class="flex justify-between mb-2">
                                     <h3 class="font-bold">รายละเอียดชุด: {{ $outfit->name }}</h3>
@@ -267,34 +267,57 @@
 
 <script>
     // Toggle variants function
-    function toggleVariants(id) {
-        const variantsElement = document.getElementById(id);
+    // Toggle variants function
+function toggleVariants(id, buttonId) {
+    const variantsElement = document.getElementById(id);
+    const button = document.getElementById(buttonId);
+    
+    // ซ่อนทุกรายการที่อาจเปิดอยู่
+    document.querySelectorAll('[id^="variants-"]').forEach(el => {
+        if (el.id !== id) {
+            el.classList.add('hidden');
+        }
+    });
+    
+    // สลับการแสดงผลของรายการที่คลิก
+    variantsElement.classList.toggle('hidden');
+    
+    // ถ้ากำลังแสดงผล ให้ตรวจสอบตำแหน่งเพื่อไม่ให้ล้นหน้าจอ
+    if (!variantsElement.classList.contains('hidden')) {
+        // รับตำแหน่งของปุ่มที่คลิก
+        const buttonRect = button.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const viewportWidth = window.innerWidth;
         
-        // ซ่อนทุกรายการที่อาจเปิดอยู่
-        document.querySelectorAll('[id^="variants-"]').forEach(el => {
-            if (el.id !== id) {
-                el.classList.add('hidden');
-            }
-        });
+        // รีเซ็ตตำแหน่งก่อน
+        variantsElement.style.left = '-150px';
+        variantsElement.style.top = 'auto';
+        variantsElement.style.bottom = 'auto';
         
-        // สลับการแสดงผลของรายการที่คลิก
-        variantsElement.classList.toggle('hidden');
+        // คำนวณว่า popup จะล้นด้านล่างของหน้าจอหรือไม่
+        const popupHeight = variantsElement.offsetHeight;
+        const spaceBelow = viewportHeight - buttonRect.bottom;
         
-        // ถ้ากำลังแสดงผล ให้ตรวจสอบตำแหน่งเพื่อไม่ให้ล้นหน้าจอ
-        if (!variantsElement.classList.contains('hidden')) {
-            const rect = variantsElement.getBoundingClientRect();
-            const viewportWidth = window.innerWidth;
-            
-            // เลื่อนกล่องมาทางซ้ายเล็กน้อย
-            variantsElement.style.left = '-150px';
-            
-            // ถ้าล้นทางขวาของหน้าจอ ให้แสดงทางซ้ายแทน
-            if (rect.right > viewportWidth) {
-                variantsElement.style.left = 'auto';
-                variantsElement.style.right = '0';
-            }
+        // ถ้าพื้นที่ด้านล่างไม่พอ ให้แสดง popup ด้านบนแทน
+        if (spaceBelow < popupHeight && buttonRect.top > popupHeight) {
+            variantsElement.style.bottom = '100%';
+            variantsElement.style.top = 'auto';
+            variantsElement.style.marginBottom = '10px';
+        } else {
+            variantsElement.style.top = '100%';
+            variantsElement.style.bottom = 'auto';
+            variantsElement.style.marginTop = '10px';
+        }
+        
+        // ตรวจสอบด้านข้างด้วย
+        const popupRect = variantsElement.getBoundingClientRect();
+        if (popupRect.right > viewportWidth) {
+            variantsElement.style.left = 'auto';
+            variantsElement.style.right = '0';
         }
     }
+}
+
 
     // เพิ่ม event listener เพื่อปิดรายละเอียดเมื่อคลิกที่อื่น
     document.addEventListener('click', function(event) {
@@ -337,9 +360,21 @@
         padding: 1rem;
         min-width: 500px;
         max-width: 800px;
-        left: -150px; /* เพิ่มบรรทัดนี้เพื่อเลื่อนกล่องมาทางซ้ายเสมอ */
+        max-height: 80vh; /* จำกัดความสูงสูงสุด */
+        overflow-y: auto; /* เพิ่ม scroll เมื่อเนื้อหาเยอะ */
+    }
+    
+    /* เพิ่ม transition เพื่อให้การแสดง/ซ่อนดูนุ่มนวลขึ้น */
+    [id^="variants-"] {
+        transition: opacity 0.2s ease-in-out;
+    }
+    
+    [id^="variants-"].hidden {
+        opacity: 0;
+        pointer-events: none;
     }
 </style>
+
 
 
 @endsection
