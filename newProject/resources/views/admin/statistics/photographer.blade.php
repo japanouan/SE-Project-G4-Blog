@@ -32,7 +32,7 @@
             <h3 class="text-xl font-semibold mb-4">Top 10 Photographers</h3>
             <table class="min-w-full bg-white shadow-md rounded-md">
                 <thead>
-                    <tr>
+                    <tr class="bg-gray-200">
                         <th class="px-4 py-2">Staff ID</th>
                         <th class="px-4 py-2">Staff Name</th>
                         <th class="px-4 py-2">Total Earning</th>
@@ -46,7 +46,7 @@
             <h3 class="text-xl font-semibold mt-6 mb-4">All Photographer Report</h3>
             <table class="min-w-full bg-white shadow-md rounded-md">
                 <thead>
-                    <tr>
+                    <tr class="bg-gray-200">
                         <th class="px-4 py-2">Staff ID</th>
                         <th class="px-4 py-2">Staff Name</th>
                         <th class="px-4 py-2">Total Earning</th>
@@ -93,9 +93,9 @@
                 const photographerReport = document.getElementById('photographerReport');
                 photographerReport.innerHTML = photographerStatsTop10.map(photographer => `
                     <tr>
-                        <td class="px-4 py-2">${photographer.staff_id}</td>
-                        <td class="px-4 py-2">${photographer.name}</td>
-                        <td class="px-4 py-2">${photographer.total_payment}</td>
+                        <td class="px-4 py-2 text-center">${photographer.staff_id}</td>
+                        <td class="px-4 py-2 text-center">${photographer.name}</td>
+                        <td class="px-4 py-2 text-center">${photographer.total_payment}</td>
                     </tr>
                 `).join('');
             }
@@ -105,9 +105,9 @@
                 const allPhotographerReport = document.getElementById('allPhotographerReport');
                 allPhotographerReport.innerHTML = photographerStatsAll.map(photographer => `
                     <tr>
-                        <td class="px-4 py-2">${photographer.staff_id}</td>
-                        <td class="px-4 py-2">${photographer.name}</td>
-                        <td class="px-4 py-2">${photographer.total_payment}</td>
+                        <td class="px-4 py-2 text-center">${photographer.staff_id}</td>
+                        <td class="px-4 py-2 text-center">${photographer.name}</td>
+                        <td class="px-4 py-2 text-center">${photographer.total_payment}</td>
                     </tr>
                 `).join('');
             }

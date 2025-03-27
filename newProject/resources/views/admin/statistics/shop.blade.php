@@ -33,7 +33,7 @@
             <h3 class="text-xl font-semibold mb-4">Top 10 Shops</h3>
             <table class="min-w-full bg-white shadow-md rounded-md">
                 <thead>
-                    <tr>
+                    <tr class="bg-gray-200">
                         <th class="px-4 py-2">Shop ID</th>
                         <th class="px-4 py-2">Shop Name</th>
                         <th class="px-4 py-2">Total Sales</th>
@@ -47,7 +47,7 @@
             <h3 class="text-xl font-semibold mt-6 mb-4">All Shops Report</h3>
             <table class="min-w-full bg-white shadow-md rounded-md">
                 <thead>
-                    <tr>
+                    <tr class="bg-gray-200">
                         <th class="px-4 py-2">Shop ID</th>
                         <th class="px-4 py-2">Shop Name</th>
                         <th class="px-4 py-2">Total Sales</th>
@@ -96,9 +96,9 @@
                 const shopReport = document.getElementById('shopReport');
                 shopReport.innerHTML = shopStatsTop10.map(shop => `
                     <tr>
-                        <td class="px-4 py-2">${shop.shop_id}</td>
-                        <td class="px-4 py-2">${shop.shop_name}</td>
-                        <td class="px-4 py-2">${shop.total_sales}</td>
+                        <td class="px-4 py-2 text-center">${shop.shop_id}</td>
+                        <td class="px-4 py-2 text-center">${shop.shop_name}</td>
+                        <td class="px-4 py-2 text-center">${shop.total_sales}</td>
                     </tr>
                 `).join('');
             }
@@ -108,9 +108,9 @@
                 const allShopReport = document.getElementById('allShopReport');
                 allShopReport.innerHTML = shopStatsAll.map(shop => `
                     <tr>
-                        <td class="px-4 py-2">${shop.shop_id}</td>
-                        <td class="px-4 py-2">${shop.shop_name}</td>
-                        <td class="px-4 py-2">${shop.total_sales}</td>
+                        <td class="px-4 py-2 text-center">${shop.shop_id}</td>
+                        <td class="px-4 py-2 text-center">${shop.shop_name}</td>
+                        <td class="px-4 py-2 text-center">${shop.total_sales}</td>
                     </tr>
                 `).join('');
             }
