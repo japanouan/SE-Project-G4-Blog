@@ -20,6 +20,7 @@
                                     <th style="padding: 10px;">Username</th>
                                     <th style="padding: 10px;">Role</th>
                                     <th style="padding: 10px;">Status</th>
+                                    <th style="padding: 10px;">Identify</th>
                                     <th style="padding: 10px;">Actions</th>
                                 </tr>
                             </thead>
@@ -33,7 +34,13 @@
                                     <td style="padding: 10px;">{{ $user->username }}</td>
                                     <td style="padding: 10px;">{{ $user->userType }}</td>
                                     <td style="padding: 10px;" id="status-{{ $user->user_id }}">{{ $user->status }}</td>
-                                    <td class="p-2">
+                                    <td style="padding: 10px; text-align: center;">
+                                        <a href="{{ asset($user->identity_path) }}" target="_blank" 
+                                        class="text-blue-500 underline">
+                                            View Document
+                                        </a>
+                                    </td>
+                                    <td class="flex justify-center p-2 ">
                                         <button class="text-white bg-blue-500 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 acceptButton" data-user-id="{{ $user->user_id }}">Accept</button>
                                         <button class="focus:outline-none text-white bg-red-500  hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900 declineButton" data-user-id="{{ $user->user_id }}">Decline</button>
                                     </td>

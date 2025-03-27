@@ -26,7 +26,7 @@
 
         <!-- กล่องฟอร์มลงทะเบียนพนักงาน -->
         <div class="bg-white p-8 rounded-lg shadow-lg w-96 text-left">
-            <form method="POST" action="{{ route('register.staff') }}">
+            <form method="POST" action="{{ route('register.staff') }}" enctype="multipart/form-data">
                 @csrf
 
                 <!-- Name -->
@@ -100,6 +100,19 @@
                     <input id="password_confirmation" type="password" name="password_confirmation" required
                         class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400" />
                 </div>
+
+                <!-- Identity Verification Document -->
+                <div class="mb-4">
+                    <label for="identity_document" class="block text-sm font-semibold text-gray-700">
+                        Identity Verification Document
+                    </label>
+                    <input id="identity_document" type="file" name="identity_document" accept=".jpg,.jpeg,.png,.pdf"
+                        class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                    @error('identity_document')
+                        <span class="text-xs text-red-500">{{ $message }}</span>
+                    @enderror
+                </div>
+
 
                 <!-- Submit -->
                 <button type="submit"

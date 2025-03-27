@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\File; // นำเข้า File Helper
 use Illuminate\Support\Facades\DB;
 
 
@@ -162,7 +163,7 @@ class UserController extends Controller
     {
         // ดึงข้อมูลผู้ใช้ทั้งหมด
         $users = User::where(function ($query) {
-            $query->where('status', 'inactive')
+            $query->where('status', 'inactive')->where('userType','!=','customer')
                 ->where('is_newUser', true);
         })
             ->get();
@@ -176,6 +177,10 @@ class UserController extends Controller
     public function updateStatus(Request $request, $user_id, $status)
     {
         $user = User::where('user_id', $user_id)->firstOrFail();
+        if ($user->identity_path && File::exists(public_path($user->identity_path))) {
+            File::delete(public_path($user->identity_path));
+        }
+        $user->identity_path = null;
         $user->status = $status;
         $user->is_newUser = false;
         $user->save();
