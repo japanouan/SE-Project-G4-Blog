@@ -25,7 +25,7 @@ if ($justToggled && $toggledUserId) {
             <form action="{{ route('admin.users.acceptance') }}" method="GET">
                 @csrf
                 <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-check-circle mr-2"></i>รายการอนุมัติ
+                    <i class="fas fa-check-circle mr-2"></i>รายการรออนุมัติ
                 </button>
             </form>
         </div>

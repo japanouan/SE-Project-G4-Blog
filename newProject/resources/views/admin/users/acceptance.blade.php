@@ -5,7 +5,13 @@
 @section('content')
 
     <div class="container mx-auto p-6">
-        <h1 class="text-3xl font-bold text-gray-800 mb-6 justify-self-center">Acceptance</h1>
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">Acceptance</h1>
+            <a href="{{ route('admin.users.index') }}" class="btn btn-primary">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Users
+            </a>
+        </div>
+        
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
