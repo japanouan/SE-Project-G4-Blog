@@ -10,7 +10,15 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-800">
             <div><strong> วันที่จอง:</strong> {{ \Carbon\Carbon::parse($booking->purchase_date)->format('d/m/Y') }}</div>
             <div><strong> ราคารวม:</strong> {{ number_format($booking->total_price, 2) }} บาท</div>
-            <div><strong> เจ้าหน้าที่:</strong> {{ $booking->amount_staff ?? '-' }} คน</div>
+            @if ($booking->SelectService)
+                @foreach ($booking->SelectService as $service)
+                @if ($service->service_type == 'photographer')
+                <p><strong>📸 ต้องการถ่ายรูป:</strong> {{ $service->customer_count }} คน</p>
+                @else
+                <p><strong>💄 ต้องการแต่งหน้า:</strong> {{ $service->customer_count }} คน</p>
+                @endif
+                @endforeach
+            @endif
             <div><strong> สถานะ:</strong>
                 <span class="px-2 py-1 rounded-full text-sm
                 @if($booking->status === 'confirmed') bg-green-200 text-green-800 
@@ -44,7 +52,16 @@
                 <span class="text-gray-500">ไม่มีข้อมูลลูกค้า</span>
                 @endif
             </div>
-            <div><strong> ที่อยู่:</strong> {{ $booking->AddressID ?? '-' }}</div>
+            <div><strong> ที่อยู่:</strong>
+            @if ($booking->address) 
+                {{ $booking->address->HouseNumber }}
+                {{ $booking->address->Street }} 
+                {{ $booking->address->Subdistrict }} 
+                {{ $booking->address->District }} 
+                {{ $booking->address->Province }} 
+                {{ $booking->address->PostalCode }}
+            @endif
+            </div>
             <div><strong> เวลาที่สร้าง:</strong> {{ \Carbon\Carbon::parse($booking->created_at)->format('d/m/Y H:i') }}</div>
         </div>
 

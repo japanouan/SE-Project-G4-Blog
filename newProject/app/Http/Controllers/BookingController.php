@@ -199,8 +199,10 @@ class BookingController extends Controller
     public function adminOrderDetails($id){
         $booking = Booking::with([
             'shop',
+            'address',
             'promotion',
             'orderDetails.cartItem.user',  // preload แบบซ้อน
+            'selectService'
         ])->findOrFail($id);
         
 
