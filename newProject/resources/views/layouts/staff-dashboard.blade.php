@@ -229,64 +229,62 @@
         }
 
         /* Job card styles */
-        /* Job card styles - updated with status indicators */
-.job-card {
-    background-color: white;
-    border-radius: 0.5rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    padding: 1.25rem;
-    margin-bottom: 1rem;
-    transition: all 0.2s;
-    position: relative;
-    border-left: 4px solid #e5e7eb;
-}
-.job-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-/* Completed job indicator */
-.job-card.completed {
-    border-left-color: #10b981;
-}
-/* Upcoming job indicator */
-.job-card.upcoming {
-    border-left-color: #3b82f6;
-}
-/* Needs completion indicator */
-.job-card.needs-completion {
-    border-left-color: #f97316;
-}
-.job-date {
-    font-weight: 600;
-    font-size: 1.125rem;
-    margin-bottom: 0.5rem;
-}
-.job-detail {
-    margin-bottom: 0.25rem;
-}
-.job-earning {
-    color: #10b981;
-    font-weight: 600;
-}
-/* Status badge in corner */
-.status-badge {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 0.75rem;
-}
-.status-badge.completed {
-    background-color: #10b981;
-}
+        .job-card {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+            position: relative;
+            border-left: 4px solid #e5e7eb;
+        }
+        .job-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        /* Completed job indicator */
+        .job-card.completed {
+            border-left-color: #10b981;
+        }
+        /* Upcoming job indicator */
+        .job-card.upcoming {
+            border-left-color: #3b82f6;
+        }
+        /* Needs completion indicator */
+        .job-card.needs-completion {
+            border-left-color: #f97316;
+        }
+        .job-date {
+            font-weight: 600;
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+        }
+        .job-detail {
+            margin-bottom: 0.25rem;
+        }
+        .job-earning {
+            color: #10b981;
+            font-weight: 600;
+        }
+        /* Status badge in corner */
+        .status-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.75rem;
+        }
+        .status-badge.completed {
+            background-color: #10b981;
+        }
 
-        
         /* Chart container */
         .chart-container {
             background-color: white;
@@ -294,6 +292,27 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
             padding: 1.25rem;
             margin-bottom: 1rem;
+        }
+
+        /* Notification Button */
+        .notification-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            background-color: #f97316;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            border-radius: 0.375rem;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+        .notification-btn:hover {
+            background-color: #ea580c;
+            transform: translateY(-1px);
+        }
+        .notification-btn i {
+            margin-right: 0.5rem;
         }
     </style>
 </head>
@@ -374,6 +393,33 @@
     
     <!-- Content -->
     <div class="content" id="mainContent">
+        @php
+            use App\Models\SelectService;
+            use Illuminate\Support\Facades\Auth;
+            use Carbon\Carbon;
+
+            // ดึงวันที่ปัจจุบัน
+            $today = Carbon::today()->toDateString();
+
+            // ดึงข้อมูลงานที่ reservation_date ตรงกับวันนี้
+            $tasksToday = SelectService::query()
+                ->join('SelectStaffDetails', 'SelectServices.select_service_id', '=', 'SelectStaffDetails.select_service_id')
+                ->where('SelectStaffDetails.staff_id', Auth::id())
+                ->whereDate('SelectServices.reservation_date', $today)
+                ->get();
+
+            // นับจำนวนงานในวันนี้
+            $taskCount = $tasksToday->count();
+        @endphp
+
+        <!-- แสดงปุ่มแจ้งเตือนถ้ามีงานในวันนี้ -->
+        @if($taskCount > 0)
+            <a href="{{ route($routePrefix.'.dashboard') }}" class="notification-btn">
+                <i class="fas fa-bell"></i>
+                คุณมีงาน {{ $taskCount }} งานในวันนี้ที่ต้องไปทำ!
+            </a>
+        @endif
+
         @yield('content')
     </div>
 
