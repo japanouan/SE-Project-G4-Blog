@@ -101,26 +101,40 @@ class IssueController extends Controller
     }
 
     // show Notifications ของ admin
-    public function showNotifications()
+    public function showNotifications(Request $request)
     {
-        $notifications = Notifications::join('issues', 'notifications.issue_id', '=', 'issues.id')
-                                        ->join('Users','issues.user_id' ,'=', 'Users.user_id')
-                                        ->where('issues.status','!=', 'fixed')
-                                        ->select(
-                                            'notifications.issue_id as issue_id',
-                                            'issues.created_at as created_at',
-                                            'issues.title as title',
-                                            'issues.status as status',
-                                            'Users.name as username',
-                                            'Users.user_id as user_id',
-                                            'issues.description as description',
-                                            'issues.id as id'
-                                        )->get();
-
-        // dd($notifications);
+        $query = Notifications::join('issues', 'notifications.issue_id', '=', 'issues.id')
+                            ->join('Users','issues.user_id' ,'=', 'Users.user_id');
         
-        return view('admin.issue.index', compact('notifications'));
+        // กรองตามสถานะถ้ามีการระบุ
+        if ($request->has('status')) {
+            $query->where('issues.status', $request->status);
+        } else {
+            // ถ้าไม่มีการระบุสถานะ ให้แสดงเฉพาะที่ยังไม่ได้แก้ไข (ตามโค้ดเดิม)
+            $query->where('issues.status', '!=', 'fixed');
+        }
+        
+        // กำหนดการเรียงลำดับ
+        $sortDirection = $request->input('sort', 'desc'); // ค่าเริ่มต้นคือ desc (ล่าสุดไปเก่าสุด)
+        $query->orderBy('issues.created_at', $sortDirection);
+        
+        $notifications = $query->select(
+                                'notifications.issue_id as issue_id',
+                                'issues.created_at as created_at',
+                                'issues.title as title',
+                                'issues.status as status',
+                                'Users.name as username',
+                                'Users.user_id as user_id',
+                                'issues.description as description',
+                                'issues.id as id'
+                            )
+                            ->paginate(10); // เพิ่มการแบ่งหน้า
+        
+        // ส่งค่า sortDirection ไปยัง view เพื่อใช้แสดงปุ่มเรียงลำดับที่เหมาะสม
+        return view('admin.issue.index', compact('notifications', 'sortDirection'));
     }
+
+
 
     // show Notifications ของ user
     public function showReportStatus()
