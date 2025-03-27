@@ -63,11 +63,12 @@ class StaffController extends Controller
                 DB::raw('CEIL(SelectServices.customer_count / 3) as required_staff')
             )
             ->where('SelectServices.service_type', $userType)
-            ->where('SelectServices.reservation_date', '<', now())
+            ->where('SelectServices.reservation_date', '>', now())
             ->groupBy('SelectServices.select_service_id', 'SelectServices.customer_count')
             ->havingRaw('staff_count < required_staff')
             ->whereNull('ss.select_staff_detail_id') // กรองงานที่ยังไม่มีช่างรับ
             ->get();
+            // dd($services,now());
 
 
         // dd($services);
