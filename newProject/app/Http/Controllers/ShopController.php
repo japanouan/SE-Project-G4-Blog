@@ -20,7 +20,7 @@ class ShopController extends Controller
         $direction = $request->input('direction') ?: 'asc';
 
 
-        $query = Shop::query();
+        $query = Shop::with('user');
         // dd($orderBy);
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
@@ -33,7 +33,7 @@ class ShopController extends Controller
         // dd($query);
 
         $shops = $query->get();
-        // dd($shop);
+        // dd($shops);
 
         return view('admin.shops.index', compact('shops'));
     }
