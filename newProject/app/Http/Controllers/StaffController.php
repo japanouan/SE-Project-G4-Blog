@@ -12,16 +12,27 @@ use Carbon\Carbon;
 class StaffController extends Controller
 {
     //
-    public function schedule()
+    public function schedule(Request $request)
     {
         $user_id = Auth::id();
-        $works = SelectStaffDetail::with(['selectService.address',])
-            ->where('staff_id', $user_id)
-            ->get();
-
-            // dd($works->first());
+        $status = $request->query('status', 'all'); // ค่า default เป็น 'all'
+    
+        $query = SelectStaffDetail::with(['selectService.address'])
+            ->where('staff_id', $user_id);
+    
+        // กรองตามสถานะ
+        if ($status === 'completed') {
+            $query->whereNotNull('finished_time');
+        } elseif ($status === 'pending') {
+            $query->whereNull('finished_time');
+        }
+    
+        $works = $query->get();
+    
+        // เรียงตาม reservation_date
         $works = $works->sortBy('selectService.reservation_date');
-        return view('work.schedule', ['works' => $works,]);
+    
+        return view('work.schedule', ['works' => $works]);
     }
 
     public function finishJob(Request $request)
