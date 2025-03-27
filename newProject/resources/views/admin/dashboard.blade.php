@@ -132,7 +132,7 @@
             <div class="card-body">
                 <div class="grid grid-cols-1 gap-6 p-4"> <!-- เพิ่ม padding และปรับ gap -->
                     <!-- Active vs Inactive Users -->
-                    <div>
+                    <div>   
                         <h3 class="text-lg font-semibold mb-4">สถานะผู้ใช้</h3>
                         <div class="flex items-center justify-between bg-gray-100 p-4 rounded-lg">
                             <div class="text-center flex-1"> <!-- เพิ่ม flex-1 เพื่อให้ขยายเต็มพื้นที่ -->
@@ -187,11 +187,11 @@
                         <h3 class="text-lg font-semibold mb-4">สถานะรายงานปัญหา</h3>
                         <div class="grid grid-cols-3 gap-2 bg-gray-100 p-4 rounded-lg">
                             <div class="text-center">
-                                <div class="text-xl font-bold text-yellow-600">{{ \App\Models\Issue::where('status', 'reported')->count() }}</div>
+                                <div class="text-xl font-bold text-red-600">{{ \App\Models\Issue::where('status', 'reported')->count() }}</div>
                                 <div class="text-xs text-gray-600">รายงานแล้ว</div>
                             </div>
                             <div class="text-center">
-                                <div class="text-xl font-bold text-blue-600">{{ \App\Models\Issue::where('status', 'in_progress')->count() }}</div>
+                                <div class="text-xl font-bold text-yellow-600">{{ \App\Models\Issue::where('status', 'in_progress')->count() }}</div>
                                 <div class="text-xs text-gray-600">กำลังดำเนินการ</div>
                             </div>
                             <div class="text-center">
