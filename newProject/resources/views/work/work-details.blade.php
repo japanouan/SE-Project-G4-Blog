@@ -65,7 +65,7 @@
             <p class="mb-2"><strong>Appointment Time:</strong>
                 {{ \Carbon\Carbon::parse($work->selectService->reservation_date)->format('H:i') }}
             </p>
-            if($work->selectService->booking->user)
+            @if($work->selectService->booking->user)
             <p class="mb-2"><strong>Customer Name:</strong>
                 {{ e($work->selectService->booking->user->name) }}
             </p>
