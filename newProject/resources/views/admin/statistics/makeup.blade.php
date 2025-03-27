@@ -20,7 +20,7 @@
 
         <!-- Graphs -->
         <div class="mb-6">
-            <canvas id="barChart" class="w-full h-96"></canvas>
+            <canvas id="barChart" height="100"></canvas>
         </div>
 
         <!-- Report Table -->
