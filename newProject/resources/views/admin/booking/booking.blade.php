@@ -6,6 +6,9 @@
 
 <body class="bg-gray-100">
     <div class="container mx-auto p-6">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">
+            <i class="fas fa-calendar-check mr-2 text-[#8B9DF9]"></i>จัดการการจอง
+        </h1>
         <div class="mb-6">
             <form method="GET" action="{{ route('admin.booking.index') }}" class="flex gap-2">
                 <input type="text" name="search" placeholder="ค้นหา Booking ID, User Name,Shop Name"

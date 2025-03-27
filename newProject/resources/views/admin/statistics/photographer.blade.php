@@ -5,6 +5,10 @@
 @section('content')
 
     <div class="container mx-auto p-6">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">
+            <i class="fas fa-camera mr-2 text-[#8B9DF9]"></i>สถิติช่างภาพ
+        </h1>
+
         <!-- Filter by Month -->
         <form method="GET" action="{{ route('admin.statistics.photographer') }}" class="flex gap-4 mb-6">
             <input type="month" name="month" value="{{ $month }}" class="px-4 py-2 border rounded-md">
