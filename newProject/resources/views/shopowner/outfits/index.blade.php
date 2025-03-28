@@ -1,4 +1,4 @@
-@extends('layouts.shopowner-layout')
+<UPDATED_CODE>@extends('layouts.shopowner-layout')
 
 @section('title', 'จัดการชุด')
 
@@ -126,13 +126,14 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">รูปภาพ</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่อชุด</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ราคา</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">มัดจำ</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ค่าปรับ</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">คงเหลือ</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ขนาดและสี</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">รายละเอียด</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">สถานะ</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">วันที่เพิ่ม</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">การจัดการ</th>
@@ -141,6 +142,9 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     @foreach($outfits as $outfit)
                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">{{ $outfit->outfit_id }}</div>
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             @if($outfit->image && file_exists(public_path($outfit->image)))
                                 <img src="{{ asset($outfit->image) }}" alt="{{ $outfit->name }}" class="h-16 w-16 object-cover rounded">
@@ -165,27 +169,56 @@
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm text-gray-900">{{ $outfit->sizeAndColors->sum('amount') }}</div>
                         </td>
-                        <td class="px-6 py-4">
-                            <div class="text-sm text-gray-900">
-                                <button type="button" class="text-blue-600 hover:text-blue-800" 
-                                        onclick="toggleVariants('variants-{{ $outfit->outfit_id }}')">
-                                    แสดงรายละเอียด <i class="fa fa-chevron-down"></i>
-                                </button>
-                                <div id="variants-{{ $outfit->outfit_id }}" class="hidden mt-2">
-                                    @if($outfit->sizeAndColors->count() > 0)
-                                        <div class="text-xs p-2 bg-gray-50 rounded">
-                                            @foreach($outfit->sizeAndColors as $variant)
-                                                <div class="mb-1">
-                                                    <span class="font-medium">{{ $variant->size->size }}</span> - 
-                                                    <span class="font-medium">{{ $variant->color->color }}</span>: 
-                                                    <span>{{ $variant->amount }} ชิ้น</span>
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    @else
-                                        <div class="text-xs text-gray-500">ไม่มีข้อมูลขนาดและสี</div>
-                                    @endif
+                        <td class="p-3 relative">
+                            <button type="button" class="text-blue-600 hover:text-blue-800 relative" 
+                                    id="btn-{{ $outfit->outfit_id }}"
+                                    onclick="toggleVariants('variants-{{ $outfit->outfit_id }}', 'btn-{{ $outfit->outfit_id }}')">
+                                แสดงรายละเอียด <i class="fa fa-chevron-down"></i>
+                            </button>
+                            <div id="variants-{{ $outfit->outfit_id }}" class="hidden fixed z-50 bg-white rounded-lg shadow-lg border p-4" style="min-width: 500px; max-width: 800px;">
+                                <div class="flex justify-between mb-2">
+                                    <h3 class="font-bold">รายละเอียดชุด: {{ $outfit->name }}</h3>
+                                    <button onclick="toggleVariants('variants-{{ $outfit->outfit_id }}')" class="text-gray-500 hover:text-gray-700">
+                                        <i class="fa fa-times"></i>
+                                    </button>
                                 </div>
+                                
+                                <!-- แสดงประเภทชุด -->
+                                <div class="mb-3 pb-3 border-b">
+                                    <p class="font-medium text-gray-700">ประเภท: 
+                                        @if(isset($outfit->categories) && $outfit->categories->count() > 0)
+                                            <span class="inline-flex flex-wrap gap-1">
+                                                @foreach($outfit->categories as $category)
+                                                    <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded">
+                                                        {{ $category->category_name }}
+                                                    </span>
+                                                @endforeach
+                                            </span>
+                                        @else
+                                            <span class="text-gray-500">ไม่ระบุประเภท</span>
+                                        @endif
+                                    </p>
+                                </div>
+                                
+                                <!-- รายละเอียดขนาดและสี -->
+                                <h4 class="font-medium mb-2">ขนาดและสี:</h4>
+                                @if(isset($outfit->sizeAndColors) && $outfit->sizeAndColors->count() > 0)
+                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                        @foreach($outfit->sizeAndColors as $variant)
+                                            <div class="bg-gray-50 p-3 rounded border flex items-center">
+                                                <div class="flex-1 whitespace-nowrap">
+                                                    <span class="font-medium">{{ $variant->size->size }}</span> - 
+                                                    <span class="font-medium">{{ $variant->color->color }}</span>
+                                                </div>
+                                                <div class="ml-2 bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
+                                                    {{ $variant->amount }}
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <div class="text-gray-500">ไม่มีข้อมูลขนาดและสี</div>
+                                @endif
                             </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
@@ -198,9 +231,9 @@
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm text-gray-900">
                                 @if(is_string($outfit->created_at))
-                                    {{ \Carbon\Carbon::parse($outfit->created_at)->format('d/m/Y') }}
+                                    {{ \Carbon\Carbon::parse($outfit->created_at)->format('d/m/Y H:i') }}
                                 @else
-                                    {{ $outfit->created_at->format('d/m/Y') }}
+                                    {{ $outfit->created_at->format('d/m/Y H:i') }}
                                 @endif
                             </div>
                         </td>
@@ -244,24 +277,108 @@
 </div>
 
 <script>
-    function toggleVariants(id) {
+    // Toggle variants function
+    function toggleVariants(id, buttonId) {
         const variantsElement = document.getElementById(id);
-        if (variantsElement.classList.contains('hidden')) {
-            variantsElement.classList.remove('hidden');
-        } else {
-            variantsElement.classList.add('hidden');
+        const button = document.getElementById(buttonId);
+        
+        // ซ่อนทุกรายการที่อาจเปิดอยู่
+        document.querySelectorAll('[id^="variants-"]').forEach(el => {
+            if (el.id !== id) {
+                el.classList.add('hidden');
+            }
+        });
+        
+        // สลับการแสดงผลของรายการที่คลิก
+        variantsElement.classList.toggle('hidden');
+        
+        // ถ้ากำลังแสดงผล ให้ตรวจสอบตำแหน่งเพื่อไม่ให้ล้นหน้าจอ
+        if (!variantsElement.classList.contains('hidden')) {
+            // รับตำแหน่งของปุ่มที่คลิก
+            const buttonRect = button.getBoundingClientRect();
+            const viewportHeight = window.innerHeight;
+            const viewportWidth = window.innerWidth;
+            
+            // รีเซ็ตตำแหน่งก่อน
+            variantsElement.style.left = '-150px';
+            variantsElement.style.top = 'auto';
+            variantsElement.style.bottom = 'auto';
+            
+            // คำนวณว่า popup จะล้นด้านล่างของหน้าจอหรือไม่
+            const popupHeight = variantsElement.offsetHeight;
+            const spaceBelow = viewportHeight - buttonRect.bottom;
+            
+            // ถ้าพื้นที่ด้านล่างไม่พอ ให้แสดง popup ด้านบนแทน
+            if (spaceBelow < popupHeight && buttonRect.top > popupHeight) {
+                variantsElement.style.bottom = '100%';
+                variantsElement.style.top = 'auto';
+                variantsElement.style.marginBottom = '10px';
+            } else {
+                variantsElement.style.top = '100%';
+                variantsElement.style.bottom = 'auto';
+                variantsElement.style.marginTop = '10px';
+            }
+            
+            // ตรวจสอบด้านข้างด้วย
+            const popupRect = variantsElement.getBoundingClientRect();
+            if (popupRect.right > viewportWidth) {
+                variantsElement.style.left = 'auto';
+                variantsElement.style.right = '0';
+            }
         }
     }
 
-    // Toggle advanced filters visibility
+    // เพิ่ม event listener เพื่อปิดรายละเอียดเมื่อคลิกที่อื่น
+    document.addEventListener('click', function(event) {
+        const isClickInsideVariants = event.target.closest('[id^="variants-"]');
+        const isClickOnButton = event.target.closest('button[onclick^="toggleVariants"]');
+        
+        if (!isClickInsideVariants && !isClickOnButton) {
+            document.querySelectorAll('[id^="variants-"]').forEach(el => {
+                el.classList.add('hidden');
+            });
+        }
+    });
+
+    // Toggle advanced filters
     document.addEventListener('DOMContentLoaded', function() {
         const toggleFiltersBtn = document.getElementById('toggle-filters');
         const advancedFilters = document.getElementById('advanced-filters');
         
-        toggleFiltersBtn.addEventListener('click', function() {
-            advancedFilters.classList.toggle('hidden');
-        });
+        if (toggleFiltersBtn && advancedFilters) {
+            toggleFiltersBtn.addEventListener('click', function() {
+                advancedFilters.classList.toggle('hidden');
+            });
+        }
     });
 </script>
-@endsection
 
+<style>
+    .table-container {
+        position: relative;
+    }
+    
+    [id^="variants-"] {
+        position: absolute;
+        z-index: 50;
+        background-color: white;
+        border-radius: 0.5rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e5e7eb;
+        padding: 1rem;
+        min-width: 500px;
+        max-width: 800px;
+        max-height: 80vh; /* จำกัดความสูงสูงสุด */
+        overflow-y: auto; /* เพิ่ม scroll เมื่อเนื้อหาเยอะ */
+    }
+    
+    /* เพิ่ม transition เพื่อให้การแสดง/ซ่อนดูนุ่มนวลขึ้น */
+    [id^="variants-"] {
+        transition: opacity 0.2s ease-in-out;
+    }
+    
+    [id^="variants-"].hidden {
+        opacity: 0;
+        pointer-events: none;
+    }
+</style>
