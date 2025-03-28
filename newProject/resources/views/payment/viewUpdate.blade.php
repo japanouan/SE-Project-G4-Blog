@@ -8,7 +8,7 @@
             </h2>
         @endif
 
-        <h3 class="text-lg mb-2">รายการชำระเงินของ Booking #{{ $booking->booking_id }}</h3>
+        <h3 class="text-lg mb-2">รายการชำระเงิน</h3>
 
         @forelse($payments as $payment)
             <div class="border p-4 rounded mb-4 shadow">
