@@ -39,8 +39,8 @@
         <div class="mb-4">
             <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
             <input id="email" type="email" name="email" 
-                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" 
-                   value="{{ old('email', $user->email) }}" required>
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-gray-100 cursor-not-allowed" 
+                   value="{{ old('email', $user->email) }}" readonly>
             @error('email')
                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
             @enderror
@@ -49,8 +49,8 @@
         <div class="mb-4">
             <label for="phone" class="block text-sm font-medium text-gray-700">Phone</label>
             <input id="phone" type="text" name="phone" 
-                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" 
-                   value="{{ old('phone', $user->phone) }}" required>
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-gray-100 cursor-not-allowed" 
+                   value="{{ old('phone', $user->phone) }}" readonly>
             @error('phone')
                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
             @enderror
@@ -68,13 +68,22 @@
 
         <div class="mb-4">
             <label for="userType" class="block text-sm font-medium text-gray-700">Staff Role</label>
-            <select id="userTypeSelect" name="userType" 
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                <option value="make-up artist" {{ $user->userType == 'make-up artist' ? 'selected' : '' }}>Make-Up Artist</option>
-                <option value="photographer" {{ $user->userType == 'photographer' ? 'selected' : '' }}>Photographer</option>
-                <option value="admin" {{ $user->userType == 'admin' ? 'selected' : '' }}>Admin</option>
-                <option value="shop owner" {{ $user->userType == 'shop owner' ? 'selected' : '' }}>Shop Owner</option>
-            </select>
+            @if(auth()->id() == $user->user_id)
+                <!-- ถ้าเป็นบัญชีของตัวเอง จะไม่สามารถเปลี่ยน role ได้ -->
+                <input type="hidden" name="userType" value="{{ $user->userType }}">
+                <div class="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 py-2 px-3 text-gray-700">
+                    {{ $user->userType }} <span class="text-xs text-gray-500 ml-2">(คุณไม่สามารถเปลี่ยนบทบาทของตัวเองได้)</span>
+                </div>
+            @else
+                <!-- ถ้าเป็นบัญชีของคนอื่น สามารถเปลี่ยน role ได้ตามปกติ -->
+                <select id="userTypeSelect" name="userType" 
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="make-up artist" {{ $user->userType == 'make-up artist' ? 'selected' : '' }}>Make-Up Artist</option>
+                    <option value="photographer" {{ $user->userType == 'photographer' ? 'selected' : '' }}>Photographer</option>
+                    <option value="admin" {{ $user->userType == 'admin' ? 'selected' : '' }}>Admin</option>
+                    <option value="shop owner" {{ $user->userType == 'shop owner' ? 'selected' : '' }}>Shop Owner</option>
+                </select>
+            @endif
             @error('userType')
                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
             @enderror
@@ -82,11 +91,20 @@
 
         <div class="mb-4">
             <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
-            <select id="statusSelect" name="status" 
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                <option value="active" {{ $user->status == 'active' ? 'selected' : '' }}>Active</option>
-                <option value="inactive" {{ $user->status == 'inactive' ? 'selected' : '' }}>Inactive</option>
-            </select>
+            @if(auth()->id() == $user->user_id)
+                <!-- ถ้าเป็นบัญชีของตัวเอง จะไม่สามารถเปลี่ยนสถานะได้ -->
+                <input type="hidden" name="status" value="active">
+                <div class="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 py-2 px-3 text-gray-700">
+                    Active <span class="text-xs text-gray-500 ml-2">(คุณไม่สามารถปิดการใช้งานบัญชีของตัวเองได้)</span>
+                </div>
+            @else
+                <!-- ถ้าเป็นบัญชีของคนอื่น สามารถเปลี่ยนสถานะได้ตามปกติ -->
+                <select id="statusSelect" name="status" 
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="active" {{ $user->status == 'active' ? 'selected' : '' }}>Active</option>
+                    <option value="inactive" {{ $user->status == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                </select>
+            @endif
             @error('status')
                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
             @enderror

@@ -74,6 +74,19 @@ class UserController extends Controller
     // ฟังก์ชันอัปเดตข้อมูลผู้ใช้
     public function update(Request $request, $user_id)
     {
+        // ตรวจสอบว่าผู้ใช้ที่จะอัปเดตเป็น admin ที่กำลังใช้งานอยู่หรือไม่
+        if (Auth::user()->user_id == $user_id) {
+            // ถ้าพยายามเปลี่ยนสถานะเป็น inactive
+            if ($request->status == 'inactive') {
+                return back()->with('error', 'ไม่สามารถปิดการใช้งานบัญชีของตัวเองได้');
+            }
+            
+            // ถ้าพยายามเปลี่ยน userType
+            if ($request->userType != Auth::user()->userType) {
+                return back()->with('error', 'ไม่สามารถเปลี่ยนบทบาทของตัวเองได้');
+            }
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email',
@@ -82,8 +95,6 @@ class UserController extends Controller
             'userType' => 'required|string',
             'status' => 'required|in:active,inactive',
         ]);
-
-
 
         // ค้นหาผู้ใช้และอัปเดตข้อมูล
         $user = User::find($user_id);
@@ -94,8 +105,10 @@ class UserController extends Controller
         parse_str($query ?? '', $params);
 
         return redirect()->route('admin.users.index', $params)
-                     ->with('success', 'User updated successfully');
+                    ->with('success', 'User updated successfully');
     }
+
+
 
 
     // ฟังก์ชันเปลี่ยนสถานะผู้ใช้
@@ -107,10 +120,10 @@ class UserController extends Controller
                 if ($request->ajax()) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'แบนตัวเองหาเรื่องแท้ ๆ'
+                        'message' => 'ไม่สามารถ Deactivated ตัวเองได้'
                     ], 403);
                 }
-                return back()->with('error', 'แบนตัวเองหาเรื่องแท้ ๆ');
+                return back()->with('error', 'ไม่สามารถ Deactivated ตัวเองได้');
             }
 
             $user = User::findOrFail($id);
