@@ -157,7 +157,7 @@ if ($justToggled && $toggledUserId) {
                                     <input type="hidden" name="search" value="{{ request('search') }}">
                                     @endif
                                     <button type="submit" class="sort-btn font-bold">
-                                        ID
+                                        รหัส
                                         <i class="fas fa-{{ request('orderBy') == 'user_id' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }}"></i>
                                     </button>
                                 </form>
@@ -180,7 +180,7 @@ if ($justToggled && $toggledUserId) {
                                     <input type="hidden" name="search" value="{{ request('search') }}">
                                     @endif
                                     <button type="submit" class="sort-btn font-bold">
-                                        Name
+                                        ชื่อเต็ม
                                         <i class="fas fa-{{ request('orderBy') == 'name' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }}"></i>
                                     </button>
                                 </form>
@@ -226,7 +226,7 @@ if ($justToggled && $toggledUserId) {
                                     <input type="hidden" name="search" value="{{ request('search') }}">
                                     @endif
                                     <button type="submit" class="sort-btn font-bold">
-                                        Phone
+                                        เบอร์โทรศัพท์
                                         <i class="fas fa-{{ request('orderBy') == 'phone' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }}"></i>
                                     </button>
                                 </form>
@@ -249,7 +249,7 @@ if ($justToggled && $toggledUserId) {
                                     <input type="hidden" name="search" value="{{ request('search') }}">
                                     @endif
                                     <button type="submit" class="sort-btn font-bold">
-                                        Username
+                                    ชื่อผู้ใช้
                                         <i class="fas fa-{{ request('orderBy') == 'username' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }}"></i>
                                     </button>
                                 </form>
@@ -272,7 +272,7 @@ if ($justToggled && $toggledUserId) {
                                     <input type="hidden" name="search" value="{{ request('search') }}">
                                     @endif
                                     <button type="submit" class="sort-btn font-bold">
-                                        Role
+                                        บทบาท
                                         <i class="fas fa-{{ request('orderBy') == 'userType' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }}"></i>
                                     </button>
                                 </form>
@@ -295,12 +295,12 @@ if ($justToggled && $toggledUserId) {
                                     <input type="hidden" name="search" value="{{ request('search') }}">
                                     @endif
                                     <button type="submit" class="sort-btn font-bold">
-                                        Status
+                                        สถานะ
                                         <i class="fas fa-{{ request('orderBy') == 'status' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }}"></i>
                                     </button>
                                 </form>
                             </th>
-                            <th class="border border-gray-300 p-3 text-center">Actions</th>
+                            <th class="border border-gray-300 p-3 text-center"></th>
                         </tr>
                     </thead>
                     <tbody>

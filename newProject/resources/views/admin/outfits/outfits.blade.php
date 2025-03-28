@@ -127,17 +127,17 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">รหัสชุด</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">รูปภาพ</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่อชุด</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ราคา</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">มัดจำ</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ค่าปรับ</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">คงเหลือ</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ขนาดและสี</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">สถานะ</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่อร้าน</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">การจัดการ</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-black-500 uppercase tracking-wider">รหัสชุด</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-black-500 uppercase tracking-wider">รูปภาพ</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-black-500 uppercase tracking-wider">ชื่อชุด</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-black-500 uppercase tracking-wider">ราคา</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-black-500 uppercase tracking-wider">มัดจำ</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-black-500 uppercase tracking-wider">ค่าปรับ</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-black-500 uppercase tracking-wider">คงเหลือ</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-black-500 uppercase tracking-wider">ขนาดและสี</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-black-500 uppercase tracking-wider">สถานะ</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-black-500 uppercase tracking-wider">ชื่อร้าน</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-black-500 uppercase tracking-wider">การจัดการ</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -232,15 +232,18 @@
                         <td class="text-sm text-gray-900">{{ $outfit->shop->shop_name }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex space-x-2">
-                        <a href="{{ route('admin.outfits.edit', $outfit->outfit_id) }}" class="text-indigo-600 hover:text-indigo-900">
-                        <i class="fa fa-pencil"></i>แก้ไข</a>
-                        <form action="{{ route('admin.outfits.destroy', $outfit->outfit_id) }}" method="POST" onsubmit="return confirm('คุณแน่ใจหรือไม่ว่าต้องการลบชุดนี้?');" class="inline-block">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-red-600 hover:text-red-900">
-                            <i class="fa fa-trash"></i>ลบ
-                        </button>
-                        </form>
+                                <a href="{{ route('admin.outfits.edit', $outfit->outfit_id) }}" 
+                                class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm flex items-center whitespace-nowrap">
+                                    <i class="fas fa-edit mr-1"></i> แก้ไข
+                                </a>
+                                <form action="{{ route('admin.outfits.destroy', $outfit->outfit_id) }}" method="POST" onsubmit="return confirm('คุณแน่ใจหรือไม่ว่าต้องการลบชุดนี้?');" class="inline-block">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" 
+                                            class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm flex items-center whitespace-nowrap">
+                                        <i class="fas fa-trash mr-1"></i> ลบ
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>
