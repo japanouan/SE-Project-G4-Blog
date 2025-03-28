@@ -69,6 +69,20 @@
                     @enderror
                 </div>
 
+                <style>
+                    /* สำหรับ Chrome, Safari, Edge */
+                    input[type=number]::-webkit-inner-spin-button,
+                    input[type=number]::-webkit-outer-spin-button {
+                        -webkit-appearance: none;
+                        margin: 0;
+                    }
+
+                    /* สำหรับ Firefox */
+                    input[type=number] {
+                        -moz-appearance: textfield;
+                    }
+                </style>
+
                 <!-- Staff Role -->
                 <div class="mb-4">
                     <label for="userType" class="block text-sm font-semibold text-gray-700">Staff Role</label>
@@ -85,20 +99,33 @@
                 </div>
 
                 <!-- Password -->
-                <div class="mb-4">
+                <div class="mb-4 relative">
                     <label for="password" class="block text-sm font-semibold text-gray-700">Password</label>
                     <input id="password" type="password" name="password" required
-                        class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                        class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400 pr-10" />
+                    
+                    <!-- ปุ่ม toggle -->
+                    <button type="button" onclick="togglePassword()" 
+                        class="absolute right-3 top-9 text-gray-600 focus:outline-none">
+                        👁️
+                    </button>
+
                     @error('password')
                         <span class="text-xs text-red-500">{{ $message }}</span>
                     @enderror
                 </div>
 
                 <!-- Confirm Password -->
-                <div class="mb-6">
+                <div class="mb-6 relative">
                     <label for="password_confirmation" class="block text-sm font-semibold text-gray-700">Confirm Password</label>
                     <input id="password_confirmation" type="password" name="password_confirmation" required
-                        class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                        class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400 pr-10" />
+                    
+                    <!-- ปุ่ม toggle -->
+                    <button type="button" onclick="toggleConfirmPassword()"
+                        class="absolute right-3 top-9 text-gray-600 focus:outline-none">
+                        👁️
+                    </button>
                 </div>
 
                 <!-- Identity Verification Document -->
@@ -129,5 +156,18 @@
         </div>
     </div>
 
+
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+        }
+        function toggleConfirmPassword() {
+            const input = document.getElementById('password_confirmation');
+            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+            input.setAttribute('type', type);
+        }
+    </script>
 </body>
 </html>
