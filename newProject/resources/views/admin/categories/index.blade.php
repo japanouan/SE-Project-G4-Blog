@@ -72,16 +72,16 @@
                             <td class="px-6 py-4 whitespace-nowrap text-center">
                                 <div class="flex justify-center space-x-2">
                                     <a href="{{ route('admin.categories.edit', $category->category_id) }}" 
-                                       class="text-indigo-600 hover:text-indigo-900 bg-indigo-100 hover:bg-indigo-200 px-3 py-1.5 rounded-md transition-colors duration-200 text-base">
-                                        <i class="fa fa-edit mr-1"></i> แก้ไข
+                                    class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm flex items-center whitespace-nowrap">
+                                        <i class="fas fa-edit mr-1"></i> แก้ไข
                                     </a>
                                     <form action="{{ route('admin.categories.destroy', $category->category_id) }}" method="POST" class="inline-block">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" 
-                                                class="text-red-600 hover:text-red-900 bg-red-100 hover:bg-red-200 px-3 py-1.5 rounded-md transition-colors duration-200 text-base"
+                                                class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm flex items-center whitespace-nowrap"
                                                 onclick="return confirm('คุณแน่ใจหรือไม่ที่จะลบหมวดหมู่นี้?')">
-                                            <i class="fa fa-trash mr-1"></i> ลบ
+                                            <i class="fas fa-trash mr-1"></i> ลบ
                                         </button>
                                     </form>
                                 </div>
