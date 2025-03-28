@@ -23,9 +23,11 @@ if (Auth::check()) {
 
     // Pending Payments
     $bookings = Booking::with(['payments', 'orderDetails', 'selectService'])
-        ->whereBelongsTo(auth()->user())
-        ->orderBy('created_at', 'desc')
-        ->get();
+    ->whereBelongsTo(auth()->user())
+    ->where('status', 'partial paid')
+    ->orderBy('created_at', 'desc')
+    ->get();
+
 
     foreach ($bookings as $booking) {
         $totalOrder = $booking->orderDetails ? $booking->orderDetails->sum('total') : 0; // ป้องกัน null
