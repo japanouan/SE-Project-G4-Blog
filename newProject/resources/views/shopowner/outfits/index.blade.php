@@ -18,6 +18,7 @@
     @endif
 
     <!-- Search and Filter Card -->
+     
     <div class="bg-white shadow-md rounded-lg overflow-hidden p-6 mb-6">
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold">ค้นหาและกรอง</h3>
@@ -255,8 +256,11 @@
                     @endforeach
                 </tbody>
             </table>
-            <div class="px-6 py-4">
+            <div class="px-6 py-4 flex justify-between items-center border-t">
                 {{ $outfits->links() }}
+                <a href="{{ route('shopowner.outfits.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                    <i class="fa fa-plus mr-2"></i> เพิ่มชุดใหม่
+                </a>
             </div>
         @else
             <div class="p-6 text-center text-gray-500">
