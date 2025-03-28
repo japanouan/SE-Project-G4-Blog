@@ -55,7 +55,7 @@
                                 <input type="hidden" name="direction" value="{{ request('orderBy') == 'shop_id' && request('direction') == 'asc' ? 'desc' : 'asc' }}">
                                 <input type="hidden" name="search" value="{{ request('search') }}">
                                 <button type="submit" class="w-full flex justify-center items-center">
-                                    รหัสร้าน
+                                    ID
                                     <i class="fas fa-{{ request('orderBy') == 'shop_id' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }} ml-1"></i>
                                 </button>
                             </form>

@@ -157,7 +157,7 @@ if ($justToggled && $toggledUserId) {
                                     <input type="hidden" name="search" value="{{ request('search') }}">
                                     @endif
                                     <button type="submit" class="sort-btn font-bold">
-                                        รหัส
+                                        ID
                                         <i class="fas fa-{{ request('orderBy') == 'user_id' ? (request('direction') == 'asc' ? 'sort-up' : 'sort-down') : 'sort' }}"></i>
                                     </button>
                                 </form>

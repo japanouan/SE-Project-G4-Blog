@@ -127,7 +127,7 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-black-500 uppercase tracking-wider">รหัสชุด</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-black-500 uppercase tracking-wider">ID</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-black-500 uppercase tracking-wider">รูปภาพ</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-black-500 uppercase tracking-wider">ชื่อชุด</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-black-500 uppercase tracking-wider">ราคา</th>
