@@ -91,7 +91,6 @@
                     </div>
                 </div>
             </div>
-            
             <!-- Filter Buttons -->
             <div class="flex items-center justify-between">
                 <div class="flex space-x-2">
@@ -107,7 +106,6 @@
                     <label class="text-sm text-gray-600 mr-2">เรียงตาม:</label>
                     <select name="orderBy" onchange="this.form.submit()" 
                         class="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                        <option value="outfit_id" {{ request('orderBy') == 'outfit_id' ? 'selected' : '' }}>ID</option>
                         <option value="name" {{ request('orderBy') == 'name' ? 'selected' : '' }}>ชื่อชุด</option>
                         <option value="price" {{ request('orderBy') == 'price' ? 'selected' : '' }}>ราคา</option>
                         <option value="created_at" {{ request('orderBy') == 'created_at' ? 'selected' : '' }}>วันที่เพิ่ม</option>
@@ -136,6 +134,7 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">คงเหลือ</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ขนาดและสี</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">สถานะ</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">วันที่เพิ่ม</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">การจัดการ</th>
                     </tr>
                 </thead>
@@ -195,6 +194,15 @@
                             @else
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">ไม่พร้อมใช้งาน</span>
                             @endif
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">
+                                @if(is_string($outfit->created_at))
+                                    {{ \Carbon\Carbon::parse($outfit->created_at)->format('d/m/Y') }}
+                                @else
+                                    {{ $outfit->created_at->format('d/m/Y') }}
+                                @endif
+                            </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex space-x-2">
@@ -256,3 +264,4 @@
     });
 </script>
 @endsection
+
